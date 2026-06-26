@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El Portón Cajicá — Comidas Rápidas & Pizzería Artesanal</title>
+  <meta name="description" content="El Portón Cajicá: hamburguesas, perros, mazorcadas, salchipapas y pizzas artesanales. Pide fácil y rápido." />
+
+  <!-- ===== Tailwind CSS v4 (CDN para prototipo · se compilará antes de producción) ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- ===== Tipografías ===== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet" />
+
+  <!-- ===== Estilos personalizados ===== -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="bg-[#0B0B0B] text-white antialiased selection:bg-[#E53E3E] selection:text-white">
+
+  <!-- ===== Fondo global (figuras + partículas/humo) detrás de TODO ===== -->
+  <!-- Se "corta" en la sección Nosotros (que lleva fondo negro opaco). -->
+  <div id="page-bg" aria-hidden="true">
+    <div class="page-bg-texture"></div>
+    <canvas id="page-particles"></canvas>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- COMPONENTE 1: NAVBAR PREMIUM (STICKY & RESPONSIVE)            -->
+  <!-- ============================================================= -->
+  <header id="navbar" class="fixed top-0 inset-x-0 z-50 transition-all duration-300">
+    <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+
+        <!-- ---------- LADO IZQUIERDO: LOGO ORIGINAL (logo.jpg) ---------- -->
+        <a href="#inicio" class="logo-link group shrink-0" aria-label="El Portón Cajicá — Inicio">
+          <img src="assets/logo-final.png" alt="El Portón Cajicá" class="logo-img" />
+        </a>
+
+        <!-- ---------- CENTRO: MENÚ DE NAVEGACIÓN (desktop) ---------- -->
+        <div class="hidden lg:flex items-center gap-9">
+          <a href="#inicio" class="nav-link">Inicio</a>
+          <a href="#menu-catalogo" class="nav-link">Menú</a>
+          <a href="#carta" class="nav-link">Catálogo</a>
+          <a href="#nosotros" class="nav-link">Nosotros</a>
+          <a href="#contacto" class="nav-link">Contacto</a>
+        </div>
+
+        <!-- ---------- LADO DERECHO: CTA + HAMBURGUESA ---------- -->
+        <div class="flex items-center gap-3">
+          <!-- CTA completo (tablet/desktop) -->
+          <a href="#menu-catalogo" class="cta-btn cta-btn--full">
+            <span aria-hidden="true">🛒</span>
+            <span>Ver el Menú / Armar Pedido</span>
+          </a>
+          <!-- CTA compacto (móvil) -->
+          <a href="#menu-catalogo" class="cta-btn cta-btn--compact" aria-label="Ver el menú y armar pedido">
+            <span aria-hidden="true">🛒</span>
+          </a>
+
+          <!-- Botón hamburguesa (móvil/tablet) -->
+          <button id="menu-toggle" class="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-drawer">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <!-- ---------- OVERLAY + DRAWER MÓVIL ---------- -->
+  <div id="mobile-overlay" class="lg:hidden"></div>
+
+  <aside id="mobile-drawer" class="lg:hidden" aria-label="Menú de navegación móvil">
+    <div class="flex items-center justify-between px-6 h-20 border-b border-white/5">
+      <span class="font-serif-vintage italic text-xl text-[#F5E9D6]">El Portón</span>
+      <button id="menu-close" class="text-2xl text-zinc-400 hover:text-white transition-colors w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5" aria-label="Cerrar menú">✕</button>
+    </div>
+
+    <nav class="flex flex-col px-6 py-8 gap-1">
+      <a href="#inicio"        class="drawer-link">Inicio</a>
+      <a href="#menu-catalogo" class="drawer-link">Menú</a>
+      <a href="#carta"         class="drawer-link">Catálogo</a>
+      <a href="#nosotros"      class="drawer-link">Nosotros</a>
+      <a href="#contacto"      class="drawer-link">Contacto</a>
+
+      <a href="#menu-catalogo" class="cta-btn mt-6 justify-center">
+        <span aria-hidden="true">🛒</span>
+        <span>Armar Pedido</span>
+      </a>
+    </nav>
+  </aside>
+  <!-- ============================================================= -->
+  <!-- /COMPONENTE 1: NAVBAR                                         -->
+  <!-- ============================================================= -->
+
+
+  <main>
+    <!-- ============================================================= -->
+    <!-- COMPONENTE 2: HERO BANNER (ROTATIVO ALEATORIO + PARALLAX)     -->
+    <!-- ============================================================= -->
+    <section id="inicio" class="hero">
+      <div class="hero-grid">
+        <!-- ---------- Columna de Textos (izquierda / arriba) ---------- -->
+        <div id="hero-text" class="hero-text">
+          <p  id="hero-tagline" class="hero-tagline">&nbsp;</p>
+          <h1 id="hero-title"   class="hero-title">&nbsp;</h1>
+          <p  id="hero-desc"    class="hero-desc">&nbsp;</p>
+          <div class="hero-actions">
+            <span id="hero-price" class="hero-price-badge">&nbsp;</span>
+            <a href="#menu-catalogo" class="hero-order-btn">
+              <span>Ordenar Ahora</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ---------- Columna de Imagen (derecha / abajo) ---------- -->
+        <div id="hero-image-wrap" class="hero-image-wrap">
+          <div class="hero-glow" aria-hidden="true"></div>
+          <div id="hero-image" class="hero-image" role="img" aria-label="Producto destacado">🍔</div>
+        </div>
+      </div>
+
+      <!-- Indicador de scroll (se desvanece tras 80px) -->
+      <div id="scroll-indicator" class="scroll-indicator" aria-hidden="true">
+        <span>Desliza</span>
+        <span class="scroll-mouse"></span>
+        <span class="scroll-chevron"></span>
+      </div>
+    </section>
+    <!-- /COMPONENTE 2 -->
+
+    <!-- Encabezado: intro del showcase (arriba del catálogo destacado) -->
+    <section class="carta-header reveal">
+      <p  class="carta-eyebrow">Conoce la carta</p>
+      <h2 class="carta-title">Cada plato, una historia</h2>
+      <p  class="carta-sub">Ingredientes seleccionados, sazón real, hecho con orgullo colombiano.</p>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- COMPONENTE 3 (showcase): CARTA DESTACADA                       -->
+    <!-- ============================================================= -->
+    <section id="carta" class="carta">
+      <!-- Las filas se renderizan dinámicamente desde CARTA_DESTACADA -->
+      <div id="carta-rows" class="carta-rows"></div>
+
+      <!-- Ver toda la carta -->
+      <button id="ver-carta-btn" class="ver-carta" type="button" aria-label="Ver toda la carta">
+        <span>Ver toda la carta</span>
+        <span class="ver-carta-arrows" aria-hidden="true"><i></i><i></i></span>
+      </button>
+    </section>
+
+    <!-- Encabezado: intro del catálogo completo (arriba del armado/personalización) -->
+    <section id="menu-catalogo" class="carta-header reveal">
+      <p  class="carta-eyebrow">Nuestra carta</p>
+      <h2 class="carta-title">Lo que nos hace únicos</h2>
+      <p  class="carta-sub">Ingredientes artesanales, sazón colombiana auténtica. Cada plato es una experiencia.</p>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- COMPONENTE 3: CATÁLOGO CON FILTROS POR CATEGORÍA              -->
+    <!-- ============================================================= -->
+    <section class="catalogo">
+      <!-- Barra de filtros (tabs) -->
+      <div class="catalogo-filtros-wrap">
+        <div id="catalogo-filtros" class="catalogo-filtros" role="tablist" aria-label="Filtrar por categoría">
+          <!-- tabs renderizados por JS -->
+        </div>
+      </div>
+
+      <!-- Grid de productos (colapsado: primeros 8 + "Mostrar más") -->
+      <div class="catalogo-grid-wrap">
+        <div id="catalogo-grid" class="catalogo-grid">
+          <!-- tarjetas renderizadas por JS -->
+        </div>
+        <div id="catalogo-fade" class="catalogo-fade" hidden aria-hidden="true"></div>
+      </div>
+      <div id="catalogo-more" class="catalogo-more" hidden>
+        <button id="catalogo-more-btn" class="ver-carta" type="button">
+          <span class="more-label">Mostrar más</span>
+          <span class="ver-carta-arrows" aria-hidden="true"><i></i><i></i></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== De aquí en adelante: fondo NEGRO opaco (sin figuras ni partículas) ===== -->
+    <div class="page-dark">
+
+    <!-- ============================================================= -->
+    <!-- SECCIÓN FINAL A: NOSOTROS (historia)                          -->
+    <!-- ============================================================= -->
+    <section id="nosotros" class="about reveal">
+      <p class="about-eyebrow">Nuestra historia</p>
+      <h2 class="about-title">Más de 11 años forjando el verdadero sabor de Cajicá</h2>
+      <div class="about-text">
+        <p>Hace más de una década encendimos la plancha con una sola convicción: llevarle a Cajicá unas comidas rápidas como nunca antes las había probado. Lo que empezó como una obsesión por el buen sabor se convirtió, plato a plato, en un <strong>punto de referencia obligado</strong> para los paladares más exigentes de la región.</p>
+        <p>Once años no se improvisan. Detrás de cada pedido hay un oficio perfeccionado con el tiempo: <strong>carnes de res maduradas</strong> en su punto, <strong>chorizo 100% de cerdo</strong>, <strong>panes artesanales mega suaves</strong> y nuestra legendaria <strong>salsa de ajo artesanal</strong> —esa que ya nos piden por su nombre—. Aquí no creemos en los atajos: creemos en los ingredientes premium y en hacer cada plato como si fuera el primero.</p>
+        <p>Pero El Portón es mucho más que un restaurante. Somos las noches con amigos, el antojo que no te deja en paz y el plan que nunca falla. Somos la prueba de que la comida rápida, hecha con pasión e ingredientes de alta gama, deja de ser «rápida» para convertirse en una <strong>experiencia que se queda contigo</strong>.</p>
+      </div>
+      <div class="about-stats">
+        <div class="about-stat"><span class="about-stat-num">+11</span><span class="about-stat-label">Años de tradición</span></div>
+        <div class="about-stat"><span class="about-stat-num">+45</span><span class="about-stat-label">Platos maestros</span></div>
+        <div class="about-stat"><span class="about-stat-num">100%</span><span class="about-stat-label">Artesanal</span></div>
+      </div>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- SECCIÓN FINAL B: CONTACTO ("Tu lugar, tus reglas")            -->
+    <!-- ============================================================= -->
+    <section id="contacto" class="contacto reveal">
+      <p class="about-eyebrow">Visítanos</p>
+      <h2 class="about-title">Tu lugar, tus reglas</h2>
+
+      <div class="contacto-box">
+        <div class="contacto-grid">
+          <div class="info-item">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <div class="info-text"><span class="info-label">Nuestra casa</span><span class="info-value">Calle 11 A Sur #10-75 · Camino entrada Fagua, sector Canelón.</span></div>
+          </div>
+          <div class="info-item">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <div class="info-text"><span class="info-label">Horarios</span><span class="info-value">Martes a Domingo · 1:00 PM – 10:00 PM.<br>Lunes cerrado — abrimos solo en lunes festivos.</span></div>
+          </div>
+          <div class="info-item">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <div class="info-text"><span class="info-label">Domicilios</span><span class="info-value">Pídelo por WhatsApp hasta las <strong style="color:#fff">9:40 PM</strong>.</span></div>
+          </div>
+          <div class="info-item">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+            <div class="info-text"><span class="info-label">Instagram</span><span class="info-value"><a href="https://instagram.com/elportoncajica" target="_blank" rel="noopener">@elportoncajica</a></span></div>
+          </div>
+        </div>
+
+        <div class="contacto-actions">
+          <a class="contacto-btn" href="https://maps.app.goo.gl/B1Yka6GRnqEvMZ6u6" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Cómo llegar
+          </a>
+          <a class="contacto-btn contacto-btn--ghost" href="https://instagram.com/elportoncajica" target="_blank" rel="noopener">Síguenos @elportoncajica</a>
+        </div>
+      </div>
+    </section>
+    </div><!-- /.page-dark -->
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <p class="site-footer-logo">El Portón Cajicá</p>
+    <p class="site-footer-tag">Comidas Rápidas & Pizzería Artesanal · Cajicá, Cundinamarca</p>
+    <p class="site-footer-copy">
+      © <span id="footer-year">2026</span> El Portón Cajicá. Hecho con 🔥 y mucho sabor.<br>
+      Síguenos en <a href="https://instagram.com/elportoncajica" target="_blank" rel="noopener">@elportoncajica</a>
+    </p>
+  </footer>
+
+  <!-- ============================================================= -->
+  <!-- COMPONENTE 5: CARRITO FLOTANTE + PANEL DE DESPACHO            -->
+  <!-- ============================================================= -->
+  <button id="cart-fab" class="cart-fab" type="button" aria-label="Ver tu pedido">
+    <span class="cart-fab-count" id="cart-fab-count">0</span>
+    <span class="cart-fab-icon" aria-hidden="true">🛒</span>
+    <span class="cart-fab-total" id="cart-fab-total">$0</span>
+  </button>
+
+  <div id="cart-overlay" class="cart-overlay"></div>
+
+  <aside id="cart-drawer" class="cart-drawer" aria-label="Tu pedido">
+    <header class="cart-head">
+      <h2 class="cart-head-title">🛒 Tu Pedido</h2>
+      <button id="cart-close" class="cart-close" aria-label="Cerrar">✕</button>
+    </header>
+
+    <div class="cart-body">
+      <div id="cart-items" class="cart-items"><!-- ítems dinámicos --></div>
+
+      <div id="cart-empty" class="cart-empty" hidden>
+        <p class="cart-empty-emoji">🛍️</p>
+        <p class="cart-empty-title">Tu pedido está vacío</p>
+        <p class="cart-empty-sub">Agrega algo delicioso del menú 😋</p>
+        <button id="cart-empty-btn" class="cart-empty-btn" type="button">Ver el menú</button>
+      </div>
+
+      <form id="cart-form" class="cart-form" autocomplete="on">
+        <h3 class="cart-form-title">📦 Datos de envío</h3>
+        <label class="cart-field"><span>Nombre completo</span>
+          <input type="text" name="nombre" autocomplete="name" placeholder="Tu nombre" /></label>
+        <label class="cart-field"><span>Teléfono de contacto</span>
+          <input type="tel" name="telefono" autocomplete="tel" placeholder="3xx xxx xxxx" /></label>
+        <label class="cart-field"><span>Dirección de entrega</span>
+          <input type="text" name="direccion" autocomplete="street-address" placeholder="Calle, número, barrio…" /></label>
+        <div class="cart-field">
+          <span>Método de pago</span>
+          <div class="pago-opts">
+            <label class="pago-opt"><input type="radio" name="pago" value="Nequi / Transferencia" /><span>Nequi / Transferencia</span></label>
+            <label class="pago-opt"><input type="radio" name="pago" value="Efectivo" /><span>Efectivo</span></label>
+          </div>
+        </div>
+        <label id="cash-field" class="cart-field" hidden><span>¿Con cuánto vas a pagar?</span>
+          <input type="text" name="cambio" inputmode="numeric" placeholder="Ej: $50.000" /></label>
+      </form>
+    </div>
+
+    <footer class="cart-foot">
+      <div class="cart-total-row"><span>Total productos</span><span id="cart-total" class="cart-total">$0</span></div>
+      <p class="cart-foot-note">El valor del domicilio lo calcula el asesor.</p>
+      <button id="cart-send" class="cart-send" type="button"><span aria-hidden="true">🟢</span> Enviar pedido por WhatsApp</button>
+    </footer>
+  </aside>
+
+
+  <!-- ============================================================= -->
+  <!-- COMPONENTE 4: MODAL DE PERSONALIZACIÓN                        -->
+  <!-- ============================================================= -->
+  <div id="modal-overlay" class="modal-overlay" aria-hidden="true">
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-head">
+        <div class="modal-head-text">
+          <h2 id="modal-title" class="modal-title"></h2>
+          <p id="modal-desc" class="modal-desc"></p>
+        </div>
+        <button id="modal-close" class="modal-close" aria-label="Cerrar">✕</button>
+      </header>
+
+      <div id="modal-body" class="modal-body"><!-- contenido dinámico --></div>
+
+      <footer class="modal-foot">
+        <button id="modal-add" class="modal-add" type="button">
+          <span>Agregar al Pedido</span>
+          <span id="modal-total" class="modal-total"></span>
+        </button>
+      </footer>
+    </div>
+
+    <!-- Upsell micro-modal -->
+    <div id="upsell" class="upsell" aria-hidden="true">
+      <div class="upsell-box">
+        <p class="upsell-title">🔥 ¡No te quedes sin papas!</p>
+        <p class="upsell-text">Hazlo Combo por solo <strong>$9.000</strong> más (papas a la francesa + bebida).</p>
+        <div class="upsell-actions">
+          <button id="upsell-yes" class="upsell-yes" type="button">Sí, hacerlo combo</button>
+          <button id="upsell-no" class="upsell-no" type="button">No, gracias</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Scripts ===== -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
