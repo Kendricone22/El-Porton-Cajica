@@ -525,6 +525,8 @@ function addToCart(ci) {
     }
     if (item.pizza)
       h += `<div class="modal-section"><h3 class="modal-section-title">🍕 Arma tu pizza</h3><div id="pizza-ui">${pizzaCounts(item.maxFlavors)}</div></div>`;
+    if (item.slices)
+      h += section('🍴 ¿En cuántos trozos?', item.slices.map((s, i) => optRadio('slices', i, s, null, i === 0)).join(''));
     if (item.combo)
       h += `<div class="modal-section">
         <label class="combo-card">
@@ -622,13 +624,15 @@ function addToCart(ci) {
         flavors.push(portion + fl);
       });
     }
+    const sliceInput = item.slices ? bodyEl.querySelector('input[name="slices"]:checked') : null;
+    const slice = sliceInput ? item.slices[+sliceInput.value] : '';
     const adiciones = [...bodyEl.querySelectorAll('.adicion-check:checked')].map((c) => ({ name: c.value, price: +c.dataset.price }));
     const notes = (document.getElementById('modal-notes')?.value || '').trim();
     const ci = {
       id: item.id, name: item.name, cat: item.cat, emoji: item.emoji, img: item.img || null,
-      option, combo, drink, proteins, flavors, adiciones, notes, unitPrice: currentTotal, qty: 1,
+      option, combo, drink, proteins, flavors, slice, adiciones, notes, unitPrice: currentTotal, qty: 1,
     };
-    ci.hash = [ci.id, ci.option, ci.combo, ci.drink, proteins.join('+'), flavors.join('+'), adiciones.map((a) => a.name).join('+'), notes].join('|');
+    ci.hash = [ci.id, ci.option, ci.combo, ci.drink, proteins.join('+'), flavors.join('+'), slice, adiciones.map((a) => a.name).join('+'), notes].join('|');
     addToCart(ci);
     close();
     showToast('✓ Agregado al pedido');
@@ -705,6 +709,7 @@ function addToCart(ci) {
     if (it.option && it.option !== 'Porción') parts.push(it.option);
     if (it.proteins && it.proteins.length) parts.push(it.proteins.join(' + '));
     if (it.flavors && it.flavors.length) parts.push('Sabores: ' + it.flavors.join(', '));
+    if (it.slice) parts.push('Trozos: ' + it.slice);
     if (it.combo) parts.push('Combo' + (it.drink ? ' · ' + it.drink : ''));
     if (it.adiciones && it.adiciones.length) parts.push(it.adiciones.map((a) => '+ ' + a.name).join(', '));
     if (it.notes) parts.push('Nota: ' + it.notes);
@@ -872,6 +877,7 @@ function addToCart(ci) {
       }
       if (line) L.push('  ↳ ' + line);
       if (it.flavors && it.flavors.length) L.push('  ↳ Sabores: ' + it.flavors.join(', '));
+      if (it.slice) L.push('  ↳ Trozos: ' + it.slice);
       if (it.adiciones && it.adiciones.length) L.push('  ↳ Adiciones: ' + it.adiciones.map((a) => a.name).join(', '));
       if (it.notes) L.push('  ↳ Nota: ' + it.notes);
       L.push('');
