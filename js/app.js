@@ -303,10 +303,10 @@
     return (item.options.length > 1 ? '<small>Desde</small>' : '') + fmt(min);
   };
 
-  // --- Tabs ---
-  tabsBox.innerHTML =
-    '<button class="filtro-tab is-active" data-cat="all" role="tab">Todos</button>' +
-    CATEGORIES.map((c) => `<button class="filtro-tab" data-cat="${c.key}" role="tab">${c.emoji} ${c.label}</button>`).join('');
+  // --- Tabs (sin "Todos"; arranca en la primera categoría) ---
+  tabsBox.innerHTML = CATEGORIES.map((c, i) =>
+    `<button class="filtro-tab${i === 0 ? ' is-active' : ''}" data-cat="${c.key}" role="tab">${c.emoji} ${c.label}</button>`
+  ).join('');
 
   // --- Tarjetas ---
   grid.innerHTML = MENU.map((item) => {
@@ -332,12 +332,26 @@
 
   // --- Filtrado + vista colapsada ("Mostrar más") ---
   const LIMIT = 8;               // platos visibles antes de "Mostrar más"
-  let currentCat = 'all';
+  let currentCat = CATEGORIES[0].key;   // arranca en la primera categoría
   let expanded = false;
   const fadeEl    = document.getElementById('catalogo-fade');
   const moreWrap  = document.getElementById('catalogo-more');
   const moreBtn   = document.getElementById('catalogo-more-btn');
   const moreLabel = moreBtn ? moreBtn.querySelector('.more-label') : null;
+  const descEl    = document.getElementById('catalogo-desc');
+
+  // Descripción de la categoría (solo donde haya CAT_DESC)
+  function renderCatDesc(cat) {
+    if (!descEl) return;
+    const items = (typeof CAT_DESC !== 'undefined') ? CAT_DESC[cat] : null;
+    if (!items || !items.length) { descEl.hidden = true; descEl.innerHTML = ''; return; }
+    descEl.hidden = false;
+    descEl.innerHTML = items.map((d) =>
+      `<div class="catdesc-item">
+        <span class="catdesc-emoji">${d.emoji}</span>
+        <div class="catdesc-text"><h4 class="catdesc-title">${d.title}</h4><p class="catdesc-p">${d.text}</p></div>
+      </div>`).join('');
+  }
 
   function applyView() {
     let matchCount = 0;
@@ -359,6 +373,7 @@
     if (moreWrap)  moreWrap.hidden = !hasMore;
     if (moreLabel) moreLabel.textContent = expanded ? 'Mostrar menos' : 'Mostrar más';
     if (moreBtn)   moreBtn.classList.toggle('is-expanded', expanded);
+    renderCatDesc(currentCat);
   }
 
   tabsBox.addEventListener('click', (e) => {
@@ -527,6 +542,8 @@ function addToCart(ci) {
       h += `<div class="modal-section"><h3 class="modal-section-title">🍕 Arma tu pizza</h3><div id="pizza-ui">${pizzaCounts(item.maxFlavors)}</div></div>`;
     if (item.slices)
       h += section('🍴 ¿En cuántos trozos?', item.slices.map((s, i) => optRadio('slices', i, s, null, i === 0)).join(''));
+    if (item.choices)
+      item.choices.forEach((ch, ci) => { h += section(ch.title, ch.options.map((o, i) => optRadio('choice-' + ci, i, o, null, i === 0)).join('')); });
     if (item.combo)
       h += `<div class="modal-section">
         <label class="combo-card">
@@ -540,7 +557,14 @@ function addToCart(ci) {
         </div>
       </div>`;
     const ad = adicionesFor(item.cat);
-    if (ad.length) h += section('➕ Adiciones premium', ad.map(adicionCard).join(''));
+    if (ad.length) h += `
+      <div class="modal-section">
+        <button type="button" class="adiciones-toggle" aria-expanded="false">
+          <span class="modal-section-title" style="margin-bottom:0">➕ Adiciones premium</span>
+          <svg class="adiciones-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="adiciones-body" hidden><div class="opt-grid">${ad.map(adicionCard).join('')}</div></div>
+      </div>`;
     h += `<div class="modal-section"><h3 class="modal-section-title">📝 Notas especiales</h3><textarea id="modal-notes" class="modal-notes" rows="2" placeholder="Instrucciones especiales..."></textarea></div>`;
     return h;
   }
@@ -598,6 +622,14 @@ function addToCart(ci) {
     recalc();
   });
   bodyEl.addEventListener('click', (e) => {
+    const adT = e.target.closest('.adiciones-toggle');
+    if (adT) {
+      const open = adT.getAttribute('aria-expanded') === 'true';
+      adT.setAttribute('aria-expanded', String(!open));
+      adT.classList.toggle('open', !open);
+      if (adT.nextElementSibling) adT.nextElementSibling.hidden = open;
+      return;
+    }
     const cnt = e.target.closest('.pizza-count-btn');
     if (cnt) { document.getElementById('pizza-ui').innerHTML = pizzaCircle(+cnt.dataset.n); return; }
     const chg = e.target.closest('.pizza-change');
@@ -626,13 +658,17 @@ function addToCart(ci) {
     }
     const sliceInput = item.slices ? bodyEl.querySelector('input[name="slices"]:checked') : null;
     const slice = sliceInput ? item.slices[+sliceInput.value] : '';
+    const choices = (item.choices || []).map((ch, k) => {
+      const inp = bodyEl.querySelector(`input[name="choice-${k}"]:checked`);
+      return inp ? ch.options[+inp.value] : ch.options[0];
+    });
     const adiciones = [...bodyEl.querySelectorAll('.adicion-check:checked')].map((c) => ({ name: c.value, price: +c.dataset.price }));
     const notes = (document.getElementById('modal-notes')?.value || '').trim();
     const ci = {
       id: item.id, name: item.name, cat: item.cat, emoji: item.emoji, img: item.img || null,
-      option, combo, drink, proteins, flavors, slice, adiciones, notes, unitPrice: currentTotal, qty: 1,
+      option, combo, drink, proteins, flavors, slice, choices, adiciones, notes, unitPrice: currentTotal, qty: 1,
     };
-    ci.hash = [ci.id, ci.option, ci.combo, ci.drink, proteins.join('+'), flavors.join('+'), slice, adiciones.map((a) => a.name).join('+'), notes].join('|');
+    ci.hash = [ci.id, ci.option, ci.combo, ci.drink, proteins.join('+'), flavors.join('+'), slice, choices.join('+'), adiciones.map((a) => a.name).join('+'), notes].join('|');
     addToCart(ci);
     close();
     showToast('✓ Agregado al pedido');
@@ -710,6 +746,7 @@ function addToCart(ci) {
     if (it.proteins && it.proteins.length) parts.push(it.proteins.join(' + '));
     if (it.flavors && it.flavors.length) parts.push('Sabores: ' + it.flavors.join(', '));
     if (it.slice) parts.push('Trozos: ' + it.slice);
+    if (it.choices && it.choices.length) it.choices.forEach((c) => parts.push(c));
     if (it.combo) parts.push('Combo' + (it.drink ? ' · ' + it.drink : ''));
     if (it.adiciones && it.adiciones.length) parts.push(it.adiciones.map((a) => '+ ' + a.name).join(', '));
     if (it.notes) parts.push('Nota: ' + it.notes);
@@ -878,6 +915,7 @@ function addToCart(ci) {
       if (line) L.push('  ↳ ' + line);
       if (it.flavors && it.flavors.length) L.push('  ↳ Sabores: ' + it.flavors.join(', '));
       if (it.slice) L.push('  ↳ Trozos: ' + it.slice);
+      if (it.choices && it.choices.length) it.choices.forEach((c) => L.push('  ↳ ' + c));
       if (it.adiciones && it.adiciones.length) L.push('  ↳ Adiciones: ' + it.adiciones.map((a) => a.name).join(', '));
       if (it.notes) L.push('  ↳ Nota: ' + it.notes);
       L.push('');

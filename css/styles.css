@@ -701,11 +701,16 @@ html { scroll-behavior: smooth; }
 /* ---- Barra de filtros ---- */
 .catalogo-filtros-wrap {
   position: sticky;
-  top: 5rem;                 /* se queda bajo el navbar */
+  top: 4.7rem;               /* se queda bajo el navbar */
   z-index: 20;
   margin-bottom: 2.5rem;
-  padding: 0.5rem 0;
-  background: linear-gradient(180deg, var(--negro) 70%, transparent);
+  padding: 0.6rem 0.4rem;
+  /* Vidrio esmerilado premium (sin marco negro duro) */
+  background: rgba(11, 11, 11, 0.45);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 .catalogo-filtros {
   display: flex;
@@ -743,6 +748,23 @@ html { scroll-behavior: smooth; }
   border-color: var(--rojo);
   box-shadow: 0 6px 18px -6px rgba(229,62,62,0.7);
 }
+
+/* Descripción de categoría (panel informativo bajo la barra) */
+.catalogo-desc {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.1rem;
+  margin-bottom: 2.5rem;
+  background: #131316;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  padding: 1.4rem 1.5rem;
+}
+@media (min-width: 768px) { .catalogo-desc { grid-template-columns: repeat(3, 1fr); gap: 1.6rem; } }
+.catdesc-item { display: flex; gap: 0.75rem; align-items: flex-start; }
+.catdesc-emoji { font-size: 1.5rem; line-height: 1.1; flex: 0 0 auto; }
+.catdesc-title { font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 0.3rem; }
+.catdesc-p { color: #a1a1aa; font-size: 0.82rem; line-height: 1.55; }
 
 /* ---- Grid ---- */
 .catalogo-grid {
@@ -966,6 +988,20 @@ html { scroll-behavior: smooth; }
   display: flex; align-items: center; gap: 0.5rem;
 }
 .modal-section-sub { color: var(--gris); font-size: 0.8rem; margin-bottom: 0.6rem; }
+
+/* Toggle desplegable de "Adiciones premium" */
+.adiciones-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 0; margin-bottom: 0.75rem;
+  background: none; border: none; cursor: pointer; text-align: left;
+}
+.adiciones-arrow {
+  width: 20px; height: 20px; flex: 0 0 auto;
+  color: var(--gris);
+  transition: transform .25s ease, color .25s ease;
+}
+.adiciones-toggle:hover .adiciones-arrow { color: #fff; }
+.adiciones-toggle.open .adiciones-arrow { transform: rotate(180deg); color: var(--rojo); }
 
 /* Grilla de opciones (radios/checkboxes/adiciones) */
 .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }

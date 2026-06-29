@@ -138,6 +138,7 @@ const MENU = [
     options:[{label:"Koller",price:21000},{label:"Artesanal",price:26500}] },
   { id:"h-mexicana", cat:"hamburguesas", combo:true, emoji:"🍔", img:"assets/Platos/hamburguesa-mexicana.jpg",
     name:"Mexicana", desc:"Carne, queso, crema agria, pico de gallo y doritos.",
+    choices:[{ title:"🌶️ Jalapeño", options:["Con jalapeño","Sin jalapeño"] }],
     options:[{label:"Koller",price:23000},{label:"Pollo",price:23500},{label:"Artesanal",price:27000}] },
   { id:"h-cheese-bacon", cat:"hamburguesas", combo:true, emoji:"🍔", img:"assets/Platos/hamburguesa-cheese-bacon.jpg",
     name:"Cheese Bacon", desc:"Carne, queso, papa cabello de ángel, pepinillos, bañada en queso cheddar, topping de tocineta y cebollín.",
@@ -268,7 +269,7 @@ const MENU = [
 /* ============================================================= */
 const COMBO_PRICE = 9000;
 // El combo (solo hamburguesas/perros) incluye papas a la francesa + 1 bebida 400ml:
-const COMBO_DRINKS = ["Coca-Cola", "Coca-Cola Zero", "Quatro", "Sprite", "Ginger", "Cola Román"];
+const COMBO_DRINKS = ["Coca-Cola", "Coca-Cola Zero", "Quatro", "Sprite", "Ginger", "Cola Román", "Fuze Té", "Agua", "Agua con gas"];
 
 // Adiciones premium con su precio y a qué categorías aplican (matriz del cliente).
 // (Infantil y bebidas no llevan adiciones.)
@@ -278,7 +279,7 @@ const ADICIONES = [
   { name:"Carne Artesanal 200gr",      price:8500, cats:["hamburguesas"] },
   { name:"Pollo Apanado",              price:7500, cats:["hamburguesas"] },
   { name:"Res / Cerdo / Pollo 150gr",  price:8500, cats:["mazorcadas"] },
-  { name:"Tocineta Crujiente",         price:6000, cats:["hamburguesas","perros"] },
+  { name:"Tocineta",                   price:6000, cats:["hamburguesas","perros"] },
   { name:"Chorizo",                    price:7500, cats:["hamburguesas","mazorcadas"] },
   { name:"Salchicha Americana",        price:6000, cats:["perros","mazorcadas","salchipapas"] },
   { name:"Queso tajado (2 lonjas)",    price:2500, cats:["hamburguesas","perros","mazorcadas","salchipapas"] },
@@ -290,3 +291,13 @@ const ADICIONES = [
   { name:"Papa cabello de ángel",      price:1500, cats:["hamburguesas","mazorcadas"] },
   { name:"Cheddar 100gr",              price:6000, cats:["hamburguesas"] },
 ];
+
+/* Descripción que aparece bajo la barra de filtros según la categoría.
+   Por ahora solo Hamburguesas (explica las 3 proteínas). */
+const CAT_DESC = {
+  hamburguesas: [
+    { emoji:"🥩", title:"Carne Koller",        text:"Carne de res procesada de alta calidad, jugosa y con un sabor clásico, ideal para quienes disfrutan una hamburguesa tradicional." },
+    { emoji:"🍗", title:"Pollo Apanado",       text:"Pollo cubierto con un apanado crujiente y dorado, frito al punto para lograr una textura crocante por fuera y jugosa por dentro." },
+    { emoji:"🍔", title:"Carne 100% Artesanal", text:"Carne de res preparada en nuestro restaurante, elaborada con ingredientes seleccionados y sin procesos industriales para ofrecer un sabor casero, jugoso y auténtico." },
+  ],
+};
