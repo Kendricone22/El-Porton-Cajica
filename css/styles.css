@@ -73,7 +73,7 @@ html { scroll-behavior: smooth; }
 /* LOGO ORIGINAL (imagen logo.jpg)                               */
 /* ============================================================= */
 .logo-img {
-  height: 50px;
+  height: 132px;
   width: auto;
   display: block;
   /* drop-shadow sigue la silueta (no la caja) ahora que el fondo es transparente */
