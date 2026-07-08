@@ -749,6 +749,34 @@ html { scroll-behavior: smooth; }
   box-shadow: 0 6px 18px -6px rgba(229,62,62,0.7);
 }
 
+/* Pista visual: "hay más categorías" (barra scrolleable en móvil) */
+.catalogo-filtros-fade {
+  position: absolute;
+  top: 0.6rem;
+  bottom: 0.6rem;
+  right: 0.4rem;
+  width: 3rem;
+  border-radius: 0 1rem 1rem 0;
+  background: linear-gradient(to right, transparent, rgba(11,11,11,0.9) 60%);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.35rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity .25s ease;
+  animation: filtrosFadePeek 1.6s ease-in-out infinite;
+}
+.catalogo-filtros-fade.is-hidden { opacity: 0; }
+@keyframes filtrosFadePeek {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(4px); }
+}
+@media (min-width: 768px) { .catalogo-filtros-fade { display: none; } }
+
 /* Descripción de categoría (panel informativo bajo la barra) */
 .catalogo-desc {
   display: grid;

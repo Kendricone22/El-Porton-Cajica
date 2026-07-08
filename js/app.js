@@ -122,7 +122,7 @@
   const ctx = canvas.getContext('2d');
 
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  let W = 0, H = 0, raf = null;
+  let W = 0, H = 0, raf = null, lastW = 0;
   let particles = [], smoke = [];
   const mouse = { x: -9999, y: -9999, active: false };
   const rand = (min, max) => Math.random() * (max - min) + min;
@@ -212,7 +212,21 @@
   window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
   window.addEventListener('mouseout', (e) => { if (!e.relatedTarget) { mouse.active = false; mouse.x = mouse.y = -9999; } });
 
-  function rebuild() { resize(); buildParticles(); buildSmoke(); }
+  // En móvil, el scroll colapsa/expande la barra de direcciones y eso dispara
+  // eventos 'resize' en cadena (solo cambia el ALTO). Si regenerásemos las
+  // partículas en cada uno, se ve como una explosión disparada hacia arriba
+  // (su velocidad vertical siempre es negativa). Por eso solo regeneramos
+  // cuando cambia el ANCHO de verdad (resize real / giro de pantalla);
+  // el alto se ajusta igual, pero las partículas existentes se conservan.
+  function rebuild() {
+    const widthChanged = Math.abs(window.innerWidth - lastW) > 40;
+    resize();
+    if (widthChanged || !particles.length) {
+      lastW = W;
+      buildParticles();
+      buildSmoke();
+    }
+  }
   window.addEventListener('resize', rebuild);
   rebuild();
 
@@ -386,6 +400,18 @@
     expanded = false;             // al cambiar de categoría, colapsa
     applyView();
   });
+
+  // --- Pista "hay más categorías": oculta el degradado al llegar al final ---
+  const filtrosFade = document.getElementById('catalogo-filtros-fade');
+  if (filtrosFade) {
+    const syncFiltrosFade = () => {
+      const atEnd = tabsBox.scrollLeft + tabsBox.clientWidth >= tabsBox.scrollWidth - 4;
+      filtrosFade.classList.toggle('is-hidden', atEnd);
+    };
+    tabsBox.addEventListener('scroll', syncFiltrosFade, { passive: true });
+    window.addEventListener('resize', syncFiltrosFade);
+    syncFiltrosFade();
+  }
 
   if (moreBtn) moreBtn.addEventListener('click', () => {
     expanded = !expanded;
