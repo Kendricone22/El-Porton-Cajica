@@ -24,6 +24,7 @@ const HERO_PRODUCTS = [
   },
   {
     emoji:   "🍔",
+    img:     "assets/Platos/hamburguesa-montanera.jpg",
     tagline: "🍔 ¡SABOR CRIOLLO BRUTAL!",
     title:   "HAMBURGUESA MONTAÑERA",
     desc:    "Carne artesanal de res de 200gr madurada, doble queso fundido, tocineta ahumada crujiente, plátano maduro frito en su punto, huevo frito y un toque de crema agria artesanal.",
@@ -53,6 +54,7 @@ const HERO_PRODUCTS = [
   },
   {
     emoji:   "🍔",
+    img:     "assets/Platos/hamburguesa-golosa.jpg",
     tagline: "🍔 ¡COMBO COMPLETO!",
     title:   "HAMBURGUESA GOLOSA EN COMBO",
     desc:    "Carne, doble queso, pollo desmechado en BBQ, tocineta, chorizo y papa cabello de ángel + papas a la francesa y bebida. El combo más cargado.",
@@ -68,7 +70,9 @@ const HERO_PRODUCTS = [
 ];
 
 /* ---------- BLOQUE 3 (showcase): CARTA DESTACADA ---------- */
-/* 2 platos completos + 1 difuminado (el último). Data real del menú. */
+/* Vitrina corta a propósito (2 platos completos + 1 teaser difuminado)      */
+/* para que la sección no se coma espacio y la gente llegue rápido al        */
+/* catálogo/armado. El último item = teaser (isTeaser = último del array).   */
 const CARTA_DESTACADA = [
   {
     img:   "assets/Platos/hamburguesa-cheese-bacon.jpg",
@@ -87,12 +91,11 @@ const CARTA_DESTACADA = [
     price: "$24.000",
   },
   {
-    img:   "assets/Platos/hamburguesa-3-carnes.jpg",
-    emoji: "🍔",
-    badge: "🍔 Hamburguesas",
-    title: "Hamburguesa Tres Carnes",
-    desc:  "Triple carne de res 100%, triple queso, lechuga, cebolla grille, tomate y salsas.",
-    price: "$36.000",
+    emoji: "🌽",
+    badge: "🌽 Mazorcadas",
+    title: "Mazorcada Colombiana",
+    desc:  "Maíz tierno desgranado, plátano maduro frito, chorizo, queso gratinado, queso costeño y salsa de ajo. (No contiene papa fósforo).",
+    price: "$26.000",
   },
 ];
 
@@ -143,7 +146,7 @@ const MENU = [
   { id:"h-cheese-bacon", cat:"hamburguesas", combo:true, emoji:"🍔", img:"assets/Platos/hamburguesa-cheese-bacon.jpg",
     name:"Cheese Bacon", desc:"Carne, queso, papa cabello de ángel, pepinillos, bañada en queso cheddar, topping de tocineta y cebollín.",
     options:[{label:"Koller",price:29000},{label:"Pollo",price:29500},{label:"Artesanal",price:33000}] },
-  { id:"h-campesina", cat:"hamburguesas", combo:true, emoji:"🍔",
+  { id:"h-campesina", cat:"hamburguesas", combo:true, emoji:"🍔", img:"assets/Platos/hamburguesa-campesina.jpg",
     name:"Campesina", desc:"Carne, queso, lechuga, tomate, cebolla grille, salsas, huevo frito y chorizo.",
     options:[{label:"Koller",price:23000},{label:"Pollo",price:23500},{label:"Artesanal",price:27000}] },
   { id:"h-ranchera", cat:"hamburguesas", combo:true, emoji:"🍔",
@@ -155,10 +158,10 @@ const MENU = [
   { id:"h-callejera", cat:"hamburguesas", combo:true, emoji:"🍔", img:"assets/Platos/hamburguesa-callejera.jpg",
     name:"Callejera", desc:"Carne, queso, papa cabello de ángel, salsas y huevos de codorniz.",
     options:[{label:"Koller",price:19000},{label:"Pollo",price:19500},{label:"Artesanal",price:23000}] },
-  { id:"h-montanera", cat:"hamburguesas", combo:true, emoji:"🍔", badge:"🍔 Sabor criollo",
+  { id:"h-montanera", cat:"hamburguesas", combo:true, emoji:"🍔", img:"assets/Platos/hamburguesa-montanera.jpg", badge:"🍔 Sabor criollo",
     name:"Montañera", desc:"Carne, doble queso, tocineta, huevo frito, plátano maduro frito y crema agria.",
     options:[{label:"Koller",price:29000},{label:"Pollo",price:29500},{label:"Artesanal",price:33000}] },
-  { id:"h-golosa", cat:"hamburguesas", combo:true, emoji:"🍔",
+  { id:"h-golosa", cat:"hamburguesas", combo:true, emoji:"🍔", img:"assets/Platos/hamburguesa-golosa.jpg",
     name:"Golosa", desc:"Carne, doble queso, salsas, pollo desmechado en BBQ, tocineta, chorizo y papa cabello de ángel.",
     options:[{label:"Koller",price:30000},{label:"Pollo",price:30500},{label:"Artesanal",price:34000}] },
   { id:"h-tres-carnes", cat:"hamburguesas", combo:true, emoji:"🍔", img:"assets/Platos/hamburguesa-3-carnes.jpg",
@@ -215,7 +218,7 @@ const MENU = [
   { id:"s-choripapa", cat:"salchipapas", combo:false, emoji:"🍟",
     name:"Choripapa", desc:"Papa francesa y chorizo 100% cerdo.",
     options:[{label:"Estándar",price:14000},{label:"Con Codorniz",price:19500}] },
-  { id:"s-clasica", cat:"salchipapas", combo:false, emoji:"🍟",
+  { id:"s-clasica", cat:"salchipapas", combo:false, emoji:"🍟", img:"assets/Platos/salchipapa-clasica.jpg",
     name:"Salchipapa Clásica", desc:"Papa francesa y salchicha americana.",
     options:[{label:"Estándar",price:11500},{label:"Con Codorniz",price:17000}] },
   { id:"s-doble", cat:"salchipapas", combo:false, emoji:"🍟",

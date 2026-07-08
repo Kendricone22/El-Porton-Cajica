@@ -767,12 +767,14 @@ html { scroll-behavior: smooth; }
 .catdesc-p { color: #a1a1aa; font-size: 0.82rem; line-height: 1.55; }
 
 /* ---- Grid ---- */
+/* Móvil: 2 columnas de entrada (tarjetas compactas, ver bloque abajo) para  */
+/* que se vean varios platos por pantalla en vez de uno gigante por fila.   */
 .catalogo-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
 }
-@media (min-width: 560px)  { .catalogo-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 560px)  { .catalogo-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; } }
 @media (min-width: 900px)  { .catalogo-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 1200px) { .catalogo-grid { grid-template-columns: repeat(4, 1fr); gap: 1.75rem; } }
 
@@ -883,6 +885,27 @@ html { scroll-behavior: smooth; }
   transition: background .25s ease, transform .2s ease;
 }
 .cat-card-btn:hover { background: var(--rojo); transform: translateY(-1px); }
+
+/* Tarjetas compactas en móvil (2 columnas): texto e íconos más chicos y      */
+/* descripción a 2 líneas para que quepan varios platos por pantalla.        */
+@media (max-width: 559.98px) {
+  .cat-card-body   { padding: 0.75rem 0.8rem 0.85rem; }
+  .cat-card-title  { font-size: 0.86rem; margin-bottom: 0.25rem; }
+  .cat-card-desc {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    margin-bottom: 0.65rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .cat-card-foot   { flex-wrap: wrap; gap: 0.5rem; }
+  .cat-card-price  { font-size: 1.05rem; }
+  .cat-card-btn    { font-size: 0.68rem; padding: 0.4rem 0.65rem; }
+  .cat-card-badge  { font-size: 0.55rem; padding: 0.22rem 0.45rem; top: 0.5rem; left: 0.5rem; }
+  .cat-card-emoji  { font-size: clamp(2.4rem, 12vw, 3.2rem); }
+}
 
 /* Entrada de tarjetas (al cargar y al filtrar) */
 .cat-card--in { animation: cardIn .35s ease both; }
