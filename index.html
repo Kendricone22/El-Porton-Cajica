@@ -147,11 +147,18 @@
       <!-- Las filas se renderizan dinámicamente desde CARTA_DESTACADA -->
       <div id="carta-rows" class="carta-rows"></div>
 
-      <!-- Ver toda la carta -->
-      <button id="ver-carta-btn" class="ver-carta" type="button" aria-label="Ver toda la carta">
-        <span>Ver toda la carta</span>
-        <span class="ver-carta-arrows" aria-hidden="true"><i></i><i></i></span>
-      </button>
+      <div class="carta-actions">
+        <!-- Ver toda la carta: agrega más platos AQUÍ MISMO (no navega) -->
+        <button id="ver-carta-btn" class="ver-carta" type="button" aria-label="Ver toda la carta">
+          <span>Ver toda la carta</span>
+          <span class="ver-carta-arrows" aria-hidden="true"><i></i><i></i></span>
+        </button>
+        <!-- Ir directo al armado del pedido (para quien ya conoce la carta) -->
+        <a href="#menu-catalogo" class="ver-carta ver-carta--armado" aria-label="Ir al armado del pedido">
+          <span>Ir al armado</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
     </section>
 
     <!-- Encabezado: intro del catálogo completo (arriba del armado/personalización) -->

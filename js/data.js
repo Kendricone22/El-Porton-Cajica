@@ -99,6 +99,63 @@ const CARTA_DESTACADA = [
   },
 ];
 
+/* Platos extra que se agregan a la vitrina AL HACER CLICK en "Ver toda la  */
+/* carta" (no navega, expande ahí mismo). Data real del menú.               */
+const CARTA_DESTACADA_MAS = [
+  {
+    img:   "assets/Platos/hamburguesa-montanera.jpg",
+    emoji: "🍔",
+    badge: "🍔 Hamburguesas",
+    title: "Hamburguesa Montañera",
+    desc:  "Carne, doble queso, tocineta, huevo frito, plátano maduro frito y crema agria.",
+    price: "Desde $29.000",
+  },
+  {
+    emoji: "🌭",
+    badge: "🌭 Perros Calientes",
+    title: "Perro Glotón",
+    desc:  "Pan artesanal, salchicha americana, cebolla grille, salsas, papa en fósforo, pollo desmechado, tocineta, queso y dos huevos de codorniz.",
+    price: "$24.000",
+  },
+  {
+    img:   "assets/Platos/salchipapa-clasica.jpg",
+    emoji: "🍟",
+    badge: "🍟 Salchipapas",
+    title: "Salchipapa Clásica",
+    desc:  "Papa francesa y salchicha americana.",
+    price: "Desde $11.500",
+  },
+  {
+    emoji: "🍔",
+    badge: "🧒 Menú Infantil",
+    title: "Mini Hamburguesa",
+    desc:  "Pan, carne 80gr, lechuga, tomate, salsas y dos huevos de codorniz. Incluye papas, Chocolatina Gol y jugo.",
+    price: "$21.000",
+  },
+  {
+    emoji: "🌭",
+    badge: "🧒 Menú Infantil",
+    title: "Mini Perro",
+    desc:  "Pan, salchicha, salsas, papa fósforo y dos huevos de codorniz. Incluye papas, Chocolatina Gol y jugo.",
+    price: "$21.000",
+  },
+  {
+    img:   "assets/Platos/hamburguesa-3-carnes.jpg",
+    emoji: "🍔",
+    badge: "🍔 Hamburguesas",
+    title: "Hamburguesa Tres Carnes",
+    desc:  "Triple carne de res 100%, triple queso, lechuga, cebolla grille, tomate y salsas.",
+    price: "$36.000",
+  },
+  {
+    emoji: "🍕",
+    badge: "🍕 Pizzas & Lasañas",
+    title: "Pizza Familiar",
+    desc:  "50cm de masa artesanal recién horneada (8 a 16 porciones). Elige hasta 3 sabores: Pepperoni, Pollo BBQ, Hawaiana, Carnes, Margarita y más.",
+    price: "$69.000",
+  },
+];
+
 
 /* ============================================================= */
 /* BLOQUE 3: MENÚ COMPLETO (FUENTE ÚNICA DE VERDAD)             */

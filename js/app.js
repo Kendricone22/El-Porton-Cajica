@@ -244,14 +244,13 @@
 /* COMPONENTE 3 (showcase): CARTA DESTACADA                      */
 /* ============================================================= */
 (function initCartaDestacada() {
-  const data = (typeof CARTA_DESTACADA !== 'undefined') ? CARTA_DESTACADA : [];
-  const cont = document.getElementById('carta-rows');
+  const data  = (typeof CARTA_DESTACADA !== 'undefined') ? CARTA_DESTACADA : [];
+  const extra = (typeof CARTA_DESTACADA_MAS !== 'undefined') ? CARTA_DESTACADA_MAS : [];
+  const cont  = document.getElementById('carta-rows');
   if (!data.length || !cont) return;
 
-  // --- Render dinámico de las filas ---
-  data.forEach((p, i) => {
-    const isTeaser = (i === data.length - 1);  // el último = teaser difuminado
-    const right    = (i % 2 === 1);            // alterna el lado de la foto
+  function buildRow(p, i, isTeaser) {
+    const right = (i % 2 === 1);                // alterna el lado de la foto
     const row = document.createElement('div');
     row.className = 'carta-row'
       + (right ? ' carta-row--right' : '')
@@ -273,8 +272,11 @@
           ${isTeaser ? '' : '<a href="#menu-catalogo" class="carta-order-btn">Ordenar ahora <span aria-hidden="true">→</span></a>'}
         </div>
       </div>`;
-    cont.appendChild(row);
-  });
+    return row;
+  }
+
+  // --- Render inicial (2 platos completos + 1 teaser difuminado) ---
+  data.forEach((p, i) => cont.appendChild(buildRow(p, i, i === data.length - 1)));
 
   // --- Animación de entrada (foto + texto a la vez) basada en scroll ---
   // Reveal por scroll (robusto en todos los entornos): aparece cuando el
@@ -295,10 +297,24 @@
   window.addEventListener('resize', revealOnScroll);
   revealOnScroll(); // estado inicial
 
-  // --- "Ver toda la carta" → scroll al catálogo completo ---
+  // --- "Ver toda la carta" → expande MÁS PLATOS aquí mismo (no navega) ---
   const btn = document.getElementById('ver-carta-btn');
   if (btn) btn.addEventListener('click', () => {
-    document.getElementById('menu-catalogo')?.scrollIntoView({ behavior: 'smooth' });
+    // El teaser difuminado se convierte en una fila completa (con su botón)
+    const teaserRow = cont.querySelector('.carta-row--teaser');
+    if (teaserRow) {
+      const lastIndex = data.length - 1;
+      const fullRow = buildRow(data[lastIndex], lastIndex, false);
+      fullRow.classList.add('in-view');
+      teaserRow.replaceWith(fullRow);
+    }
+    // Se agregan los platos extra, ya visibles (fue un click deliberado)
+    extra.forEach((p, j) => {
+      const row = buildRow(p, data.length + j, false);
+      row.classList.add('in-view');
+      cont.appendChild(row);
+    });
+    btn.hidden = true;
   });
 })();
 

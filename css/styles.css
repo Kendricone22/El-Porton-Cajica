@@ -166,15 +166,19 @@ html { scroll-behavior: smooth; }
   justify-content: center;
   align-items: center;
   gap: 5px;
-  width: 44px;
-  height: 44px;
-  border-radius: 0.6rem;
-  transition: background .3s ease;
+  width: 46px;
+  height: 46px;
+  margin-left: 0.4rem;                        /* separa del botón carrito, evita que se vean "pegados" */
+  border-radius: 0.7rem;
+  /* Chip visible en reposo (antes solo eran 3 líneas sueltas, difíciles de ver) */
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: background .3s ease, border-color .3s ease;
 }
-.hamburger:hover { background: rgba(255, 255, 255, 0.06); }
+.hamburger:hover { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.32); }
 .hamburger span {
-  width: 24px;
-  height: 2px;
+  width: 22px;
+  height: 2.5px;
   background: #fff;
   border-radius: 2px;
   transition: transform .3s ease, opacity .3s ease;
@@ -238,6 +242,11 @@ html { scroll-behavior: smooth; }
 .hero {
   position: relative;
   min-height: 100vh;
+  /* El navbar es fixed (h-36 = 9rem) y NO empuja el contenido: sin este      */
+  /* padding, un título de 2 líneas + tagline puede quedar centrado tan alto  */
+  /* que queda tapado detrás del navbar y ya no hay scroll hacia arriba para  */
+  /* revelarlo. Este padding garantiza el despeje pase lo que pase.          */
+  padding-top: 9rem;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -269,7 +278,7 @@ html { scroll-behavior: smooth; }
   width: 100%;
   max-width: 88rem;
   margin: 0 auto;
-  padding: 6rem 1.5rem 5rem;
+  padding: 2rem 1.5rem 5rem;   /* el despeje del navbar ya lo da .hero (padding-top: 9rem) */
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
@@ -279,7 +288,7 @@ html { scroll-behavior: smooth; }
   .hero-grid {
     grid-template-columns: 1fr 1fr;
     gap: 3rem;
-    padding: 5rem 2rem;
+    padding: 2rem 2rem 5rem;
   }
 }
 
@@ -659,6 +668,29 @@ html { scroll-behavior: smooth; }
   0%, 100% { transform: rotate(45deg) translate(0, 0);     opacity: 0.5; }
   50%      { transform: rotate(45deg) translate(3px, 3px); opacity: 1;   }
 }
+
+/* Dos acciones lado a lado: expandir la vitrina AQUÍ vs. saltar al armado */
+.carta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem 2rem;
+  margin: 1.5rem auto 0;
+}
+.carta-actions .ver-carta { margin: 0; }
+.ver-carta--armado {
+  text-decoration: none;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+.ver-carta--armado > span:first-child { letter-spacing: 0.2em; }
+.ver-carta--armado > span:last-child {
+  color: var(--rojo);
+  font-size: 1.1rem;
+  transition: transform .3s ease;
+}
+.ver-carta--armado:hover > span:last-child { transform: translateX(4px); }
 
 /* ---- Encabezados de la carta ---- */
 .carta-header {
