@@ -1504,6 +1504,53 @@ html { scroll-behavior: smooth; }
 
 
 /* ============================================================= */
+/* LIGHTBOX: foto del producto en grande (click en cualquier foto) */
+/* ============================================================= */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background: rgba(0, 0, 0, 0.92);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.lightbox.open { opacity: 1; pointer-events: auto; }
+.lightbox-img {
+  max-width: 92vw;
+  max-height: 88vh;
+  border-radius: 1rem;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.9);
+  will-change: transform, opacity;
+}
+.lightbox-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: background .25s ease, transform .2s ease;
+}
+.lightbox-close:hover { background: rgba(229, 62, 62, 0.85); transform: scale(1.06); }
+
+/* Pista de que la foto se puede abrir en grande */
+.carta-photo-img, .cat-card-img, .hero-photo { cursor: zoom-in; }
+
+/* ============================================================= */
 /* PLACEHOLDERS TEMPORALES (se eliminan con el Hero)             */
 /* ============================================================= */
 .placeholder-bg   { background: radial-gradient(circle at 50% 30%, rgba(229,62,62,0.08), transparent 60%), #0B0B0B; }

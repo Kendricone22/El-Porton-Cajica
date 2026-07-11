@@ -1001,6 +1001,79 @@ function addToCart(ci) {
   };
 })();
 
+/* ============================================================= */
+/* LIGHTBOX: ver la foto del producto en grande, con animación de   */
+/* "apertura" desde la miniatura clickeada (estilo FLIP).           */
+/* Delegado en document → funciona con fotos que se agregan después */
+/* (tarjetas del catálogo, filas nuevas de "Ver toda la carta").    */
+/* ============================================================= */
+(function initLightbox() {
+  const lightbox    = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const closeBtn    = document.getElementById('lightbox-close');
+  if (!lightbox || !lightboxImg) return;
+
+  const PHOTO_SELECTOR = '.carta-photo-img, .cat-card-img, .hero-photo';
+  let lastFocused = null;
+
+  function animateOpen(fromRect) {
+    // Arranca superpuesto exactamente sobre la miniatura clickeada...
+    const finalRect = lightboxImg.getBoundingClientRect(); // ya centrado por el flex del overlay
+    const scaleX = fromRect.width  / finalRect.width;
+    const scaleY = fromRect.height / finalRect.height;
+    const dx = (fromRect.left + fromRect.width  / 2) - (finalRect.left + finalRect.width  / 2);
+    const dy = (fromRect.top  + fromRect.height / 2) - (finalRect.top  + finalRect.height / 2);
+
+    lightboxImg.style.transition = 'none';
+    lightboxImg.style.transform  = `translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
+    lightboxImg.style.opacity    = '0.4';
+    void lightboxImg.offsetWidth;   // fuerza el reflow: aplica el estado inicial YA
+    // ...y ahora sí anima hacia el centro/tamaño final ("se abre").
+    lightboxImg.style.transition = 'transform .4s cubic-bezier(0.22, 1, 0.36, 1), opacity .3s ease';
+    lightboxImg.style.transform  = 'translate(0, 0) scale(1, 1)';
+    lightboxImg.style.opacity    = '1';
+  }
+
+  function open(imgEl) {
+    const src = imgEl.currentSrc || imgEl.src;
+    if (!src) return;
+    const fromRect = imgEl.getBoundingClientRect();
+
+    lastFocused = document.activeElement;
+    lightboxImg.alt = imgEl.alt || '';
+    lightboxImg.src = src;
+    lightbox.classList.add('open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+
+    const run = () => animateOpen(fromRect);
+    if (lightboxImg.complete) run();
+    else lightboxImg.onload = run;
+  }
+
+  function close() {
+    lightbox.classList.remove('open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    lightboxImg.style.transition = '';
+    lightboxImg.style.transform  = '';
+    lightboxImg.style.opacity    = '';
+    lastFocused?.focus?.();
+  }
+
+  document.addEventListener('click', (e) => {
+    const img = e.target.closest(PHOTO_SELECTOR);
+    if (img) open(img);
+  });
+  closeBtn.addEventListener('click', close);
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) close(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('open')) close();
+  });
+})();
+
+
 /* Año dinámico del footer */
 (function () {
   const y = document.getElementById('footer-year');
