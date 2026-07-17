@@ -257,10 +257,10 @@
       + (isTeaser ? ' carta-row--teaser in-view' : '');  // el teaser no se anima
     row.innerHTML = `
       <div class="carta-photo">
-        <div class="carta-photo-card">
+        <div class="carta-photo-card${p.img ? ' is-loading' : ''}">
           <span class="carta-badge">${p.badge}</span>
           ${p.img
-            ? `<img class="carta-photo-img" src="${p.img}" alt="${p.title}">`
+            ? `<img class="carta-photo-img" src="${p.img}" alt="${p.title}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">`
             : `<span class="carta-photo-emoji">${p.emoji}</span>`}
         </div>
       </div>
@@ -341,12 +341,12 @@
   // --- Tarjetas ---
   grid.innerHTML = MENU.map((item) => {
     const media = item.img
-      ? `<img class="cat-card-img" src="${item.img}" alt="${item.name}">`
+      ? `<img class="cat-card-img" src="${item.img}" alt="${item.name}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">`
       : `<span class="cat-card-emoji">${item.emoji}</span>`;
     const badge = item.badge ? `<span class="cat-card-badge">${item.badge}</span>` : '';
     return `
       <article class="cat-card cat-card--in" data-cat="${item.cat}">
-        <div class="cat-card-media">${badge}${media}</div>
+        <div class="cat-card-media${item.img ? ' is-loading' : ''}">${badge}${media}</div>
         <div class="cat-card-body">
           <h3 class="cat-card-title">${item.name}</h3>
           <p class="cat-card-desc">${item.desc}</p>

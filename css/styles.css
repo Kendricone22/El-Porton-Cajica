@@ -532,6 +532,7 @@ html { scroll-behavior: smooth; }
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transition: opacity .35s ease;
 }
 .carta-badge {
   position: absolute;
@@ -862,6 +863,18 @@ html { scroll-behavior: smooth; }
   align-items: center;
   justify-content: center;
 }
+/* Shimmer mientras carga la foto (lazy loading) — evita el "salto" de caja vacía */
+.cat-card-media.is-loading, .carta-photo-card.is-loading {
+  background: linear-gradient(100deg, #161616 30%, #232327 50%, #161616 70%);
+  background-size: 200% 100%;
+  animation: photo-shimmer 1.4s ease-in-out infinite;
+}
+.cat-card-media.is-loading .cat-card-img,
+.carta-photo-card.is-loading .carta-photo-img { opacity: 0; }
+@keyframes photo-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 .cat-card-img {
   position: absolute;
   inset: 0;
@@ -869,7 +882,7 @@ html { scroll-behavior: smooth; }
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: transform .35s ease;
+  transition: transform .35s ease, opacity .35s ease;
 }
 .cat-card:hover .cat-card-img { transform: scale(1.06); }   /* zoom sutil */
 .cat-card-emoji {
