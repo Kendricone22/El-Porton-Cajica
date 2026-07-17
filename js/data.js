@@ -111,6 +111,7 @@ const CARTA_DESTACADA_MAS = [
     price: "Desde $29.000",
   },
   {
+    img:   "assets/Platos/perro-gloton.jpg",
     emoji: "🌭",
     badge: "🌭 Perros Calientes",
     title: "Perro Glotón",
@@ -247,7 +248,7 @@ const MENU = [
   { id:"p-todo-terreno", cat:"perros", combo:true, emoji:"🌭", img:"assets/Platos/perro-todo-terreno.jpg", badge:"🔥 La reina de la casa",
     name:"Todo Terreno", desc:"Pan artesanal, DOBLE salchicha americana, 10 huevos de codorniz, salsas, papa en fósforo y doble queso.",
     options:[{label:"Porción",price:24000}] },
-  { id:"p-gloton", cat:"perros", combo:true, emoji:"🌭",
+  { id:"p-gloton", cat:"perros", combo:true, emoji:"🌭", img:"assets/Platos/perro-gloton.jpg",
     name:"Glotón", desc:"Pan artesanal, salchicha americana, cebolla grille, salsas, papa en fósforo, pollo desmechado, tocineta, queso y dos huevos de codorniz.",
     options:[{label:"Porción",price:24000}] },
 
@@ -278,7 +279,7 @@ const MENU = [
   { id:"s-clasica", cat:"salchipapas", combo:false, emoji:"🍟", img:"assets/Platos/salchipapa-clasica.jpg",
     name:"Salchipapa Clásica", desc:"Papa francesa y salchicha americana.",
     options:[{label:"Estándar",price:11500},{label:"Con Codorniz",price:17000}] },
-  { id:"s-doble", cat:"salchipapas", combo:false, emoji:"🍟",
+  { id:"s-doble", cat:"salchipapas", combo:false, emoji:"🍟", img:"assets/Platos/salchipapa-doble.jpg",
     name:"Salchipapa Doble", desc:"Doble papa y doble salchicha americana.",
     options:[{label:"Estándar",price:20000},{label:"Con Codorniz",price:25500}] },
   { id:"s-salchipollo", cat:"salchipapas", combo:false, emoji:"🍟",
@@ -290,7 +291,7 @@ const MENU = [
   { id:"s-salchicosta", cat:"salchipapas", combo:false, emoji:"🍟",
     name:"Salchicosta", desc:"Papa francesa, salchicha, pollo en trozos, queso, papa fósforo, lechuga, tocineta y queso costeño.",
     options:[{label:"Estándar",price:31000},{label:"Con Codorniz",price:36500}] },
-  { id:"s-cheese-bacon", cat:"salchipapas", combo:false, emoji:"🍟",
+  { id:"s-cheese-bacon", cat:"salchipapas", combo:false, emoji:"🍟", img:"assets/Platos/salchipapa-cheese-bacon.jpg",
     name:"Papas Cheese Bacon", desc:"Doble papa, salchicha, queso cheddar, tocineta y cebollín.",
     options:[{label:"Estándar",price:26000},{label:"Con Codorniz",price:31500}] },
 
