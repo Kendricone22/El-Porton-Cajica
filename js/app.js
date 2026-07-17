@@ -77,7 +77,10 @@
   set('hero-desc',    pick.desc);
   set('hero-price',   pick.price);
   if (elImg) {
-    if (pick.img) {
+    if (pick.video) {
+      // Cinemagraph: video corto en loop; la foto hace de poster mientras carga
+      elImg.innerHTML = `<video class="hero-photo" autoplay muted loop playsinline ${pick.img ? `poster="${pick.img}"` : ''} src="${pick.video}" aria-label="${pick.title}"></video>`;
+    } else if (pick.img) {
       elImg.innerHTML = `<img class="hero-photo" src="${pick.img}" alt="${pick.title}">`;
     } else {
       elImg.textContent = pick.emoji;
@@ -393,6 +396,9 @@
         card.style.display = '';
         card.classList.remove('cat-card--in');
         void card.offsetWidth;          // reflow para reiniciar la animación
+        // Entrada escalonada (cascada): cada tarjeta entra 40ms después de la
+        // anterior, con tope para que las listas largas no se sientan lentas.
+        card.style.animationDelay = Math.min((matchCount - 1) * 40, 320) + 'ms';
         card.classList.add('cat-card--in');
       } else {
         card.style.display = 'none';
@@ -466,6 +472,33 @@ function addToCart(ci) {
   const found = cartState.find((x) => x.hash === ci.hash);
   if (found) found.qty += 1; else cartState.push(ci);
   saveCart();
+}
+
+/* Micro-interacción: una miniatura del plato "vuela" desde el botón de
+   agregar hasta el carrito flotante (patrón clásico de apps de delivery). */
+function flyToCart(fromEl, img, emoji) {
+  const fab = document.getElementById('cart-fab');
+  if (!fab || !fromEl) return;
+  const from = fromEl.getBoundingClientRect();
+  const to   = fab.getBoundingClientRect();
+  if (!from.width || !to.width) return;   // algo no está visible: no animar
+
+  const el = document.createElement('div');
+  el.className = 'fly-to-cart';
+  el.innerHTML = img ? `<img src="${img}" alt="">` : `<span>${emoji || '🍔'}</span>`;
+  const x0 = from.left + from.width / 2 - 28;
+  const y0 = from.top  + from.height / 2 - 28;
+  el.style.left = x0 + 'px';
+  el.style.top  = y0 + 'px';
+  document.body.appendChild(el);
+
+  const dx = (to.left + to.width / 2 - 28) - x0;
+  const dy = (to.top  + to.height / 2 - 28) - y0;
+  void el.offsetWidth;                     // aplica el estado inicial YA
+  el.style.transform = `translate(${dx}px, ${dy}px) scale(0.25)`;
+  el.style.opacity   = '0.25';
+  el.addEventListener('transitionend', () => el.remove(), { once: true });
+  setTimeout(() => el.remove(), 1200);     // red de seguridad si no dispara
 }
 
 /* ============================================================= */
@@ -712,6 +745,7 @@ function addToCart(ci) {
     };
     ci.hash = [ci.id, ci.option, ci.combo, ci.drink, proteins.join('+'), flavors.join('+'), slice, choices.join('+'), adiciones.map((a) => a.name).join('+'), notes].join('|');
     addToCart(ci);
+    flyToCart(addBtn, ci.img, ci.emoji);   // miniatura vuela hacia el carrito
     close();
     showToast('✓ Agregado al pedido');
   }
@@ -1071,6 +1105,61 @@ function addToCart(ci) {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && lightbox.classList.contains('open')) close();
   });
+})();
+
+
+/* ============================================================= */
+/* CURSOR PERSONALIZADO: anillo rojo que sigue al cursor nativo   */
+/* Solo en punteros finos (desktop); nunca en táctil.             */
+/* ============================================================= */
+(function initCursor() {
+  if (!window.matchMedia('(pointer: fine)').matches) return;
+  const ring = document.createElement('div');
+  ring.id = 'cursor-ring';
+  document.body.appendChild(ring);
+
+  const INTERACTIVE = 'a, button, input, select, textarea, label, .cat-card, .carta-photo-img, .hero-photo';
+  let visible = false;
+
+  document.addEventListener('mousemove', (e) => {
+    ring.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+    if (!visible) { ring.classList.add('is-visible'); visible = true; }
+  }, { passive: true });
+
+  document.addEventListener('mouseover', (e) => {
+    ring.classList.toggle('is-hover', !!e.target.closest(INTERACTIVE));
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', () => {
+    ring.classList.remove('is-visible');
+    visible = false;
+  });
+})();
+
+
+/* ============================================================= */
+/* TESTIMONIOS (prueba social) — se renderiza desde TESTIMONIOS   */
+/* en data.js; si el array está vacío, la sección no se muestra.  */
+/* ============================================================= */
+(function initTestimonios() {
+  const section = document.getElementById('testimonios');
+  const grid    = document.getElementById('testimonios-grid');
+  const data    = (typeof TESTIMONIOS !== 'undefined') ? TESTIMONIOS : [];
+  if (!section || !grid) return;
+  if (!data.length) { section.hidden = true; return; }
+
+  grid.innerHTML = data.map((t) => `
+    <article class="testimonio-card">
+      <div class="testimonio-stars" aria-label="${t.stars} de 5 estrellas">${'★'.repeat(t.stars)}${'☆'.repeat(5 - t.stars)}</div>
+      <p class="testimonio-text">${t.text}</p>
+      <div class="testimonio-who">
+        <span class="testimonio-avatar" aria-hidden="true">${t.name.trim().charAt(0).toUpperCase()}</span>
+        <div>
+          <div class="testimonio-name">${t.name}</div>
+          <div class="testimonio-src">${t.source || ''}</div>
+        </div>
+      </div>
+    </article>`).join('');
 })();
 
 

@@ -13,6 +13,9 @@ const BRAND = {
 
 /* ---------- BLOQUE 2: HERO — 4 productos estrella (rotación aleatoria) ---------- */
 /* Texto EXACTO del PRD. El emoji hace de "imagen" hasta tener las fotos reales. */
+/* Soporta `video:` (cinemagraph mp4 en loop; `img` hace de poster). Pendiente:  */
+/* generar el video requiere plan Basic de Higgsfield — cuando exista el mp4,   */
+/* soltarlo en assets/ y agregar video:"assets/..." al producto.                */
 const HERO_PRODUCTS = [
   {
     emoji:   "🌭",
@@ -351,6 +354,20 @@ const ADICIONES = [
   { name:"Champiñón Salteado",         price:6000, cats:["hamburguesas","perros","mazorcadas","salchipapas","pizzas"] },
   { name:"Papa cabello de ángel",      price:1500, cats:["hamburguesas","mazorcadas"] },
   { name:"Cheddar 100gr",              price:6000, cats:["hamburguesas"] },
+];
+
+/* ============================================================= */
+/* TESTIMONIOS (prueba social) — RESEÑAS REALES de Google Maps.   */
+/* Nota calificación global del negocio en Google: 4.4 ★ (236).   */
+/* Si el array queda vacío [], la sección no se muestra.          */
+/* ============================================================= */
+const TESTIMONIOS = [
+  { name:"Yuri Ontibon", stars:5, source:"Google · Local Guide",
+    text:"Comida rápida, la carta tiene muy buenas opciones, rico, buen servicio y los precios son bastante buenos." },
+  { name:"Daniel Vargas Romero", stars:5, source:"Google Maps",
+    text:"De las mejores hamburguesas que me he comido, la atención y los precios buenos, recomendadísimo." },
+  { name:"Rafamusik", stars:5, source:"Google · Local Guide",
+    text:"Compartimos con mi familia en este lugar. Muy buen servicio. Ofrecen comida rápida: hamburguesas, mazorcadas de diferentes sabores, entre otras. Platos con porciones generosas y costos razonables. Buena opción para compartir en familia." },
 ];
 
 /* Descripción que aparece bajo la barra de filtros según la categoría.

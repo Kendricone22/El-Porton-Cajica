@@ -1517,6 +1517,183 @@ html { scroll-behavior: smooth; }
 
 
 /* ============================================================= */
+/* MICRO-INTERACCIÓN: "vuela al carrito" al agregar un plato      */
+/* ============================================================= */
+.fly-to-cart {
+  position: fixed;
+  z-index: 300;
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  background: #18181b;
+  border: 2px solid var(--rojo);
+  box-shadow: 0 10px 30px -8px rgba(229,62,62,0.7);
+  pointer-events: none;
+  /* la trayectoria se anima por JS con transform (x/y separados en wrapper) */
+  transition: transform .7s cubic-bezier(0.5, -0.1, 0.7, 0.4), opacity .7s ease;
+}
+.fly-to-cart img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ============================================================= */
+/* CURSOR PERSONALIZADO (solo desktop / puntero fino)             */
+/* Anillo rojo sutil que sigue al cursor nativo (no lo reemplaza) */
+/* ============================================================= */
+#cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 400;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1.5px solid rgba(229, 62, 62, 0.55);
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  /* transform con transición corta = el anillo "persigue" al cursor nativo */
+  transition: width .25s ease, height .25s ease, margin .25s ease,
+              border-color .25s ease, opacity .3s ease, background .25s ease,
+              transform .13s ease-out;
+}
+#cursor-ring.is-visible { opacity: 1; }
+#cursor-ring.is-hover {
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  border-color: rgba(229, 62, 62, 0.9);
+  background: rgba(229, 62, 62, 0.08);
+}
+/* Solo existe en punteros finos; en táctil jamás se muestra */
+@media (pointer: coarse) { #cursor-ring { display: none; } }
+
+/* ============================================================= */
+/* SECCIÓN: CÓMO PEDIR (3 pasos)                                  */
+/* ============================================================= */
+.como-pedir {
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3.5rem;
+}
+.como-pedir-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 768px) { .como-pedir-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; } }
+.paso-card {
+  position: relative;
+  background: #131316;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 1rem;
+  padding: 1.6rem 1.5rem 1.5rem;
+  overflow: hidden;
+  transition: transform .3s ease, border-color .3s ease;
+}
+.paso-card:hover { transform: translateY(-4px); border-color: rgba(229,62,62,0.4); }
+.paso-num {
+  position: absolute;
+  top: -0.6rem;
+  right: 0.4rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 5.2rem;
+  line-height: 1;
+  color: rgba(229, 62, 62, 0.14);
+  user-select: none;
+}
+.paso-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 0.8rem;
+  background: rgba(229,62,62,0.12);
+  border: 1px solid rgba(229,62,62,0.35);
+  color: var(--rojo);
+  margin-bottom: 0.9rem;
+}
+.paso-title { font-weight: 700; color: #fff; font-size: 1.02rem; margin-bottom: 0.4rem; }
+.paso-text  { color: #a1a1aa; font-size: 0.86rem; line-height: 1.55; }
+
+/* ============================================================= */
+/* SECCIÓN: TESTIMONIOS (prueba social)                           */
+/* ============================================================= */
+.testimonios {
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem 3rem;
+}
+/* Badge de calificación global de Google (dato real, verificable) */
+.google-rating {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.4rem auto 0;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  text-decoration: none;
+  transition: border-color .25s ease, background .25s ease, transform .2s ease;
+}
+.google-rating:hover { border-color: rgba(246,196,83,0.5); background: rgba(255,255,255,0.06); transform: translateY(-1px); }
+.google-rating-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: #fff; line-height: 1; }
+.google-rating-stars { color: #F6C453; letter-spacing: 0.05em; font-size: 0.95rem; position: relative; }
+.google-rating-half { display: inline-block; width: 0.5em; overflow: hidden; }
+.google-rating-count { color: #a1a1aa; font-size: 0.82rem; }
+
+.testimonios-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1.6rem;
+}
+@media (min-width: 768px) { .testimonios-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; } }
+.testimonio-card {
+  display: flex;
+  flex-direction: column;
+  background: #131316;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+.testimonio-stars { color: #F6C453; letter-spacing: 0.15em; font-size: 0.95rem; margin-bottom: 0.8rem; }
+.testimonio-text {
+  color: #d4d4d8;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  flex: 1;
+  font-style: italic;
+}
+.testimonio-text::before { content: "“"; color: var(--rojo); font-size: 1.4em; font-style: normal; }
+.testimonio-text::after  { content: "”"; color: var(--rojo); font-size: 1.4em; font-style: normal; }
+.testimonio-who {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+}
+.testimonio-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--rojo), #7a1f1f);
+  flex: 0 0 auto;
+}
+.testimonio-name { color: #fff; font-weight: 600; font-size: 0.9rem; }
+.testimonio-src  { color: #71717a; font-size: 0.74rem; }
+
+/* ============================================================= */
 /* LIGHTBOX: foto del producto en grande (click en cualquier foto) */
 /* ============================================================= */
 .lightbox {
