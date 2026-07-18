@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel · El Portón Cajicá</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <meta name="theme-color" content="#0B0B0B" />
+  <link rel="stylesheet" href="css/tailwind-built.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --rojo:#E53E3E; --rojo-dark:#C53030; --negro:#0B0B0B; }
+    body { font-family:'Inter',system-ui,sans-serif; background:var(--negro); color:#fff; -webkit-font-smoothing:antialiased; }
+    a { color:inherit; }
+
+    /* ---------- LOGIN ---------- */
+    .admin-login { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem; }
+    .login-card { width:100%; max-width:22rem; background:#131316; border:1px solid rgba(255,255,255,.08); border-radius:1.1rem; padding:2rem 1.6rem; }
+    .login-logo { display:block; height:56px; margin:0 auto 1.3rem; }
+    .login-title { font-family:'Bebas Neue',sans-serif; font-size:1.7rem; text-align:center; letter-spacing:.02em; }
+    .login-sub { color:#a1a1aa; font-size:.82rem; text-align:center; margin-bottom:1.4rem; }
+    .field { display:flex; flex-direction:column; gap:.35rem; margin-bottom:.9rem; }
+    .field span { font-size:.76rem; color:#a1a1aa; font-weight:600; }
+    .field input { background:#0e0e11; border:1px solid rgba(255,255,255,.12); border-radius:.6rem; padding:.7rem .8rem; color:#fff; font-size:.95rem; }
+    .field input:focus { outline:none; border-color:var(--rojo); }
+    .btn-primary { width:100%; background:var(--rojo); color:#fff; font-weight:600; border:none; border-radius:.7rem; padding:.8rem; cursor:pointer; font-size:.95rem; transition:background .2s; }
+    .btn-primary:hover { background:var(--rojo-dark); }
+    .btn-primary:disabled { opacity:.6; cursor:default; }
+    .login-error { color:#fca5a5; font-size:.8rem; text-align:center; margin-top:.8rem; min-height:1rem; }
+
+    /* ---------- SHELL ---------- */
+    .admin-top { position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:1rem; padding:.8rem 1.2rem; background:rgba(11,11,11,.9); backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,.08); }
+    .admin-top img { height:38px; }
+    .admin-top .spacer { margin-left:auto; }
+    .btn-ghost { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); color:#e4e4e7; font-size:.82rem; font-weight:600; padding:.5rem .9rem; border-radius:.6rem; cursor:pointer; transition:background .2s; }
+    .btn-ghost:hover { background:rgba(255,255,255,.12); }
+    .admin-wrap { max-width:60rem; margin:0 auto; padding:1.2rem 1rem 4rem; }
+
+    .tabs { display:flex; gap:.5rem; margin-bottom:1.3rem; }
+    .tab { flex:0 0 auto; font-weight:600; font-size:.9rem; color:#cfcfcf; background:#18181b; border:1px solid rgba(255,255,255,.08); padding:.55rem 1.1rem; border-radius:999px; cursor:pointer; }
+    .tab.active { background:var(--rojo); color:#fff; border-color:var(--rojo); }
+
+    /* ---------- KPIs ---------- */
+    .kpis { display:grid; grid-template-columns:repeat(2,1fr); gap:.7rem; margin-bottom:1.3rem; }
+    @media(min-width:640px){ .kpis { grid-template-columns:repeat(4,1fr); } }
+    .kpi { background:#131316; border:1px solid rgba(255,255,255,.07); border-radius:.9rem; padding:1rem; }
+    .kpi-num { font-family:'Bebas Neue',sans-serif; font-size:2rem; line-height:1; color:#fff; }
+    .kpi-label { color:#a1a1aa; font-size:.74rem; margin-top:.25rem; }
+
+    /* ---------- FUNNEL ---------- */
+    .panel-box { background:#131316; border:1px solid rgba(255,255,255,.07); border-radius:.9rem; padding:1.2rem; margin-bottom:1.3rem; }
+    .panel-box h3 { font-size:.95rem; font-weight:700; margin-bottom:1rem; }
+    .funnel-row { display:flex; align-items:center; gap:.8rem; margin-bottom:.7rem; }
+    .funnel-label { width:9.5rem; flex:0 0 auto; font-size:.82rem; color:#d4d4d8; }
+    .funnel-bar-wrap { flex:1; background:#0e0e11; border-radius:999px; height:1.4rem; overflow:hidden; }
+    .funnel-bar { height:100%; background:linear-gradient(90deg,var(--rojo),#7a1f1f); border-radius:999px; min-width:2px; transition:width .5s; }
+    .funnel-val { width:3.5rem; flex:0 0 auto; text-align:right; font-size:.82rem; font-weight:600; }
+    .top-item { display:flex; justify-content:space-between; font-size:.86rem; padding:.4rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .top-item:last-child { border-bottom:none; }
+    .top-item span:last-child { color:var(--rojo); font-weight:700; }
+
+    /* ---------- PEDIDOS ---------- */
+    .order-card { background:#131316; border:1px solid rgba(255,255,255,.07); border-radius:.9rem; padding:1rem 1.1rem; margin-bottom:.8rem; }
+    .order-head { display:flex; align-items:flex-start; gap:.6rem; flex-wrap:wrap; }
+    .order-name { font-weight:700; font-size:1rem; }
+    .order-when { color:#71717a; font-size:.74rem; }
+    .order-total { margin-left:auto; font-family:'Bebas Neue',sans-serif; font-size:1.5rem; color:var(--rojo); }
+    .order-meta { display:flex; flex-wrap:wrap; gap:.4rem 1rem; margin:.6rem 0; font-size:.8rem; color:#a1a1aa; }
+    .order-meta a { color:#7dd3fc; }
+    .order-items { border-top:1px solid rgba(255,255,255,.06); padding-top:.6rem; margin-top:.2rem; }
+    .order-items li { font-size:.83rem; color:#d4d4d8; margin-bottom:.2rem; list-style:none; }
+    .order-foot { display:flex; align-items:center; gap:.6rem; margin-top:.8rem; }
+    .order-foot span { font-size:.76rem; color:#a1a1aa; }
+    .order-foot select { background:#0e0e11; color:#fff; border:1px solid rgba(255,255,255,.14); border-radius:.5rem; padding:.4rem .6rem; font-size:.82rem; }
+    .badge-status { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:.2rem .55rem; border-radius:999px; }
+    .st-nuevo { background:rgba(229,62,62,.18); color:#fca5a5; }
+    .st-en_camino { background:rgba(246,196,83,.18); color:#f6c453; }
+    .st-entregado { background:rgba(74,222,128,.16); color:#86efac; }
+    .st-cancelado { background:rgba(160,160,160,.15); color:#a1a1aa; }
+    .empty-state { text-align:center; color:#71717a; padding:3rem 1rem; }
+    .loading { text-align:center; color:#a1a1aa; padding:2rem; }
+  </style>
+</head>
+
+<body>
+  <!-- ===== LOGIN ===== -->
+  <div id="login-view" class="admin-login">
+    <form id="login-form" class="login-card">
+      <img src="assets/logo-final.png" alt="El Portón" class="login-logo" />
+      <h1 class="login-title">Panel Administrativo</h1>
+      <p class="login-sub">Acceso solo para el equipo</p>
+      <label class="field"><span>Correo</span><input type="email" id="login-email" autocomplete="username" required /></label>
+      <label class="field"><span>Contraseña</span><input type="password" id="login-pass" autocomplete="current-password" required /></label>
+      <button type="submit" class="btn-primary" id="login-btn">Entrar</button>
+      <p class="login-error" id="login-error"></p>
+    </form>
+  </div>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="dash-view" hidden>
+    <header class="admin-top">
+      <img src="assets/logo-final.png" alt="El Portón" />
+      <span class="spacer"></span>
+      <button class="btn-ghost" id="refresh-btn">↻ Actualizar</button>
+      <button class="btn-ghost" id="logout-btn">Salir</button>
+    </header>
+    <div class="admin-wrap">
+      <div class="tabs">
+        <button class="tab active" data-tab="pedidos">📦 Pedidos</button>
+        <button class="tab" data-tab="analitica">📊 Analítica</button>
+      </div>
+
+      <section id="tab-pedidos">
+        <div id="orders-list"><p class="loading">Cargando pedidos…</p></div>
+      </section>
+
+      <section id="tab-analitica" hidden>
+        <div class="kpis" id="kpis"></div>
+        <div class="panel-box">
+          <h3>Embudo (acciones registradas)</h3>
+          <div id="funnel"></div>
+        </div>
+        <div class="panel-box">
+          <h3>Productos más pedidos</h3>
+          <div id="top-products"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script>
+  (function () {
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const $ = (id) => document.getElementById(id);
+    const fmt = (n) => '$' + Number(n || 0).toLocaleString('es-CO');
+
+    /* ---------- vistas ---------- */
+    function showLogin() { $('login-view').hidden = false; $('dash-view').hidden = true; }
+    function showDash()  { $('login-view').hidden = true;  $('dash-view').hidden = false; }
+
+    /* ---------- login ---------- */
+    $('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = $('login-btn'); const err = $('login-error');
+      err.textContent = ''; btn.disabled = true; btn.textContent = 'Entrando…';
+      const { error } = await sb.auth.signInWithPassword({
+        email: $('login-email').value.trim(),
+        password: $('login-pass').value,
+      });
+      btn.disabled = false; btn.textContent = 'Entrar';
+      if (error) { err.textContent = 'No pudimos entrar: ' + error.message; return; }
+      showDash(); loadAll();
+    });
+    $('logout-btn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+    $('refresh-btn').addEventListener('click', loadAll);
+
+    /* ---------- tabs ---------- */
+    document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach((x) => x.classList.remove('active'));
+      t.classList.add('active');
+      const tab = t.dataset.tab;
+      $('tab-pedidos').hidden = tab !== 'pedidos';
+      $('tab-analitica').hidden = tab !== 'analitica';
+    }));
+
+    /* ---------- carga de datos ---------- */
+    async function loadAll() {
+      $('orders-list').innerHTML = '<p class="loading">Cargando pedidos…</p>';
+      const [{ data: orders, error: oErr }, { data: events }] = await Promise.all([
+        sb.from('orders').select('*').order('created_at', { ascending: false }),
+        sb.from('events').select('type, created_at'),
+      ]);
+      if (oErr) { $('orders-list').innerHTML = '<p class="empty-state">Error al leer pedidos: ' + oErr.message + '</p>'; return; }
+      renderOrders(orders || []);
+      renderStats(orders || [], events || []);
+    }
+
+    /* ---------- pedidos ---------- */
+    const STATUSES = ['nuevo', 'en_camino', 'entregado', 'cancelado'];
+    const STATUS_LABEL = { nuevo:'Nuevo', en_camino:'En camino', entregado:'Entregado', cancelado:'Cancelado' };
+
+    function renderOrders(orders) {
+      if (!orders.length) { $('orders-list').innerHTML = '<p class="empty-state">Aún no hay pedidos.</p>'; return; }
+      $('orders-list').innerHTML = orders.map((o) => {
+        const when = new Date(o.created_at).toLocaleString('es-CO', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+        const items = (o.items || []).map((it) => {
+          const extras = [];
+          if (it.option && it.option !== 'Porción') extras.push(it.option);
+          if (it.combo) extras.push('Combo' + (it.drink ? ' · ' + it.drink : ''));
+          if (it.proteins && it.proteins.length) extras.push(it.proteins.join('+'));
+          if (it.flavors && it.flavors.length) extras.push(it.flavors.join(', '));
+          if (it.adiciones && it.adiciones.length) extras.push('+' + it.adiciones.map((a) => a.name).join(', '));
+          if (it.notes) extras.push('Nota: ' + it.notes);
+          return '<li>• (' + it.qty + 'x) ' + esc(it.name) + (extras.length ? ' <span style="color:#71717a">— ' + esc(extras.join(' · ')) + '</span>' : '') + '</li>';
+        }).join('');
+        const waPhone = (o.customer_phone || '').replace(/\D/g, '');
+        return (
+          '<article class="order-card">' +
+            '<div class="order-head">' +
+              '<div><div class="order-name">' + esc(o.customer_name) + ' <span class="badge-status st-' + o.status + '">' + (STATUS_LABEL[o.status] || o.status) + '</span></div>' +
+              '<div class="order-when">' + when + '</div></div>' +
+              '<div class="order-total">' + fmt(o.subtotal) + '</div>' +
+            '</div>' +
+            '<div class="order-meta">' +
+              '<span>📞 <a href="https://wa.me/57' + waPhone + '" target="_blank" rel="noopener">' + esc(o.customer_phone) + '</a></span>' +
+              '<span>📍 ' + esc(o.customer_address) + '</span>' +
+              '<span>💳 ' + esc(o.payment_method || '—') + (o.cash_change ? ' (' + esc(o.cash_change) + ')' : '') + '</span>' +
+            '</div>' +
+            '<ul class="order-items">' + items + '</ul>' +
+            '<div class="order-foot"><span>Estado:</span>' +
+              '<select data-id="' + o.id + '">' + STATUSES.map((s) => '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + STATUS_LABEL[s] + '</option>').join('') + '</select>' +
+            '</div>' +
+          '</article>'
+        );
+      }).join('');
+
+      $('orders-list').querySelectorAll('select[data-id]').forEach((sel) => {
+        sel.addEventListener('change', async () => {
+          sel.disabled = true;
+          const { error } = await sb.from('orders').update({ status: sel.value }).eq('id', sel.dataset.id);
+          sel.disabled = false;
+          if (error) { alert('No se pudo actualizar: ' + error.message); return; }
+          const badge = sel.closest('.order-card').querySelector('.badge-status');
+          badge.className = 'badge-status st-' + sel.value;
+          badge.textContent = STATUS_LABEL[sel.value];
+        });
+      });
+    }
+
+    /* ---------- analítica ---------- */
+    function renderStats(orders, events) {
+      const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+      const active = orders.filter((o) => o.status !== 'cancelado');
+      const ingreso = active.reduce((s, o) => s + (o.subtotal || 0), 0);
+      const hoy = orders.filter((o) => new Date(o.created_at) >= startToday).length;
+      const ticket = active.length ? Math.round(ingreso / active.length) : 0;
+
+      $('kpis').innerHTML = [
+        ['Pedidos totales', orders.length],
+        ['Pedidos hoy', hoy],
+        ['Ingreso (sin cancelados)', fmt(ingreso)],
+        ['Ticket promedio', fmt(ticket)],
+      ].map(([l, v]) => '<div class="kpi"><div class="kpi-num">' + v + '</div><div class="kpi-label">' + l + '</div></div>').join('');
+
+      const count = (t) => events.filter((e) => e.type === t).length;
+      const steps = [
+        ['Agregó al carrito', count('add_to_cart')],
+        ['Abrió el carrito', count('checkout_opened')],
+        ['Envió el pedido', count('order_sent')],
+      ];
+      const max = Math.max(1, ...steps.map((s) => s[1]));
+      $('funnel').innerHTML = steps.map(([l, v]) =>
+        '<div class="funnel-row"><span class="funnel-label">' + l + '</span>' +
+        '<div class="funnel-bar-wrap"><div class="funnel-bar" style="width:' + (v / max * 100) + '%"></div></div>' +
+        '<span class="funnel-val">' + v + '</span></div>'
+      ).join('');
+
+      const tally = {};
+      orders.forEach((o) => (o.items || []).forEach((it) => { tally[it.name] = (tally[it.name] || 0) + (it.qty || 1); }));
+      const top = Object.entries(tally).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      $('top-products').innerHTML = top.length
+        ? top.map(([n, q]) => '<div class="top-item"><span>' + esc(n) + '</span><span>' + q + '</span></div>').join('')
+        : '<p style="color:#71717a;font-size:.85rem">Sin datos todavía.</p>';
+    }
+
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
+
+    /* ---------- init: ¿ya hay sesión? ---------- */
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) { showDash(); loadAll(); } else { showLogin(); }
+    })();
+  })();
+  </script>
+</body>
+</html>

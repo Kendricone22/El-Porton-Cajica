@@ -1419,6 +1419,24 @@ html { scroll-behavior: smooth; }
 .cart-field input::placeholder { color: #5a5a61; }
 .cart-field input:focus { outline: none; border-color: var(--rojo); }
 .field-error input, input.field-error { border-color: #E53E3E; }
+
+/* Consentimiento de datos (Ley 1581) */
+.cart-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0.7rem;
+  background: rgba(255,255,255,0.02);
+  transition: border-color .25s ease, background .25s ease;
+}
+.cart-consent input { margin-top: 0.15rem; width: 18px; height: 18px; accent-color: var(--rojo); flex: 0 0 auto; cursor: pointer; }
+.cart-consent span { font-size: 0.75rem; color: #a1a1aa; line-height: 1.5; }
+.cart-consent a { color: var(--rojo); text-decoration: underline; }
+.cart-consent.field-error { border-color: #E53E3E; background: rgba(229,62,62,0.06); }
+
 .pago-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 .pago-opts.field-error { outline: 1.5px solid #E53E3E; outline-offset: 2px; border-radius: 0.6rem; }
 .pago-opt {
@@ -1512,8 +1530,59 @@ html { scroll-behavior: smooth; }
 }
 .site-footer-logo { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 700; font-size: 1.45rem; color: var(--crema); }
 .site-footer-tag { color: var(--gris); font-size: 0.85rem; margin-top: 0.35rem; }
-.site-footer-copy { color: #52525b; font-size: 0.78rem; margin-top: 1.3rem; line-height: 1.6; }
+.site-footer-links { margin-top: 1.1rem; font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; align-items: center; }
+.site-footer-links a { color: #a1a1aa; text-decoration: none; transition: color .25s ease; }
+.site-footer-links a:hover { color: #fff; }
+.site-footer-links span { color: #3f3f46; }
+.site-footer-copy { color: #52525b; font-size: 0.78rem; margin-top: 1rem; line-height: 1.6; }
 .site-footer-copy a { color: var(--rojo); }
+
+/* ============================================================= */
+/* PÁGINA LEGAL (legal.html)                                     */
+/* ============================================================= */
+.legal-page { background: #0B0B0B; min-height: 100vh; }
+.legal-nav {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  background: rgba(11,11,11,0.85);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.legal-nav .logo-img { height: 44px; width: auto; }
+.legal-back { margin-left: auto; color: #a1a1aa; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: color .25s ease; }
+.legal-back:hover { color: #fff; }
+.legal-wrap { max-width: 52rem; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+.legal-h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.4rem, 7vw, 3.6rem); color: #fff; line-height: 1; margin-bottom: 0.5rem; }
+.legal-updated { color: #71717a; font-size: 0.85rem; margin-bottom: 1.5rem; }
+.legal-note {
+  background: rgba(246,196,83,0.08);
+  border: 1px solid rgba(246,196,83,0.3);
+  border-radius: 0.7rem;
+  padding: 0.9rem 1.1rem;
+  color: #d9c48c; font-size: 0.82rem; line-height: 1.55;
+  margin-bottom: 2.5rem;
+}
+.legal-toc { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 2.5rem; }
+.legal-toc a {
+  font-size: 0.85rem; font-weight: 600; color: #cfcfcf; text-decoration: none;
+  background: #18181b; border: 1px solid rgba(255,255,255,0.08);
+  padding: 0.5rem 1rem; border-radius: 999px; transition: border-color .25s ease, color .25s ease;
+}
+.legal-toc a:hover { color: #fff; border-color: rgba(229,62,62,0.5); }
+.legal-section { scroll-margin-top: 5rem; margin-bottom: 3rem; }
+.legal-h2 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; color: #fff;
+  letter-spacing: 0.02em; padding-bottom: 0.5rem; margin-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(229,62,62,0.4);
+}
+.legal-h3 { color: #fff; font-size: 1.02rem; font-weight: 700; margin: 1.6rem 0 0.6rem; }
+.legal-section p, .legal-section li { color: #b4b4bb; font-size: 0.92rem; line-height: 1.7; }
+.legal-section p { margin-bottom: 0.9rem; }
+.legal-section ul { list-style: disc; padding-left: 1.3rem; margin-bottom: 0.9rem; }
+.legal-section li { margin-bottom: 0.45rem; }
+.legal-section a { color: var(--rojo); }
+.legal-fill { color: #F6C453; font-weight: 600; background: rgba(246,196,83,0.1); padding: 0 0.3rem; border-radius: 0.25rem; }
 
 
 /* ============================================================= */

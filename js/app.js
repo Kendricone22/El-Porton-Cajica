@@ -3,6 +3,38 @@
 /* ============================================================= */
 
 /* ============================================================= */
+/* REGISTRO EN SUPABASE (pedidos + eventos para el panel)        */
+/* Fire-and-forget y 100% defensivo: si Supabase falla, no está  */
+/* configurado, o la tabla no existe, el cliente NUNCA se entera  */
+/* y el flujo de WhatsApp sigue igual. Solo INSERTA (RLS impide   */
+/* leer con la anon key; leer es solo para el admin autenticado). */
+/* ============================================================= */
+window.PortonTrack = (function () {
+  const ready = typeof SUPABASE_URL === 'string' && typeof SUPABASE_ANON_KEY === 'string'
+                && SUPABASE_URL && SUPABASE_ANON_KEY;
+  function post(path, body) {
+    if (!ready) return;
+    try {
+      fetch(SUPABASE_URL + '/rest/v1/' + path, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',   // no intenta leer de vuelta (anon no puede)
+        },
+        body: JSON.stringify(body),
+        keepalive: true,                // sobrevive a la navegación a WhatsApp
+      }).catch(() => {});               // silencioso: nunca afecta al cliente
+    } catch (e) { /* no-op */ }
+  }
+  return {
+    event: (type, meta) => post('events', { type: type, meta: meta || null }),
+    order: (order) => post('orders', order),
+  };
+})();
+
+/* ============================================================= */
 /* COMPONENTE 1: NAVBAR                                          */
 /* ============================================================= */
 (function initNavbar() {
@@ -472,6 +504,7 @@ function addToCart(ci) {
   const found = cartState.find((x) => x.hash === ci.hash);
   if (found) found.qty += 1; else cartState.push(ci);
   saveCart();
+  window.PortonTrack?.event('add_to_cart', { id: ci.id, name: ci.name });
 }
 
 /* Micro-interacción: una miniatura del plato "vuela" desde el botón de
@@ -877,7 +910,10 @@ function flyToCart(fromEl, img, emoji) {
   };
 
   /* abrir / cerrar */
-  const openCart  = () => { drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; };
+  const openCart  = () => {
+    drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden';
+    if (cartState.length) window.PortonTrack?.event('checkout_opened', { items: cartState.length });
+  };
   const closeCart = () => { drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; };
   fab.addEventListener('click', openCart);
   closeBtn.addEventListener('click', closeCart);
@@ -939,7 +975,17 @@ function flyToCart(fromEl, img, emoji) {
     const pago = formEl.querySelector('input[name="pago"]:checked');
     formEl.querySelector('.pago-opts').classList.toggle('field-error', !pago);
     if (!pago) ok = false;
-    if (!ok) showToast('Completa tus datos de envío 📝');
+    if (!ok) { showToast('Completa tus datos de envío 📝'); return false; }
+    // Consentimiento de datos (Ley 1581) obligatorio para poder enviar
+    const consent = formEl.elements.consent;
+    const consentWrap = formEl.querySelector('.cart-consent');
+    if (consent && !consent.checked) {
+      consentWrap?.classList.add('field-error');
+      consentWrap?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast('Debes autorizar el tratamiento de datos 🔒');
+      return false;
+    }
+    consentWrap?.classList.remove('field-error');
     return ok;
   }
   sendBtn.addEventListener('click', () => {
@@ -1021,6 +1067,29 @@ function flyToCart(fromEl, img, emoji) {
   // Construye el enlace y abre WhatsApp; limpia el carrito tras el envío
   window.sendOrderWhatsApp = function () {
     if (!cartState.length) return;
+
+    // Registrar el pedido en Supabase ANTES de limpiar el carrito
+    // (fire-and-forget: si falla, el envío por WhatsApp sigue igual).
+    try {
+      const d = getForm();
+      const subtotal = cartState.reduce((s, i) => s + i.unitPrice * i.qty, 0);
+      window.PortonTrack?.order({
+        customer_name:    d.nombre,
+        customer_phone:   d.telefono,
+        customer_address: d.direccion,
+        payment_method:   d.pago || null,
+        cash_change:      d.cambio || null,
+        subtotal:         subtotal,
+        items: cartState.map((it) => ({
+          id: it.id, name: it.name, cat: it.cat, qty: it.qty, unitPrice: it.unitPrice,
+          option: it.option, combo: it.combo, drink: it.drink, proteins: it.proteins,
+          flavors: it.flavors, slice: it.slice, choices: it.choices,
+          adiciones: it.adiciones, notes: it.notes,
+        })),
+      });
+      window.PortonTrack?.event('order_sent', { items: cartState.length, subtotal: subtotal });
+    } catch (e) { /* el registro nunca bloquea el envío */ }
+
     const url = 'https://api.whatsapp.com/send?phone=' + BRAND.whatsapp +
                 '&text=' + encodeURIComponent(buildMessage());
     window.open(url, '_blank');
