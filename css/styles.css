@@ -73,13 +73,18 @@ html { scroll-behavior: smooth; }
 /* LOGO ORIGINAL (imagen logo.jpg)                               */
 /* ============================================================= */
 .logo-img {
-  height: 132px;
+  /* En móvil, 132px de alto (~330px de ancho) empujaba el botón de menú
+     fuera de la pantalla. Escala progresiva por breakpoint (Tailwind:
+     sm=640px, lg=1024px) — el tamaño grande original se conserva en desktop. */
+  height: 56px;
   width: auto;
   display: block;
   /* drop-shadow sigue la silueta (no la caja) ahora que el fondo es transparente */
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.55));
-  transition: transform .3s ease, filter .3s ease;
+  transition: transform .3s ease, filter .3s ease, height .3s ease;
 }
+@media (min-width: 640px)  { .logo-img { height: 90px; } }
+@media (min-width: 1024px) { .logo-img { height: 132px; } }
 .logo-link:hover .logo-img {
   transform: translateY(-1px) scale(1.04);
   filter: drop-shadow(0 0 10px rgba(229, 62, 62, 0.55)) drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
@@ -1712,8 +1717,17 @@ html { scroll-behavior: smooth; }
 }
 .google-rating:hover { border-color: rgba(246,196,83,0.5); background: rgba(255,255,255,0.06); transform: translateY(-1px); }
 .google-rating-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: #fff; line-height: 1; }
-.google-rating-stars { color: #F6C453; letter-spacing: 0.05em; font-size: 0.95rem; position: relative; }
-.google-rating-half { display: inline-block; width: 0.5em; overflow: hidden; }
+/* Estrellas parciales: dos filas idénticas superpuestas (base tenue +      */
+/* relleno dorado recortado a un %) en vez de recortar un solo glyph — así   */
+/* no depende de la geometría interna del carácter ★ y nunca queda mal      */
+/* alineado, sin importar el porcentaje (4.4/5 = 88%, no siempre "mitad").  */
+.google-rating-stars { position: relative; display: inline-block; line-height: 1; letter-spacing: 0.05em; font-size: 0.95rem; }
+/* Ambas filas en display:block: un <span> inline mide su alto por las      */
+/* métricas de la fuente (ascenso/descenso), distinto del alto por          */
+/* line-height que usa un bloque — si una queda inline y la otra bloque,    */
+/* no calzan pixel a pixel. Forzando las dos a "block" quedan idénticas.    */
+.stars-base { display: block; line-height: 1; color: rgba(246, 196, 83, 0.25); white-space: nowrap; }
+.stars-fill { display: block; line-height: 1; position: absolute; top: 0; left: 0; overflow: hidden; white-space: nowrap; color: #F6C453; }
 .google-rating-count { color: #a1a1aa; font-size: 0.82rem; }
 
 .testimonios-grid {

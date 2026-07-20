@@ -156,7 +156,12 @@ window.PortonTrack = (function () {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // Heurística simple para gama baja: pocos núcleos o poca RAM (deviceMemory
+  // no existe en todos los navegadores — si no está, no penaliza). En esos
+  // equipos, menos densidad de partículas/humo y menor resolución de canvas.
+  const isLowEnd = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+                 || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+  const dpr = Math.min(window.devicePixelRatio || 1, isLowEnd ? 1.5 : 2);
   let W = 0, H = 0, raf = null, lastW = 0;
   let particles = [], smoke = [];
   const mouse = { x: -9999, y: -9999, active: false };
@@ -173,7 +178,8 @@ window.PortonTrack = (function () {
   }
 
   function buildParticles() {
-    const count = Math.round(Math.min(120, Math.max(60, W / 14)));
+    const base = Math.round(Math.min(120, Math.max(60, W / 14)));
+    const count = isLowEnd ? Math.round(base * 0.5) : base;
     particles = [];
     for (let i = 0; i < count; i++) {
       const red = Math.random() < 0.18;       // ~18% puntos rojos (variedad)
@@ -189,7 +195,8 @@ window.PortonTrack = (function () {
   }
   function buildSmoke() {
     smoke = [];
-    for (let i = 0; i < 16; i++) {
+    const smokeCount = isLowEnd ? 8 : 16;
+    for (let i = 0; i < smokeCount; i++) {
       smoke.push({
         x: rand(0, W), y: rand(0, H),
         r: rand(60, 140),
@@ -373,27 +380,31 @@ window.PortonTrack = (function () {
     `<button class="filtro-tab${i === 0 ? ' is-active' : ''}" data-cat="${c.key}" role="tab">${c.emoji} ${c.label}</button>`
   ).join('');
 
-  // --- Tarjetas ---
-  grid.innerHTML = MENU.map((item) => {
-    const media = item.img
-      ? `<img class="cat-card-img" src="${item.img}" alt="${item.name}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">`
-      : `<span class="cat-card-emoji">${item.emoji}</span>`;
-    const badge = item.badge ? `<span class="cat-card-badge">${item.badge}</span>` : '';
-    return `
-      <article class="cat-card cat-card--in" data-cat="${item.cat}">
-        <div class="cat-card-media${item.img ? ' is-loading' : ''}">${badge}${media}</div>
-        <div class="cat-card-body">
-          <h3 class="cat-card-title">${item.name}</h3>
-          <p class="cat-card-desc">${item.desc}</p>
-          <div class="cat-card-foot">
-            <span class="cat-card-price">${priceHTML(item)}</span>
-            <button class="cat-card-btn" data-id="${item.id}">Personalizar</button>
+  // --- Tarjetas (buildGrid se puede re-ejecutar si el menú se actualiza en vivo
+  //     desde Supabase; oculta los productos marcados como no disponibles) ---
+  let cards = [];
+  function buildGrid() {
+    grid.innerHTML = MENU.filter((item) => item.available !== false).map((item) => {
+      const media = item.img
+        ? `<img class="cat-card-img" src="${item.img}" alt="${item.name}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">`
+        : `<span class="cat-card-emoji">${item.emoji}</span>`;
+      const badge = item.badge ? `<span class="cat-card-badge">${item.badge}</span>` : '';
+      return `
+        <article class="cat-card cat-card--in" data-cat="${item.cat}">
+          <div class="cat-card-media${item.img ? ' is-loading' : ''}">${badge}${media}</div>
+          <div class="cat-card-body">
+            <h3 class="cat-card-title">${item.name}</h3>
+            <p class="cat-card-desc">${item.desc}</p>
+            <div class="cat-card-foot">
+              <span class="cat-card-price">${priceHTML(item)}</span>
+              <button class="cat-card-btn" data-id="${item.id}">Personalizar</button>
+            </div>
           </div>
-        </div>
-      </article>`;
-  }).join('');
-
-  const cards = [...grid.querySelectorAll('.cat-card')];
+        </article>`;
+    }).join('');
+    cards = [...grid.querySelectorAll('.cat-card')];
+  }
+  buildGrid();
 
   // --- Filtrado + vista colapsada ("Mostrar más") ---
   const LIMIT = 8;               // platos visibles antes de "Mostrar más"
@@ -476,10 +487,49 @@ window.PortonTrack = (function () {
   applyView();                    // estado inicial (colapsado)
 
   // --- Botón "Personalizar" (abre el modal del Bloque 4) ---
+  // Delegado en `grid`, así que sobrevive a los re-render de buildGrid().
   grid.addEventListener('click', (e) => {
     const b = e.target.closest('.cat-card-btn');
     if (b) window.openProductModal(b.dataset.id);
   });
+
+  // Permite re-pintar el catálogo cuando el menú se actualiza en vivo
+  // (initMenuSync reemplaza MENU y llama a esto), conservando la categoría
+  // activa y el estado colapsado/expandido.
+  window.rerenderCatalog = () => { buildGrid(); applyView(); };
+})();
+
+/* ============================================================= */
+/* MENÚ EN VIVO: si hay menú en Supabase, reemplaza al del código  */
+/* Estrategia "stale-while-revalidate": la página ya se pintó al   */
+/* instante con el MENU del código (rápido y offline-safe); esto   */
+/* corre en segundo plano y, SOLO si Supabase devuelve un menú no  */
+/* vacío, lo reemplaza y re-pinta. Si falla, no hay tabla o está   */
+/* vacía, se queda con el del código. Nunca rompe nada.            */
+/* ============================================================= */
+(async function initMenuSync() {
+  if (typeof SUPABASE_URL !== 'string' || !SUPABASE_URL || typeof MENU === 'undefined') return;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 4000);   // no esperar más de 4s
+    const res = await fetch(SUPABASE_URL + '/rest/v1/menu_items?select=data,available&order=sort_order.asc', {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY },
+      signal: ctrl.signal,
+    });
+    clearTimeout(t);
+    if (!res.ok) return;                              // sin tabla / error → menú del código
+    const rows = await res.json();
+    if (!Array.isArray(rows) || !rows.length) return; // vacío → menú del código
+    const items = rows
+      .filter((r) => r && r.data)
+      .map((r) => Object.assign({}, r.data, { available: r.available }));
+    if (!items.length) return;
+    // Reemplaza el contenido de MENU EN SU LUGAR (misma referencia), para que
+    // el modal/carrito (que leen MENU por id) usen los datos frescos.
+    MENU.length = 0;
+    items.forEach((it) => MENU.push(it));
+    window.rerenderCatalog?.();
+  } catch (e) { /* red caída / abort → se queda con el menú del código */ }
 })();
 
 /* Toast simple + stub del modal (se reemplaza en el Bloque 4) */
@@ -935,6 +985,17 @@ function flyToCart(fromEl, img, emoji) {
     }
   });
 
+  /* Formatea "¿Con cuánto vas a pagar?" con puntos de miles mientras se
+     escribe (50000 → 50.000). Solo reordena dígitos, nunca cambia el valor
+     real (se quita todo lo que no sea número antes de re-formatear). */
+  const cambioInput = formEl.elements.cambio;
+  if (cambioInput) {
+    cambioInput.addEventListener('input', () => {
+      const digits = cambioInput.value.replace(/\D/g, '');
+      cambioInput.value = digits ? Number(digits).toLocaleString('es-CO') : '';
+    });
+  }
+
   /* formulario: método de pago + persistencia */
   function togglePago() {
     const pago = formEl.querySelector('input[name="pago"]:checked');
@@ -1064,9 +1125,32 @@ function flyToCart(fromEl, img, emoji) {
 
   window.buildOrderMessage = buildMessage; // expuesto para verificación
 
+  /* ---------- Freno anti-spam de envíos ----------
+     Control del lado del cliente (no es infalible: alguien podría borrar el
+     localStorage a mano), pero frena clics repetidos, doble-envío accidental
+     y bots simples que no se molestan en editar el navegador. Máximo 4
+     pedidos enviados cada 15 minutos por navegador. */
+  const ORDER_RATE_LIMIT = { max: 4, windowMs: 15 * 60 * 1000 };
+  function checkOrderRateLimit() {
+    const key = 'porton_order_times';
+    const now = Date.now();
+    let times = [];
+    try { times = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { times = []; }
+    times = times.filter((t) => now - t < ORDER_RATE_LIMIT.windowMs);
+    if (times.length >= ORDER_RATE_LIMIT.max) return false;
+    times.push(now);
+    try { localStorage.setItem(key, JSON.stringify(times)); } catch (e) { /* no-op */ }
+    return true;
+  }
+  window.__testOrderRateLimit = checkOrderRateLimit; // expuesto para verificación
+
   // Construye el enlace y abre WhatsApp; limpia el carrito tras el envío
   window.sendOrderWhatsApp = function () {
     if (!cartState.length) return;
+    if (!checkOrderRateLimit()) {
+      showToast('⏳ Ya enviaste varios pedidos seguidos. Espera unos minutos e intenta de nuevo.');
+      return;
+    }
 
     // Registrar el pedido en Supabase ANTES de limpiar el carrito
     // (fire-and-forget: si falla, el envío por WhatsApp sigue igual).

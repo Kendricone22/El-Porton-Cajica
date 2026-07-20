@@ -82,6 +82,61 @@
     .st-cancelado { background:rgba(160,160,160,.15); color:#a1a1aa; }
     .empty-state { text-align:center; color:#71717a; padding:3rem 1rem; }
     .loading { text-align:center; color:#a1a1aa; padding:2rem; }
+
+    /* ---------- MENÚ (editor) ---------- */
+    .menu-toolbar { display:flex; align-items:center; gap:1rem; margin-bottom:1.2rem; }
+    .menu-count { color:#a1a1aa; font-size:.85rem; }
+    .mi-add { margin-left:auto; width:auto; max-width:15rem; }
+    .menu-onboard { text-align:center; padding:2.5rem 1rem; background:#131316; border:1px solid rgba(255,255,255,.07); border-radius:.9rem; }
+    .menu-onboard-emoji { font-size:2.5rem; }
+    .menu-onboard-title { font-weight:700; font-size:1.1rem; margin-top:.5rem; }
+    .menu-onboard-sub { color:#a1a1aa; font-size:.86rem; max-width:34rem; margin:.5rem auto 0; line-height:1.55; }
+    .menu-onboard code { background:#0e0e11; padding:.1rem .4rem; border-radius:.3rem; color:#f6c453; }
+    .menu-cat-group { margin-bottom:1.5rem; }
+    .menu-cat-title { font-size:.95rem; font-weight:700; margin-bottom:.6rem; color:#e4e4e7; }
+    .menu-cat-title span { color:#71717a; font-weight:500; }
+    .menu-item { display:flex; align-items:center; gap:.8rem; background:#131316; border:1px solid rgba(255,255,255,.07); border-radius:.7rem; padding:.7rem .9rem; margin-bottom:.5rem; }
+    .menu-item.is-out { opacity:.55; }
+    .menu-item-thumb { width:2.6rem; height:2.6rem; flex:0 0 auto; border-radius:.5rem; object-fit:cover; background:#0e0e11; }
+    .menu-item-thumb--emoji { display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+    .menu-item-info { display:flex; flex-direction:column; gap:.15rem; min-width:0; }
+    .menu-item-name { font-weight:600; font-size:.92rem; }
+    .menu-item-price { color:#a1a1aa; font-size:.8rem; }
+    .out-pill { background:rgba(229,62,62,.18); color:#fca5a5; font-size:.62rem; font-weight:700; padding:.1rem .4rem; border-radius:999px; letter-spacing:.05em; vertical-align:middle; margin-left:.3rem; }
+    .menu-item-actions { margin-left:auto; display:flex; gap:.4rem; flex-shrink:0; }
+    .mi-btn { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); color:#e4e4e7; font-size:.76rem; font-weight:600; padding:.4rem .7rem; border-radius:.5rem; cursor:pointer; transition:background .2s; }
+    .mi-btn:hover { background:rgba(255,255,255,.13); }
+    .mi-del:hover { background:rgba(229,62,62,.2); border-color:rgba(229,62,62,.4); color:#fca5a5; }
+
+    /* Modal producto */
+    .mm-overlay { position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:1rem; }
+    .mm-overlay.open { display:flex; }
+    .mm-card { width:100%; max-width:30rem; max-height:90vh; overflow-y:auto; background:#18181b; border:1px solid rgba(255,255,255,.1); border-radius:1rem; }
+    .mm-head { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.2rem; border-bottom:1px solid rgba(255,255,255,.08); position:sticky; top:0; background:#18181b; }
+    .mm-head h2 { font-size:1.1rem; font-weight:700; }
+    .mm-close { background:none; border:none; color:#a1a1aa; font-size:1.2rem; cursor:pointer; line-height:1; }
+    .mm-body { padding:1.2rem; display:flex; flex-direction:column; gap:.5rem; }
+    .mm-body .field { margin-bottom:.4rem; }
+    .mm-body textarea { background:#0e0e11; border:1px solid rgba(255,255,255,.12); border-radius:.6rem; padding:.7rem .8rem; color:#fff; font-size:.92rem; font-family:inherit; resize:vertical; }
+    .mm-body textarea:focus { outline:none; border-color:var(--rojo); }
+    .mm-row2 { display:grid; grid-template-columns:1fr 6rem; gap:.7rem; }
+    .mm-body select { background:#0e0e11; border:1px solid rgba(255,255,255,.12); border-radius:.6rem; padding:.7rem .8rem; color:#fff; font-size:.92rem; }
+    .mm-body select:focus { outline:none; border-color:var(--rojo); }
+    .mm-opt-row { display:flex; gap:.5rem; margin-bottom:.5rem; align-items:center; }
+    .mm-opt-row input { background:#0e0e11; border:1px solid rgba(255,255,255,.12); border-radius:.5rem; padding:.55rem .7rem; color:#fff; font-size:.88rem; }
+    .mm-opt-row input:focus { outline:none; border-color:var(--rojo); }
+    .mm-opt-label { flex:1; min-width:0; }
+    .mm-opt-price { width:7rem; flex:0 0 auto; }
+    .mm-toggle { display:flex; align-items:center; gap:.5rem; font-size:.88rem; color:#d4d4d8; cursor:pointer; margin-top:.4rem; }
+    .mm-photo-row { display:flex; gap:.8rem; align-items:center; }
+    .mm-photo-preview { width:5rem; height:5rem; flex:0 0 auto; border-radius:.6rem; overflow:hidden; background:#0e0e11; border:1px solid rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; }
+    .mm-photo-preview img { width:100%; height:100%; object-fit:cover; display:block; }
+    .mm-photo-preview span { font-size:.65rem; color:#71717a; text-align:center; padding:.3rem; line-height:1.3; }
+    .mm-photo-actions { display:flex; flex-direction:column; gap:.4rem; }
+    .mm-photo-actions .btn-ghost { width:auto; }
+    .mm-photo-hint { font-size:.72rem; color:#a1a1aa; margin-top:.3rem; min-height:1rem; }
+    .mm-foot { display:flex; gap:.7rem; justify-content:flex-end; padding:1rem 1.2rem; border-top:1px solid rgba(255,255,255,.08); position:sticky; bottom:0; background:#18181b; }
+    .mm-foot .btn-primary, .mm-foot .btn-ghost { width:auto; }
   </style>
 </head>
 
@@ -99,11 +154,25 @@
     </form>
   </div>
 
+  <!-- ===== VERIFICACIÓN EN DOS PASOS (2FA), solo si el admin la activó ===== -->
+  <div id="mfa-view" class="admin-login" hidden>
+    <form id="mfa-form" class="login-card">
+      <img src="assets/logo-final.png" alt="El Portón" class="login-logo" />
+      <h1 class="login-title">Verificación en dos pasos</h1>
+      <p class="login-sub">Ingresa el código de tu app de autenticación</p>
+      <label class="field"><span>Código (6 dígitos)</span><input type="text" id="mfa-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required /></label>
+      <button type="submit" class="btn-primary" id="mfa-btn">Verificar</button>
+      <p class="login-error" id="mfa-error"></p>
+      <p class="login-sub" style="margin-top:1rem"><a href="#" id="mfa-cancel" style="color:#a1a1aa">← Volver a iniciar sesión</a></p>
+    </form>
+  </div>
+
   <!-- ===== DASHBOARD ===== -->
   <div id="dash-view" hidden>
     <header class="admin-top">
       <img src="assets/logo-final.png" alt="El Portón" />
       <span class="spacer"></span>
+      <button class="btn-ghost" id="security-btn">🔒 Seguridad</button>
       <button class="btn-ghost" id="refresh-btn">↻ Actualizar</button>
       <button class="btn-ghost" id="logout-btn">Salir</button>
     </header>
@@ -111,6 +180,7 @@
       <div class="tabs">
         <button class="tab active" data-tab="pedidos">📦 Pedidos</button>
         <button class="tab" data-tab="analitica">📊 Analítica</button>
+        <button class="tab" data-tab="menu">🍔 Menú</button>
       </div>
 
       <section id="tab-pedidos">
@@ -118,6 +188,10 @@
       </section>
 
       <section id="tab-analitica" hidden>
+        <div class="menu-toolbar">
+          <span class="menu-count">Exporta las ventas para usarlas en otro dashboard</span>
+          <button class="btn-primary mi-add" id="export-csv-btn">⬇️ Exportar CSV</button>
+        </div>
         <div class="kpis" id="kpis"></div>
         <div class="panel-box">
           <h3>Embudo (acciones registradas)</h3>
@@ -128,11 +202,67 @@
           <div id="top-products"></div>
         </div>
       </section>
+
+      <section id="tab-menu" hidden>
+        <div id="menu-body"><p class="loading">Cargando menú…</p></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal editor de producto -->
+  <div id="mm-overlay" class="mm-overlay">
+    <div class="mm-card">
+      <header class="mm-head">
+        <h2 id="mm-title">Editar producto</h2>
+        <button class="mm-close" id="mm-close" aria-label="Cerrar">✕</button>
+      </header>
+      <div class="mm-body">
+        <label class="field"><span>Nombre</span><input id="mm-name" type="text" placeholder="Ej. Hamburguesa Clásica" /></label>
+        <label class="field"><span>Descripción</span><textarea id="mm-desc" rows="2" placeholder="Ingredientes…"></textarea></label>
+        <div class="mm-row2">
+          <label class="field"><span>Categoría</span><select id="mm-cat"></select></label>
+          <label class="field"><span>Emoji</span><input id="mm-emoji" type="text" maxlength="4" placeholder="🍔" /></label>
+        </div>
+        <div class="field">
+          <span>Foto del producto</span>
+          <div class="mm-photo-row">
+            <div class="mm-photo-preview" id="mm-photo-preview"><span>Sin foto (se usa el emoji)</span></div>
+            <div class="mm-photo-actions">
+              <input type="file" id="mm-photo-input" accept="image/*" hidden />
+              <button type="button" class="btn-ghost" id="mm-photo-pick">📷 Cambiar foto</button>
+              <button type="button" class="btn-ghost" id="mm-photo-remove">Quitar foto</button>
+            </div>
+          </div>
+          <p class="mm-photo-hint" id="mm-photo-hint"></p>
+        </div>
+        <div class="field">
+          <span>Precios / opciones</span>
+          <div id="mm-opts"></div>
+          <button type="button" class="btn-ghost" id="mm-add-opt" style="margin-top:.5rem">➕ Agregar opción</button>
+        </div>
+        <label class="mm-toggle"><input type="checkbox" id="mm-avail" /><span>Disponible (desmarca para dejarlo agotado)</span></label>
+      </div>
+      <footer class="mm-foot">
+        <button class="btn-ghost" id="mm-cancel" type="button">Cancelar</button>
+        <button class="btn-primary" id="mm-save" type="button">Guardar</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal de seguridad (activar/desactivar 2FA) -->
+  <div id="sec-overlay" class="mm-overlay">
+    <div class="mm-card" style="max-width:26rem">
+      <header class="mm-head">
+        <h2>Verificación en dos pasos</h2>
+        <button class="mm-close" id="sec-close" aria-label="Cerrar">✕</button>
+      </header>
+      <div class="mm-body" id="sec-body"><p class="loading">Cargando…</p></div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
   <script>
   (function () {
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -154,10 +284,111 @@
       });
       btn.disabled = false; btn.textContent = 'Entrar';
       if (error) { err.textContent = 'No pudimos entrar: ' + error.message; return; }
-      showDash(); loadAll();
+      const ok = await checkMfaAfterLogin();
+      if (ok) { showDash(); loadAll(); }
     });
     $('logout-btn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
     $('refresh-btn').addEventListener('click', loadAll);
+
+    /* ============================================================= */
+    /* 2FA (OPCIONAL) — Supabase Auth MFA con TOTP                   */
+    /* Apagado por defecto: si el admin nunca lo activa desde el     */
+    /* botón "🔒 Seguridad", el login funciona exactamente igual que */
+    /* siempre, sin ningún paso extra. Solo pide código cuando HAY   */
+    /* un factor verificado y la sesión aún no llegó a nivel aal2.   */
+    /* ============================================================= */
+    let mfaFactorId = null;
+    let enrollingFactorId = null;
+
+    // Devuelve true si puede pasar directo al dashboard; false si se quedó
+    // esperando el código en #mfa-view. Si algo falla revisando MFA, no
+    // bloquea el acceso (evita dejar al admin fuera de su propio panel).
+    async function checkMfaAfterLogin() {
+      try {
+        const { data, error } = await sb.auth.mfa.listFactors();
+        if (error) throw error;
+        const verified = (data.totp || []).filter((f) => f.status === 'verified');
+        if (!verified.length) return true;
+        const { data: aal } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal && aal.currentLevel === 'aal2') return true;
+        mfaFactorId = verified[0].id;
+        $('login-view').hidden = true; $('dash-view').hidden = true; $('mfa-view').hidden = false;
+        return false;
+      } catch (e) { return true; }
+    }
+
+    $('mfa-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = $('mfa-btn'); const err = $('mfa-error');
+      const code = $('mfa-code').value.trim();
+      err.textContent = '';
+      if (!/^\d{6}$/.test(code)) { err.textContent = 'Ingresa los 6 dígitos.'; return; }
+      btn.disabled = true; btn.textContent = 'Verificando…';
+      const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: mfaFactorId, code });
+      btn.disabled = false; btn.textContent = 'Verificar';
+      if (error) { err.textContent = 'Código incorrecto, intenta de nuevo.'; return; }
+      $('mfa-view').hidden = true;
+      showDash(); loadAll();
+    });
+    $('mfa-cancel').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await sb.auth.signOut();
+      $('mfa-view').hidden = true;
+      showLogin();
+    });
+
+    /* ---------- panel "Seguridad": activar / desactivar 2FA ---------- */
+    async function renderSecurity() {
+      const body = $('sec-body');
+      body.innerHTML = '<p class="loading">Cargando…</p>';
+      const { data, error } = await sb.auth.mfa.listFactors();
+      if (error) { body.innerHTML = '<p class="empty-state">Error: ' + esc(error.message) + '</p>'; return; }
+      const verified = (data.totp || []).filter((f) => f.status === 'verified');
+      if (verified.length) {
+        body.innerHTML =
+          '<p style="color:#86efac;font-weight:600;margin-bottom:1rem">✓ Verificación en dos pasos ACTIVADA</p>'
+          + '<p class="login-sub" style="text-align:left;margin-bottom:1rem">Si pierdes acceso a tu app de códigos, tendrás que desactivarla desde el panel de Supabase (Authentication → Users) — guarda bien tu app de autenticación.</p>'
+          + '<button class="btn-ghost" id="sec-disable">Desactivar 2FA</button>';
+        $('sec-disable').addEventListener('click', async () => {
+          if (!confirm('¿Desactivar la verificación en dos pasos?')) return;
+          const { error: uErr } = await sb.auth.mfa.unenroll({ factorId: verified[0].id });
+          if (uErr) { alert('No se pudo desactivar: ' + uErr.message); return; }
+          renderSecurity();
+        });
+      } else {
+        body.innerHTML =
+          '<p class="login-sub" style="text-align:left;margin-bottom:1rem">Agrega un segundo paso al iniciar sesión usando una app como Google Authenticator o Authy. Es opcional, pero recomendado.</p>'
+          + '<button class="btn-primary" id="sec-enroll" style="margin-bottom:1rem">Activar 2FA</button>'
+          + '<div id="sec-enroll-box"></div>';
+        $('sec-enroll').addEventListener('click', startEnroll);
+      }
+    }
+
+    async function startEnroll() {
+      const box = $('sec-enroll-box');
+      box.innerHTML = '<p class="loading">Generando código…</p>';
+      const { data, error } = await sb.auth.mfa.enroll({ factorType: 'totp' });
+      if (error) { box.innerHTML = '<p class="empty-state">Error: ' + esc(error.message) + '</p>'; return; }
+      enrollingFactorId = data.id;
+      box.innerHTML =
+        '<div style="background:#fff;padding:1rem;border-radius:.6rem;margin-bottom:1rem;max-width:12rem">' + data.totp.qr_code + '</div>'
+        + '<p class="login-sub" style="text-align:left;margin-bottom:.6rem">Escanéalo con tu app y escribe el código de 6 dígitos:</p>'
+        + '<label class="field"><input id="sec-code" type="text" inputmode="numeric" maxlength="6" placeholder="123456" /></label>'
+        + '<button class="btn-primary" id="sec-verify">Confirmar</button>'
+        + '<p class="login-error" id="sec-error"></p>';
+      $('sec-verify').addEventListener('click', async () => {
+        const code = $('sec-code').value.trim();
+        const err = $('sec-error');
+        if (!/^\d{6}$/.test(code)) { err.textContent = 'Ingresa los 6 dígitos.'; return; }
+        const { error: vErr } = await sb.auth.mfa.challengeAndVerify({ factorId: enrollingFactorId, code });
+        if (vErr) { err.textContent = 'Código incorrecto, intenta de nuevo.'; return; }
+        renderSecurity();
+      });
+    }
+
+    $('security-btn').addEventListener('click', () => { $('sec-overlay').classList.add('open'); renderSecurity(); });
+    $('sec-close').addEventListener('click', () => $('sec-overlay').classList.remove('open'));
+    $('sec-overlay').addEventListener('click', (e) => { if (e.target === $('sec-overlay')) $('sec-overlay').classList.remove('open'); });
 
     /* ---------- tabs ---------- */
     document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
@@ -166,9 +397,12 @@
       const tab = t.dataset.tab;
       $('tab-pedidos').hidden = tab !== 'pedidos';
       $('tab-analitica').hidden = tab !== 'analitica';
+      $('tab-menu').hidden = tab !== 'menu';
+      if (tab === 'menu') ensureMenuLoaded();
     }));
 
     /* ---------- carga de datos ---------- */
+    let lastOrders = [];   // cache para el export CSV
     async function loadAll() {
       $('orders-list').innerHTML = '<p class="loading">Cargando pedidos…</p>';
       const [{ data: orders, error: oErr }, { data: events }] = await Promise.all([
@@ -176,6 +410,7 @@
         sb.from('events').select('type, created_at'),
       ]);
       if (oErr) { $('orders-list').innerHTML = '<p class="empty-state">Error al leer pedidos: ' + oErr.message + '</p>'; return; }
+      lastOrders = orders || [];
       renderOrders(orders || []);
       renderStats(orders || [], events || []);
     }
@@ -270,10 +505,309 @@
 
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
 
+    /* ---------- Exportar analítica a CSV ----------
+       Una fila por PRODUCTO dentro de cada pedido (no por pedido) para que
+       se pueda medir por producto/categoría en otro dashboard. Excluye
+       pedidos cancelados (mismo criterio que el KPI "Ingreso"). Encabezados
+       en español simple para que el importador de Ventas Dashboard los
+       detecte solo (fecha/total/producto/categoria/pago). NO se incluye una
+       columna de cantidad a propósito: el Monto ya viene multiplicado por
+       cantidad, y si se mapeara una columna "cantidad" el importador
+       volvería a multiplicar y duplicaría el número. */
+    function ordersToSalesRows(orders) {
+      const rows = [['Fecha', 'Producto', 'Categoria', 'Monto', 'Pago', 'Cliente', 'Estado']];
+      orders.forEach((o) => {
+        if (o.status === 'cancelado') return;
+        const fecha = new Date(o.created_at).toISOString().slice(0, 10); // yyyy-mm-dd, sin ambigüedad
+        (o.items || []).forEach((it) => {
+          rows.push([
+            fecha,
+            it.name || '',
+            catLabel(it.cat) || it.cat || '',
+            Math.round((it.unitPrice || 0) * (it.qty || 1)),
+            o.payment_method || '',
+            o.customer_name || '',
+            STATUS_LABEL[o.status] || o.status || '',
+          ]);
+        });
+      });
+      return rows;
+    }
+
+    function toCSV(rows) {
+      return rows.map((r) => r.map((cell) => {
+        const s = String(cell == null ? '' : cell);
+        return /[",\r\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }).join(',')).join('\r\n');
+    }
+
+    function downloadCSV(filename, csvText) {
+      const blob = new Blob(['﻿' + csvText], { type: 'text/csv;charset=utf-8;' }); // BOM: Excel abre bien tildes/ñ
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    $('export-csv-btn').addEventListener('click', () => {
+      const withItems = lastOrders.filter((o) => o.status !== 'cancelado' && (o.items || []).length);
+      if (!withItems.length) { alert('No hay ventas para exportar todavía (o todos los pedidos están cancelados).'); return; }
+      const csv = toCSV(ordersToSalesRows(lastOrders));
+      const stamp = new Date().toISOString().slice(0, 10);
+      downloadCSV('el-porton-cajica-ventas-' + stamp + '.csv', csv);
+    });
+    window.__testExportCSV = { ordersToSalesRows, toCSV }; // expuesto para verificación
+
+    /* ============================================================= */
+    /* PESTAÑA MENÚ (editor del catálogo)                            */
+    /* Lee/escribe la tabla `menu_items` de Supabase. El público la  */
+    /* lee (initMenuSync en app.js); solo el admin autenticado edita.*/
+    /* ============================================================= */
+    const CATS = (typeof CATEGORIES !== 'undefined') ? CATEGORIES : [];
+    const catLabel = (k) => (CATS.find((c) => c.key === k) || {}).label || k;
+    const catEmoji = (k) => (CATS.find((c) => c.key === k) || {}).emoji || '🍽️';
+    const priceText = (opts) => {
+      if (!opts || !opts.length) return '—';
+      const min = Math.min(...opts.map((o) => Number(o.price) || 0));
+      return (opts.length > 1 ? 'Desde ' : '') + fmt(min);
+    };
+    const slug = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+
+    let menuRows = null;      // cache de las filas de Supabase
+    let menuLoaded = false;
+    let editingId = null;
+    let pendingImg = null;    // URL de la foto actual mientras el modal está abierto
+
+    function ensureMenuLoaded() { if (!menuLoaded) loadMenu(); }
+
+    async function loadMenu() {
+      const box = $('menu-body');
+      box.innerHTML = '<p class="loading">Cargando menú…</p>';
+      const { data, error } = await sb.from('menu_items').select('*').order('cat').order('sort_order');
+      if (error) {
+        // Tabla aún no creada, o error inesperado de lectura
+        box.innerHTML = '<div class="menu-onboard"><p class="menu-onboard-emoji">🛠️</p>'
+          + '<p class="menu-onboard-title">Falta preparar la tabla del menú</p>'
+          + '<p class="menu-onboard-sub">Corre primero <code>menu-setup.sql</code> en Supabase (reemplazando el correo admin). '
+          + 'Detalle técnico: ' + esc(error.message) + '</p></div>';
+        return;
+      }
+      menuRows = data || [];
+      menuLoaded = true;
+      renderMenu();
+    }
+
+    function renderMenu() {
+      const box = $('menu-body');
+      if (!menuRows.length) {
+        const n = (typeof MENU !== 'undefined') ? MENU.length : 0;
+        box.innerHTML = '<div class="menu-onboard">'
+          + '<p class="menu-onboard-emoji">🍔</p>'
+          + '<p class="menu-onboard-title">El menú todavía está vacío</p>'
+          + '<p class="menu-onboard-sub">Importa los ' + n + ' productos actuales de la página con un clic. '
+          + 'Después podrás editar precios y descripciones, marcar como agotado, agregar o borrar productos.</p>'
+          + '<button class="btn-primary" id="menu-import-btn" style="max-width:22rem;margin:1.2rem auto 0">⬇️ Importar menú actual</button>'
+          + '</div>';
+        $('menu-import-btn').addEventListener('click', importMenu);
+        return;
+      }
+      let h = '<div class="menu-toolbar">'
+        + '<span class="menu-count">' + menuRows.length + ' productos en el menú</span>'
+        + '<button class="btn-primary mi-add" id="menu-add-btn">➕ Agregar producto</button>'
+        + '</div>';
+      const order = CATS.map((c) => c.key);
+      const groups = {};
+      menuRows.forEach((r) => { (groups[r.cat] = groups[r.cat] || []).push(r); });
+      Object.keys(groups)
+        .sort((a, b) => order.indexOf(a) - order.indexOf(b))
+        .forEach((cat) => {
+          h += '<div class="menu-cat-group"><h3 class="menu-cat-title">' + catEmoji(cat) + ' ' + esc(catLabel(cat))
+            + ' <span>(' + groups[cat].length + ')</span></h3>';
+          groups[cat].forEach((r) => {
+            const d = r.data || {};
+            const thumb = d.img
+              ? '<img class="menu-item-thumb" src="' + esc(d.img) + '" alt="">'
+              : '<span class="menu-item-thumb menu-item-thumb--emoji">' + (d.emoji || '🍽️') + '</span>';
+            h += '<div class="menu-item' + (r.available ? '' : ' is-out') + '">'
+              + thumb
+              + '<div class="menu-item-info">'
+              + '<span class="menu-item-name">' + (d.emoji ? d.emoji + ' ' : '') + esc(d.name || r.id)
+              + (r.available ? '' : '<span class="out-pill">AGOTADO</span>') + '</span>'
+              + '<span class="menu-item-price">' + priceText(d.options) + '</span>'
+              + '</div>'
+              + '<div class="menu-item-actions">'
+              + '<button class="mi-btn mi-toggle" data-id="' + esc(r.id) + '">' + (r.available ? 'Agotar' : 'Reactivar') + '</button>'
+              + '<button class="mi-btn mi-edit" data-id="' + esc(r.id) + '">Editar</button>'
+              + '<button class="mi-btn mi-del" data-id="' + esc(r.id) + '">Borrar</button>'
+              + '</div></div>';
+          });
+          h += '</div>';
+        });
+      box.innerHTML = h;
+      $('menu-add-btn').addEventListener('click', () => openMenuForm(null));
+      box.querySelectorAll('.mi-toggle').forEach((b) => b.addEventListener('click', () => toggleAvail(b.dataset.id)));
+      box.querySelectorAll('.mi-edit').forEach((b) => b.addEventListener('click', () => openMenuForm(b.dataset.id)));
+      box.querySelectorAll('.mi-del').forEach((b) => b.addEventListener('click', () => delItem(b.dataset.id)));
+    }
+
+    async function importMenu() {
+      if (typeof MENU === 'undefined' || !MENU.length) { alert('No encuentro el menú del código (data.js).'); return; }
+      const btn = $('menu-import-btn'); btn.disabled = true; btn.textContent = 'Importando…';
+      const rows = MENU.map((item, i) => ({
+        id: item.id, cat: item.cat, sort_order: i,
+        available: item.available !== false, data: item,
+      }));
+      // upsert idempotente: si algún id ya existe, NO lo pisa (protege ediciones)
+      const { error } = await sb.from('menu_items').upsert(rows, { onConflict: 'id', ignoreDuplicates: true });
+      if (error) { btn.disabled = false; btn.textContent = '⬇️ Importar menú actual'; alert('No se pudo importar: ' + error.message); return; }
+      await loadMenu();
+    }
+
+    async function toggleAvail(id) {
+      const r = menuRows.find((x) => x.id === id); if (!r) return;
+      const next = !r.available;
+      const newData = Object.assign({}, r.data, { available: next });
+      const { error } = await sb.from('menu_items')
+        .update({ available: next, data: newData, updated_at: new Date().toISOString() }).eq('id', id);
+      if (error) { alert('No se pudo cambiar: ' + error.message); return; }
+      r.available = next; r.data = newData; renderMenu();
+    }
+
+    async function delItem(id) {
+      const r = menuRows.find((x) => x.id === id); if (!r) return;
+      if (!confirm('¿Borrar "' + ((r.data && r.data.name) || id) + '" del menú? Esto no se puede deshacer.')) return;
+      const { error } = await sb.from('menu_items').delete().eq('id', id);
+      if (error) { alert('No se pudo borrar: ' + error.message); return; }
+      menuRows = menuRows.filter((x) => x.id !== id); renderMenu();
+    }
+
+    /* ----- Formulario (modal) crear / editar ----- */
+    function openMenuForm(id) {
+      editingId = id;
+      const r = id ? menuRows.find((x) => x.id === id) : null;
+      const d = r ? (r.data || {}) : { cat: (CATS[0] || {}).key || 'hamburguesas', emoji: '', options: [{ label: 'Porción', price: 0 }] };
+      $('mm-title').textContent = id ? 'Editar producto' : 'Nuevo producto';
+      $('mm-name').value = d.name || '';
+      $('mm-desc').value = d.desc || '';
+      $('mm-emoji').value = d.emoji || '';
+      const curCat = r ? r.cat : d.cat;
+      $('mm-cat').innerHTML = CATS.map((c) =>
+        '<option value="' + c.key + '"' + (c.key === curCat ? ' selected' : '') + '>' + c.emoji + ' ' + esc(c.label) + '</option>').join('');
+      $('mm-avail').checked = r ? !!r.available : true;
+      renderOptRows((d.options && d.options.length) ? d.options : [{ label: 'Porción', price: 0 }]);
+      pendingImg = d.img || null;
+      $('mm-photo-hint').textContent = '';
+      renderPhotoPreview();
+      $('mm-overlay').classList.add('open');
+    }
+
+    function renderPhotoPreview() {
+      $('mm-photo-preview').innerHTML = pendingImg
+        ? '<img src="' + esc(pendingImg) + '" alt="">'
+        : '<span>Sin foto (se usa el emoji)</span>';
+    }
+
+    async function uploadPhoto(file) {
+      const hint = $('mm-photo-hint');
+      if (!file.type.startsWith('image/')) { hint.textContent = 'Solo se permiten imágenes.'; return; }
+      if (file.size > 5 * 1024 * 1024) { hint.textContent = 'La imagen pesa más de 5MB, usa una más liviana.'; return; }
+      hint.textContent = 'Subiendo…';
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+      const path = (editingId || 'nuevo') + '-' + Date.now() + '.' + ext;
+      const { error } = await sb.storage.from('menu-photos').upload(path, file, { upsert: true, cacheControl: '3600' });
+      if (error) {
+        const notFound = /not found|bucket/i.test(error.message || '');
+        hint.textContent = 'No se pudo subir: ' + error.message + (notFound ? ' (¿ya corriste storage-setup.sql en Supabase?)' : '');
+        return;
+      }
+      const { data: pub } = sb.storage.from('menu-photos').getPublicUrl(path);
+      pendingImg = pub.publicUrl;
+      hint.textContent = '✓ Foto lista';
+      renderPhotoPreview();
+    }
+
+    $('mm-photo-pick').addEventListener('click', () => $('mm-photo-input').click());
+    $('mm-photo-input').addEventListener('change', () => {
+      const f = $('mm-photo-input').files[0];
+      if (f) uploadPhoto(f);
+      $('mm-photo-input').value = '';
+    });
+    $('mm-photo-remove').addEventListener('click', () => {
+      pendingImg = null; $('mm-photo-hint').textContent = ''; renderPhotoPreview();
+    });
+
+    function renderOptRows(opts) {
+      $('mm-opts').innerHTML = opts.map((o) =>
+        '<div class="mm-opt-row">'
+        + '<input class="mm-opt-label" placeholder="Nombre (ej. Koller)" value="' + esc(o.label || '') + '">'
+        + '<input class="mm-opt-price" type="number" min="0" step="500" placeholder="Precio" value="' + (Number(o.price) || 0) + '">'
+        + '<button type="button" class="mi-btn mm-opt-del" aria-label="Quitar opción">✕</button>'
+        + '</div>').join('');
+      $('mm-opts').querySelectorAll('.mm-opt-del').forEach((b) =>
+        b.addEventListener('click', () => b.closest('.mm-opt-row').remove()));
+    }
+
+    // Lee las filas de opción SIN filtrar (para re-render al agregar una nueva)
+    function readOptRowsRaw() {
+      return Array.from($('mm-opts').querySelectorAll('.mm-opt-row')).map((row) => ({
+        label: row.querySelector('.mm-opt-label').value,
+        price: Number(row.querySelector('.mm-opt-price').value) || 0,
+      }));
+    }
+
+    async function saveMenuForm() {
+      const name = $('mm-name').value.trim();
+      if (!name) { alert('Ponle un nombre al producto.'); return; }
+      const opts = readOptRowsRaw()
+        .map((o) => ({ label: (o.label || '').trim() || 'Porción', price: Math.round(o.price) }))
+        .filter((o) => o.price > 0);
+      if (!opts.length) { alert('Agrega al menos una opción con precio mayor a 0.'); return; }
+      const cat = $('mm-cat').value;
+      const available = $('mm-avail').checked;
+      const emoji = $('mm-emoji').value.trim();
+      const desc = $('mm-desc').value.trim();
+      const btn = $('mm-save'); btn.disabled = true; btn.textContent = 'Guardando…';
+
+      if (editingId) {
+        const r = menuRows.find((x) => x.id === editingId);
+        // Conserva el resto del objeto (combo, pizza, proteins, badge…) intacto
+        const newData = Object.assign({}, r.data, { name, desc, emoji, cat, options: opts, available, img: pendingImg });
+        const { error } = await sb.from('menu_items')
+          .update({ cat, available, data: newData, updated_at: new Date().toISOString() }).eq('id', editingId);
+        btn.disabled = false; btn.textContent = 'Guardar';
+        if (error) { alert('No se pudo guardar: ' + error.message); return; }
+        r.cat = cat; r.available = available; r.data = newData;
+      } else {
+        let id = slug(name) || ('item-' + Date.now().toString(36));
+        if (menuRows.some((x) => x.id === id)) id += '-' + Date.now().toString(36).slice(-3);
+        const data = { id, cat, combo: false, emoji, name, desc, options: opts, available, img: pendingImg };
+        const sort_order = 1000 + menuRows.filter((x) => x.cat === cat).length;
+        const { error } = await sb.from('menu_items').insert({ id, cat, sort_order, available, data });
+        btn.disabled = false; btn.textContent = 'Guardar';
+        if (error) { alert('No se pudo crear: ' + error.message); return; }
+        menuRows.push({ id, cat, sort_order, available, data });
+      }
+      closeMenuForm(); renderMenu();
+    }
+
+    function closeMenuForm() { $('mm-overlay').classList.remove('open'); editingId = null; }
+
+    // Wiring del modal (los elementos existen siempre en el DOM)
+    $('mm-add-opt').addEventListener('click', () => { const rows = readOptRowsRaw(); rows.push({ label: '', price: 0 }); renderOptRows(rows); });
+    $('mm-save').addEventListener('click', saveMenuForm);
+    $('mm-close').addEventListener('click', closeMenuForm);
+    $('mm-cancel').addEventListener('click', closeMenuForm);
+    $('mm-overlay').addEventListener('click', (e) => { if (e.target === $('mm-overlay')) closeMenuForm(); });
+
     /* ---------- init: ¿ya hay sesión? ---------- */
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
-      if (session) { showDash(); loadAll(); } else { showLogin(); }
+      if (session) {
+        const ok = await checkMfaAfterLogin();
+        if (ok) { showDash(); loadAll(); }
+      } else { showLogin(); }
     })();
   })();
   </script>
