@@ -16,6 +16,11 @@
     body { font-family:'Inter',system-ui,sans-serif; background:var(--negro); color:#fff; -webkit-font-smoothing:antialiased; }
     a { color:inherit; }
 
+    /* Fondo interactivo: canvas fijo detrás de TODO; el contenido se eleva */
+    /* con z-index:1 para quedar por encima (los modales van en z-index:50). */
+    #admin-bg { position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+    #login-view, #mfa-view, #dash-view { position:relative; z-index:1; }
+
     /* ---------- LOGIN ---------- */
     .admin-login { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem; }
     .login-card { width:100%; max-width:22rem; background:#131316; border:1px solid rgba(255,255,255,.08); border-radius:1.1rem; padding:2rem 1.6rem; }
@@ -141,6 +146,9 @@
 </head>
 
 <body>
+  <!-- Fondo interactivo (malla de puntos que ondula + repele el cursor) -->
+  <canvas id="admin-bg" aria-hidden="true"></canvas>
+
   <!-- ===== LOGIN ===== -->
   <div id="login-view" class="admin-login">
     <form id="login-form" class="login-card">
@@ -809,6 +817,112 @@
         if (ok) { showDash(); loadAll(); }
       } else { showLogin(); }
     })();
+  })();
+  </script>
+
+  <!-- ============================================================= -->
+  <!-- FONDO INTERACTIVO: malla de puntos (rojo/gris) que ondula      -->
+  <!-- como agua (orden predecible, lento) y se repele del cursor     -->
+  <!-- formando un círculo; al salir el mouse, vuelven a su ola.      -->
+  <!-- Solo en el panel admin. Independiente del script de arriba.    -->
+  <!-- ============================================================= -->
+  <script>
+  (function initAdminBg() {
+    const canvas = document.getElementById('admin-bg');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Menos densidad/resolución en equipos de gama baja (mismo criterio que el sitio)
+    const isLowEnd = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+                   || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+    const dpr   = Math.min(window.devicePixelRatio || 1, isLowEnd ? 1.5 : 2);
+    const GAP   = isLowEnd ? 24 : 16;    // separación de la malla (más densa)
+    const DOT   = 1.3;                   // radio de cada punto
+    const AMP   = 11;                    // amplitud de la ola (más notoria)
+    const FLOW  = 0.6;                   // velocidad del avance hacia la derecha (más rápido)
+    const SPX   = 0.016, SPY = 0.020;    // frecuencia espacial de la ola geométrica
+    const GRADX = 0.006, GRADY = 0.003;  // frecuencia del degradado de color (zonas amplias, fijo)
+    const R     = 130;                   // radio de repulsión del cursor
+    const PUSH  = 56;                    // fuerza máxima de repulsión
+    const EASE  = 0.10;                  // suavidad del retorno a la ola
+
+    let W = 0, H = 0, cols = 0, rows = 0, pts = [], raf = null;
+    const mouse = { x: -9999, y: -9999, active: false };
+
+    function build() {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.ceil(W / GAP) + 2;
+      rows = Math.ceil(H / GAP) + 2;
+      pts = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const hx = (c - 1) * GAP, hy = (r - 1) * GAP;
+          pts.push({ hx, hy, x: hx, y: hy });
+        }
+      }
+    }
+
+    function frame() {
+      const t = performance.now() / 1000;   // segundos (velocidad estable sin depender de FPS)
+      const flow = t * FLOW;                 // fase que avanza → todo viaja hacia la derecha
+      ctx.clearRect(0, 0, W, H);
+      for (const p of pts) {
+        // Ola geométrica que VIAJA hacia la derecha: las crestas se desplazan en
+        // +x con el tiempo (restamos `flow` a la fase espacial en x), como la
+        // superficie del agua avanzando lento. Los vecinos se mueven en conjunto.
+        const wobY = Math.sin(p.hx * SPX - flow) * AMP
+                   + Math.sin(p.hx * SPX * 0.5 + p.hy * SPY - flow * 0.7) * (AMP * 0.5);
+        const wobX = Math.cos(p.hy * SPY - flow * 0.6) * (AMP * 0.5);
+        let tx = p.hx + wobX, ty = p.hy + wobY;
+
+        // Repulsión del cursor: empuje radial → despeja un círculo alrededor del mouse
+        if (mouse.active) {
+          const dx = tx - mouse.x, dy = ty - mouse.y, d = Math.hypot(dx, dy);
+          if (d < R && d > 0) {
+            const f = (R - d) / R;         // 0..1 (más cerca = más fuerte)
+            const push = f * f * PUSH;
+            tx += (dx / d) * push;
+            ty += (dy / d) * push;
+          }
+        }
+
+        // Retorno suave a la posición objetivo (al salir el mouse, vuelve a la ola)
+        p.x += (tx - p.x) * EASE;
+        p.y += (ty - p.y) * EASE;
+
+        // Degradado de color ESPACIAL (fijo, no depende del tiempo): a lo ancho de
+        // la malla el color va suavemente de gris a rojo de marca y de vuelta, en
+        // zonas amplias ("un lado un color, se degrada al otro, y así sucesivamente").
+        // El movimiento visible viene SOLO de la ola geométrica de arriba, no del color.
+        const g = 0.5 + 0.5 * Math.sin(p.hx * GRADX + p.hy * GRADY);
+        const cr = Math.round(115 + (229 - 115) * g);
+        const cg = Math.round(116 + (62  - 116) * g);
+        const cb = Math.round(120 + (62  - 120) * g);
+        const alpha = 0.5;
+
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + alpha + ')';
+        ctx.arc(p.x, p.y, DOT, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(frame);
+    }
+
+    function start() { if (!raf) raf = requestAnimationFrame(frame); }
+    function stop()  { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+
+    window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
+    window.addEventListener('mouseout', (e) => { if (!e.relatedTarget) { mouse.active = false; mouse.x = mouse.y = -9999; } });
+    let rt = null;
+    window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
+    document.addEventListener('visibilitychange', () => { document.hidden ? stop() : start(); });
+
+    build();
+    start();
+    window.__adminBg = { pointCount: () => pts.length, setMouse: (x, y) => { mouse.x = x; mouse.y = y; mouse.active = true; } }; // para verificación
   })();
   </script>
 </body>

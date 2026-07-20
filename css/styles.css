@@ -75,8 +75,9 @@ html { scroll-behavior: smooth; }
 .logo-img {
   /* En móvil, 132px de alto (~330px de ancho) empujaba el botón de menú
      fuera de la pantalla. Escala progresiva por breakpoint (Tailwind:
-     sm=640px, lg=1024px) — el tamaño grande original se conserva en desktop. */
-  height: 56px;
+     sm=640px, lg=1024px) — el tamaño grande original se conserva en desktop.
+     72px móvil = logo más presente sin llegar a chocar con el CTA/hamburguesa. */
+  height: 72px;
   width: auto;
   display: block;
   /* drop-shadow sigue la silueta (no la caja) ahora que el fondo es transparente */
