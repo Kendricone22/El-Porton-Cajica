@@ -248,63 +248,112 @@ html { scroll-behavior: smooth; }
 .hero {
   position: relative;
   min-height: 100vh;
-  /* El navbar es fixed (h-36 = 9rem) y NO empuja el contenido: sin este      */
-  /* padding, un título de 2 líneas + tagline puede quedar centrado tan alto  */
-  /* que queda tapado detrás del navbar y ya no hay scroll hacia arriba para  */
-  /* revelarlo. Este padding garantiza el despeje pase lo que pase.          */
-  padding-top: 9rem;
-  display: flex;
-  align-items: center;
   overflow: hidden;
-  background: transparent;          /* el fondo lo pone #page-bg (global) */
+  background: var(--negro);   /* opaco: tapa las partículas globales fijas, igual que .page-dark en Nosotros */
 }
 
-/* Textura sutil de fondo (doodles de comida) */
-.hero-bg-texture {
-  position: absolute;
-  inset: 0;
-  background: url('../assets/fondo.png') center / cover no-repeat;
-  opacity: 0.16;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Capa de partículas + humo (canvas), sobre la textura y bajo el contenido */
-.hero-particles {
+/* ---- Foto/video del producto, a pantalla completa ---- */
+.hero-media {
   position: absolute;
   inset: 0;
   z-index: 0;
-  pointer-events: none;
 }
-
-/* Cuadrícula principal */
-.hero-grid {
-  position: relative;
-  z-index: 1;
+.hero-photo {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  max-width: 88rem;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 5rem;   /* el despeje del navbar ya lo da .hero (padding-top: 9rem) */
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  align-items: center;
+  height: 100%;
+  object-fit: cover;
+  /* Las fotos panorámicas traen el plato entre el 49% y el 81% del ancho.
+     Móvil recorta muchísimo (solo se ve ~20% del ancho), así que el encuadre
+     se centra en el plato para que se vea de cerca. */
+  object-position: 65% center;
 }
 @media (min-width: 768px) {
-  .hero-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    padding: 2rem 2rem 5rem;
+  .hero-photo {
+    /* Escritorio: se corre el encuadre para empujar el plato a la derecha y
+       dejarle limpio el lado izquierdo al texto. */
+    object-position: 50% center;
+  }
+}
+/* Fallback para productos sin foto todavía: fondo con resplandor de marca + emoji grande */
+.hero-media--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 45%, rgba(229, 62, 62, 0.22), var(--negro) 68%);
+}
+.hero-media-emoji {
+  font-size: clamp(8rem, 24vw, 16rem);
+  line-height: 1;
+  filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.65));
+  opacity: 0.9;
+}
+
+/* Insignia "Video en loop" (aparece solo cuando el producto trae video) */
+.hero-video-pill {
+  position: absolute;
+  top: 6.5rem;
+  right: 1.5rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(11, 11, 11, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+.hero-video-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rojo);
+}
+
+/* ---- Degradado oscuro para que el texto se lea sobre cualquier foto ---- */
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* Móvil: oscuro abajo (donde va el texto), claro arriba (se ve el plato) */
+  background: linear-gradient(180deg, transparent 0%, transparent 38%, rgba(11, 11, 11, 0.72) 62%, rgba(11, 11, 11, 0.97) 82%, var(--negro) 100%);
+}
+@media (min-width: 768px) {
+  .hero-scrim {
+    /* Escritorio: oscuro a la izquierda (texto), claro a la derecha (plato) */
+    background: linear-gradient(90deg, rgba(11, 11, 11, 0.96) 0%, rgba(11, 11, 11, 0.86) 26%, rgba(11, 11, 11, 0.4) 52%, rgba(11, 11, 11, 0.05) 72%, transparent 88%);
   }
 }
 
-/* ---- Textos ---- */
-.hero-text {
-  text-align: center;
-  order: 1;
+/* ---- Texto + CTA ---- */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 88rem;
+  margin: 0 auto;
+  padding: 9rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
   will-change: transform, opacity;
 }
-@media (min-width: 768px) { .hero-text { text-align: left; } }
+@media (min-width: 768px) {
+  .hero-content {
+    justify-content: center;
+    padding: 9rem 2rem 5rem;
+  }
+}
+
+.hero-content > * { max-width: 34rem; }
 
 .hero-tagline {
   color: var(--rojo);
@@ -317,34 +366,30 @@ html { scroll-behavior: smooth; }
 .hero-title {
   font-family: 'Bebas Neue', sans-serif;
   color: #fff;
-  font-size: clamp(3.5rem, 9vw, 7rem);
-  line-height: 0.92;
-  margin-bottom: 1.25rem;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  font-size: clamp(2.75rem, 8vw, 6rem);
+  line-height: 0.96;
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 .hero-desc {
   color: var(--gris);
-  font-size: 1.05rem;
-  line-height: 1.65;
-  max-width: 34rem;
-  margin: 0 auto 2rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
 }
-@media (min-width: 768px) { .hero-desc { margin-left: 0; } }
 
 .hero-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-wrap: wrap;
   gap: 1rem;
 }
-@media (min-width: 768px) { .hero-actions { justify-content: flex-start; } }
 
 .hero-price-badge {
   display: inline-flex;
   align-items: center;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   color: #fff;
   background: rgba(229, 62, 62, 0.14);
   border: 1px solid var(--rojo);
@@ -370,50 +415,6 @@ html { scroll-behavior: smooth; }
   box-shadow: 0 12px 30px -6px rgba(229, 62, 62, 0.7);
 }
 .hero-order-btn:active { transform: scale(0.98); }
-
-/* ---- Imagen (emoji gigante) ---- */
-.hero-image-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  order: 2;
-  min-height: 18rem;
-  will-change: transform;
-}
-.hero-glow {
-  position: absolute;
-  width: min(100%, 38rem);
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(229, 62, 62, 0.40), rgba(229, 62, 62, 0) 70%);
-  filter: blur(50px);
-  z-index: 0;
-  pointer-events: none;
-}
-.hero-image {
-  position: relative;
-  z-index: 1;
-  font-size: clamp(7rem, 20vw, 14rem);
-  line-height: 1;
-  filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.65));
-  animation: hero-float 4s ease-in-out infinite;
-}
-/* Foto real del producto en el Hero (reemplaza al emoji cuando existe) */
-.hero-photo {
-  display: block;
-  width: 100%;
-  max-width: 46rem;
-  aspect-ratio: 5 / 4;            /* grande, llena el marco del Hero */
-  object-fit: cover;
-  object-position: center;
-  border-radius: 1.5rem;
-  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.75);
-}
-@keyframes hero-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-18px); }
-}
 
 /* ---- Indicador de scroll ---- */
 .scroll-indicator {
@@ -1787,19 +1788,100 @@ html { scroll-behavior: smooth; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem;
+  /* El padding superior deja libre la esquina del botón de cerrar */
+  padding: 4.5rem 1.5rem 2rem;
   background: rgba(0, 0, 0, 0.92);
   opacity: 0;
   pointer-events: none;
   transition: opacity .25s ease;
 }
 .lightbox.open { opacity: 1; pointer-events: auto; }
+
+/* Panel = foto + ficha del producto (qué lleva, precios, combo) */
+.lightbox-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  width: 100%;
+  max-width: 72rem;
+  max-height: 100%;
+}
+.lightbox-media {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
 .lightbox-img {
-  max-width: 92vw;
-  max-height: 88vh;
+  max-width: 100%;
+  max-height: 82vh;
   border-radius: 1rem;
   box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.9);
   will-change: transform, opacity;
+}
+
+/* ---- Ficha del producto (la llena app.js con los datos del MENU) ---- */
+.lightbox-info {
+  flex: 0 0 21rem;
+  max-width: 21rem;
+  max-height: 82vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  text-align: left;
+  color: #d4d4d8;
+  background: rgba(24, 24, 27, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.lightbox-info[hidden] { display: none; }
+
+.lb-cat { font-size: .78rem; color: #a1a1aa; margin-bottom: .2rem; }
+.lb-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  line-height: 1.05;
+  letter-spacing: .02em;
+  color: #fff;
+  margin: 0;
+}
+.lb-label {
+  margin: 1.1rem 0 .4rem;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #E53E3E;
+}
+.lb-desc { margin: 0; font-size: .95rem; line-height: 1.6; color: #d4d4d8; }
+/* Frases derivadas de la data del plato (opciones, proteínas, sabores, combo) */
+.lb-detalles {
+  margin: .85rem 0 0;
+  padding-top: .85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: .88rem;
+  line-height: 1.55;
+  color: #a1a1aa;
+}
+
+/* Angosto: la ficha pasa debajo de la foto y el panel entero scrollea */
+@media (max-width: 899px) {
+  .lightbox { padding: 4.25rem 1rem 1.5rem; }
+  .lightbox-panel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    overflow-y: auto;
+  }
+  .lightbox-media { flex: 0 0 auto; }
+  /* La ficha ahora es solo texto corto, así que la foto puede ir más grande */
+  .lightbox-img { max-height: 52vh; }
+  .lightbox-info {
+    flex: 0 0 auto;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+  }
 }
 .lightbox-close {
   position: absolute;

@@ -95,45 +95,44 @@ window.PortonTrack = (function () {
 /* ============================================================= */
 (function initHero() {
   const products = (typeof HERO_PRODUCTS !== 'undefined') ? HERO_PRODUCTS : [];
-  const elText  = document.getElementById('hero-text');
-  const elWrap  = document.getElementById('hero-image-wrap');
-  const elImg   = document.getElementById('hero-image');
-  const elInd   = document.getElementById('scroll-indicator');
-  if (!products.length || !elText) return;
+  const elMedia   = document.getElementById('hero-media');
+  const elContent = document.getElementById('hero-content');
+  const elInd     = document.getElementById('scroll-indicator');
+  if (!products.length || !elMedia || !elContent) return;
 
   /* --- Inyección aleatoria del producto estrella --- */
-  const pick = products[Math.floor(Math.random() * products.length)];
+  // Solo rotan los productos que ya tienen su foto panorámica: el respaldo con
+  // emoji desentona al lado de una foto real. En cuanto un producto reciba su
+  // `img` entra solo a la rotación, sin tocar código.
+  const conFoto = products.filter((p) => p.img || p.video);
+  const pool = conFoto.length ? conFoto : products;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
   set('hero-tagline', pick.tagline);
   set('hero-title',   pick.title);
   set('hero-desc',    pick.desc);
   set('hero-price',   pick.price);
-  if (elImg) {
-    if (pick.video) {
-      // Cinemagraph: video corto en loop; la foto hace de poster mientras carga
-      elImg.innerHTML = `<video class="hero-photo" autoplay muted loop playsinline ${pick.img ? `poster="${pick.img}"` : ''} src="${pick.video}" aria-label="${pick.title}"></video>`;
-    } else if (pick.img) {
-      elImg.innerHTML = `<img class="hero-photo" src="${pick.img}" alt="${pick.title}">`;
-    } else {
-      elImg.textContent = pick.emoji;
-    }
-    elImg.setAttribute('aria-label', pick.title);
-  }
 
-  /* --- Parallax en scroll + fade del indicador --- */
+  // Fondo a pantalla completa: video (si existe) > foto > respaldo con emoji.
+  // La ficha "Video en loop" solo aparece cuando el producto realmente trae video.
+  elMedia.classList.remove('hero-media--fallback');
+  if (pick.video) {
+    elMedia.innerHTML = `<video class="hero-photo" autoplay muted loop playsinline ${pick.img ? `poster="${pick.img}"` : ''} src="${pick.video}"></video>
+      <span class="hero-video-pill">Video en loop</span>`;
+  } else if (pick.img) {
+    elMedia.innerHTML = `<img class="hero-photo" src="${pick.img}" alt="${pick.title}">`;
+  } else {
+    elMedia.classList.add('hero-media--fallback');
+    elMedia.innerHTML = `<span class="hero-media-emoji" aria-hidden="true">${pick.emoji}</span>`;
+  }
+  elMedia.setAttribute('aria-label', pick.title);
+
+  /* --- Fade del texto y el indicador de scroll (el fondo se queda fijo) --- */
   let ticking = false;
   const update = () => {
     const y = window.scrollY;
-    // Mismo fade de opacidad para TODO el bloque (texto + imagen + resplandor)
     const fade = String(Math.max(0, 1 - y / 500));
-    if (elWrap) {
-      elWrap.style.transform = `translateY(${y * 0.18}px)`;
-      elWrap.style.opacity   = fade;
-    }
-    if (elText) {
-      elText.style.transform = `translateY(${y * 0.30}px)`;
-      elText.style.opacity   = fade;
-    }
+    elContent.style.opacity = fade;
     if (elInd) {
       elInd.style.opacity       = y > 200 ? '0' : '1';
       elInd.style.pointerEvents = y > 200 ? 'none' : 'auto';
@@ -302,7 +301,7 @@ window.PortonTrack = (function () {
         <div class="carta-photo-card${p.img ? ' is-loading' : ''}">
           <span class="carta-badge">${p.badge}</span>
           ${p.img
-            ? `<img class="carta-photo-img" src="${p.img}" alt="${p.title}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">`
+            ? `<img class="carta-photo-img" data-menu-id="${p.menuId || ''}" src="${p.img}" alt="${p.title}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">`
             : `<span class="carta-photo-emoji">${p.emoji}</span>`}
         </div>
       </div>
@@ -386,7 +385,7 @@ window.PortonTrack = (function () {
   function buildGrid() {
     grid.innerHTML = MENU.filter((item) => item.available !== false).map((item) => {
       const media = item.img
-        ? `<img class="cat-card-img" src="${item.img}" alt="${item.name}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">`
+        ? `<img class="cat-card-img" data-menu-id="${item.id}" src="${item.img}" alt="${item.name}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">`
         : `<span class="cat-card-emoji">${item.emoji}</span>`;
       const badge = item.badge ? `<span class="cat-card-badge">${item.badge}</span>` : '';
       return `
@@ -1197,11 +1196,64 @@ function flyToCart(fromEl, img, emoji) {
 (function initLightbox() {
   const lightbox    = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
+  const infoEl      = document.getElementById('lightbox-info');
   const closeBtn    = document.getElementById('lightbox-close');
   if (!lightbox || !lightboxImg) return;
 
-  const PHOTO_SELECTOR = '.carta-photo-img, .cat-card-img, .hero-photo';
+  const PHOTO_SELECTOR = '.carta-photo-img, .cat-card-img';
   let lastFocused = null;
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  /* Ficha del producto: SOLO nombre + qué lleva. La idea es ver la foto en   */
+  /* grande y al tiempo poder leer qué trae el plato, así que aquí no van     */
+  /* precios ni botones (eso ya está en la tarjeta y en el modal de armado).  */
+  /*                                                                          */
+  /* SIEMPRE se arma buscando el id en el MENU (la foto lleva su              */
+  /* `data-menu-id`), nunca por nombre ni por posición: así la descripción    */
+  /* que se ve es la de ESE plato y no la de otro parecido. Se resuelve en    */
+  /* cada click porque initMenuSync puede haber actualizado el MENU en vivo.  */
+  /*                                                                          */
+  /* Las frases de detalle se DERIVAN de la data real del producto            */
+  /* (opciones, proteínas, sabores, combo) — no hay texto inventado.          */
+  function buildInfo(id) {
+    if (!id || typeof MENU === 'undefined') return '';
+    const item = MENU.find((p) => p.id === id);
+    if (!item) return '';
+
+    const cat  = (typeof CATEGORIES !== 'undefined') ? CATEGORIES.find((c) => c.key === item.cat) : null;
+    const opts = Array.isArray(item.options) ? item.options : [];
+    const lista = (arr) => (arr.length < 2 ? (arr[0] || '')
+      : arr.slice(0, -1).join(', ') + ' o ' + arr[arr.length - 1]);
+
+    const detalles = [];
+    if (opts.length > 1) {
+      const labels = opts.map((o) => o.label);
+      detalles.push(item.cat === 'hamburguesas'
+        ? `Elige la proteína: ${lista(labels)}.`
+        : `Disponible en ${lista(labels)}.`);
+    }
+    if (Array.isArray(item.proteins) && item.chooseProteins) {
+      detalles.push(item.chooseProteins > 1
+        ? `Escoge ${item.chooseProteins} proteínas entre ${lista(item.proteins)}.`
+        : `Escoge la proteína: ${lista(item.proteins)}.`);
+    }
+    // Solo si la descripción no lo dice ya (las de pizza suelen incluirlo)
+    if (item.pizza && item.maxFlavors && !/sabor/i.test(item.desc || ''))
+      detalles.push(`Puedes combinar hasta ${item.maxFlavors} sabores en la misma pizza.`);
+    (item.choices || []).forEach((ch) => {
+      const o = ch.options || [];
+      if (o.length) detalles.push(`Elige: ${lista(o)}.`);
+    });
+    if (item.combo) detalles.push('Se puede pedir en combo con papas a la francesa y bebida.');
+
+    return `
+      ${cat ? `<p class="lb-cat">${cat.emoji} ${esc(cat.label)}</p>` : ''}
+      <h3 class="lb-title">${esc(item.name)}</h3>
+      <p class="lb-label">Qué lleva</p>
+      <p class="lb-desc">${esc(item.desc)}</p>
+      ${detalles.length ? `<p class="lb-detalles">${detalles.map(esc).join(' ')}</p>` : ''}`;
+  }
 
   function animateOpen(fromRect) {
     // Arranca superpuesto exactamente sobre la miniatura clickeada...
@@ -1225,6 +1277,15 @@ function flyToCart(fromEl, img, emoji) {
     const src = imgEl.currentSrc || imgEl.src;
     if (!src) return;
     const fromRect = imgEl.getBoundingClientRect();
+
+    // La ficha se llena ANTES de medir: ocupa ancho y cambia el tamaño final
+    // de la foto, del que depende la animación de apertura.
+    if (infoEl) {
+      const html = buildInfo(imgEl.dataset.menuId);
+      infoEl.innerHTML = html;
+      infoEl.hidden    = !html;
+      infoEl.scrollTop = 0;
+    }
 
     lastFocused = document.activeElement;
     lightboxImg.alt = imgEl.alt || '';
@@ -1271,7 +1332,7 @@ function flyToCart(fromEl, img, emoji) {
   ring.id = 'cursor-ring';
   document.body.appendChild(ring);
 
-  const INTERACTIVE = 'a, button, input, select, textarea, label, .cat-card, .carta-photo-img, .hero-photo';
+  const INTERACTIVE = 'a, button, input, select, textarea, label, .cat-card, .carta-photo-img';
   let visible = false;
 
   document.addEventListener('mousemove', (e) => {

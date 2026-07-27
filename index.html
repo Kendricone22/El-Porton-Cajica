@@ -121,25 +121,20 @@
     <!-- COMPONENTE 2: HERO BANNER (ROTATIVO ALEATORIO + PARALLAX)     -->
     <!-- ============================================================= -->
     <section id="inicio" class="hero">
-      <div class="hero-grid">
-        <!-- ---------- Columna de Textos (izquierda / arriba) ---------- -->
-        <div id="hero-text" class="hero-text">
-          <p  id="hero-tagline" class="hero-tagline">&nbsp;</p>
-          <h1 id="hero-title"   class="hero-title">&nbsp;</h1>
-          <p  id="hero-desc"    class="hero-desc">&nbsp;</p>
-          <div class="hero-actions">
-            <span id="hero-price" class="hero-price-badge">&nbsp;</span>
-            <a href="#menu-catalogo" class="hero-order-btn">
-              <span>Ordenar Ahora</span>
-              <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        </div>
+      <!-- Foto/video del producto a pantalla completa (lo llena initHero) -->
+      <div id="hero-media" class="hero-media" role="img" aria-label="Producto destacado"></div>
+      <div class="hero-scrim" aria-hidden="true"></div>
 
-        <!-- ---------- Columna de Imagen (derecha / abajo) ---------- -->
-        <div id="hero-image-wrap" class="hero-image-wrap">
-          <div class="hero-glow" aria-hidden="true"></div>
-          <div id="hero-image" class="hero-image" role="img" aria-label="Producto destacado">🍔</div>
+      <div id="hero-content" class="hero-content">
+        <p  id="hero-tagline" class="hero-tagline">&nbsp;</p>
+        <h1 id="hero-title"   class="hero-title">&nbsp;</h1>
+        <p  id="hero-desc"    class="hero-desc">&nbsp;</p>
+        <div class="hero-actions">
+          <span id="hero-price" class="hero-price-badge">&nbsp;</span>
+          <a href="#menu-catalogo" class="hero-order-btn">
+            <span>Ordenar Ahora</span>
+            <span aria-hidden="true">→</span>
+          </a>
         </div>
       </div>
 
@@ -430,11 +425,17 @@
   </div>
 
   <!-- ============================================================= -->
-  <!-- LIGHTBOX: ver la foto del producto en grande (click en la foto) -->
+  <!-- LIGHTBOX: la foto en grande + la ficha del producto (qué lleva, -->
+  <!-- precios, combo). El panel de la derecha lo llena app.js.        -->
   <!-- ============================================================= -->
   <div id="lightbox" class="lightbox" aria-hidden="true">
     <button id="lightbox-close" class="lightbox-close" aria-label="Cerrar">✕</button>
-    <img id="lightbox-img" class="lightbox-img" src="" alt="">
+    <div class="lightbox-panel">
+      <div class="lightbox-media">
+        <img id="lightbox-img" class="lightbox-img" src="" alt="">
+      </div>
+      <aside id="lightbox-info" class="lightbox-info" hidden></aside>
+    </div>
   </div>
 
   <!-- ===== Scripts ===== -->

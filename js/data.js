@@ -19,7 +19,7 @@ const BRAND = {
 const HERO_PRODUCTS = [
   {
     emoji:   "🌭",
-    img:     "assets/Platos/perro-todo-terreno.jpg",
+    img:     "assets/Platos/perro-todo-terreno-wide.jpg",
     tagline: "🔥 ¡LA REINA DE LA CASA!",
     title:   "PERRO TODO TERRENO",
     desc:    "Pan artesanal mega suave, DOBLE salchicha americana premium, 10 huevos de codorniz, papas en fósforo y doble queso.",
@@ -27,7 +27,7 @@ const HERO_PRODUCTS = [
   },
   {
     emoji:   "🍔",
-    img:     "assets/Platos/hamburguesa-montanera.jpg",
+    img:     "assets/Platos/hamburguesa-montanera-wide.jpg",
     tagline: "🍔 ¡SABOR CRIOLLO BRUTAL!",
     title:   "HAMBURGUESA MONTAÑERA",
     desc:    "Carne artesanal de res de 200gr madurada, doble queso fundido, tocineta ahumada crujiente, plátano maduro frito en su punto, huevo frito y un toque de crema agria artesanal.",
@@ -42,6 +42,7 @@ const HERO_PRODUCTS = [
   },
   {
     emoji:   "🍟",
+    img:     "assets/Platos/salchipapa-mixta-wide.jpg",
     tagline: "🍟 ¡PARA COMPARTIR O MORIR EN EL INTENTO!",
     title:   "SALCHIPAPA MIXTA",
     desc:    "Cama de papas francesas doradas, salchicha americana premium, jugosos trozos de pollo y res saltados a la plancha, plátano maduro y una capa masiva de queso gratinado.",
@@ -50,6 +51,7 @@ const HERO_PRODUCTS = [
   /* --- Añadidos: pizza + combos (precio combo = base + $9.000, incluye papas francesas y bebida) --- */
   {
     emoji:   "🍕",
+    img:     "assets/Platos/pizza-familiar-wide.jpg",
     tagline: "🍕 ¡PARA TODA LA MESA!",
     title:   "PIZZA FAMILIAR",
     desc:    "50cm de masa artesanal recién horneada (8 a 16 porciones). Elige hasta 3 sabores: Pepperoni, Pollo BBQ, Hawaiana, Carnes, Margarita y más.",
@@ -57,7 +59,7 @@ const HERO_PRODUCTS = [
   },
   {
     emoji:   "🍔",
-    img:     "assets/Platos/hamburguesa-golosa.jpg",
+    img:     "assets/Platos/hamburguesa-golosa-wide.jpg",
     tagline: "🍔 ¡COMBO COMPLETO!",
     title:   "HAMBURGUESA GOLOSA EN COMBO",
     desc:    "Carne, doble queso, pollo desmechado en BBQ, tocineta, chorizo y papa cabello de ángel + papas a la francesa y bebida. El combo más cargado.",
@@ -76,8 +78,13 @@ const HERO_PRODUCTS = [
 /* Vitrina corta a propósito (2 platos completos + 1 teaser difuminado)      */
 /* para que la sección no se coma espacio y la gente llegue rápido al        */
 /* catálogo/armado. El último item = teaser (isTeaser = último del array).   */
+/* `menuId` enlaza cada plato de la vitrina con su producto real del MENU     */
+/* (abajo). El lightbox lo usa para mostrar la ficha completa al hacer click  */
+/* en la foto. Se enlaza por ID, nunca por nombre, para que no haya riesgo    */
+/* de cruzar la descripción de un producto con otro.                          */
 const CARTA_DESTACADA = [
   {
+    menuId: "h-cheese-bacon",
     img:   "assets/Platos/hamburguesa-cheese-bacon.jpg",
     emoji: "🍔",
     badge: "🍔 Hamburguesas",
@@ -86,6 +93,7 @@ const CARTA_DESTACADA = [
     price: "Desde $29.000",
   },
   {
+    menuId: "p-todo-terreno",
     img:   "assets/Platos/perro-todo-terreno.jpg",
     emoji: "🌭",
     badge: "🌭 Perros Calientes",
@@ -94,6 +102,7 @@ const CARTA_DESTACADA = [
     price: "$24.000",
   },
   {
+    menuId: "m-colombiana",
     emoji: "🌽",
     badge: "🌽 Mazorcadas",
     title: "Mazorcada Colombiana",
@@ -106,6 +115,7 @@ const CARTA_DESTACADA = [
 /* carta" (no navega, expande ahí mismo). Data real del menú.               */
 const CARTA_DESTACADA_MAS = [
   {
+    menuId: "h-montanera",
     img:   "assets/Platos/hamburguesa-montanera.jpg",
     emoji: "🍔",
     badge: "🍔 Hamburguesas",
@@ -114,6 +124,7 @@ const CARTA_DESTACADA_MAS = [
     price: "Desde $29.000",
   },
   {
+    menuId: "p-gloton",
     img:   "assets/Platos/perro-gloton.jpg",
     emoji: "🌭",
     badge: "🌭 Perros Calientes",
@@ -122,6 +133,7 @@ const CARTA_DESTACADA_MAS = [
     price: "$24.000",
   },
   {
+    menuId: "s-clasica",
     img:   "assets/Platos/salchipapa-clasica.jpg",
     emoji: "🍟",
     badge: "🍟 Salchipapas",
@@ -130,6 +142,7 @@ const CARTA_DESTACADA_MAS = [
     price: "Desde $11.500",
   },
   {
+    menuId: "i-hamburguesa",
     emoji: "🍔",
     badge: "🧒 Menú Infantil",
     title: "Mini Hamburguesa",
@@ -137,6 +150,7 @@ const CARTA_DESTACADA_MAS = [
     price: "$21.000",
   },
   {
+    menuId: "i-perro",
     emoji: "🌭",
     badge: "🧒 Menú Infantil",
     title: "Mini Perro",
@@ -144,6 +158,7 @@ const CARTA_DESTACADA_MAS = [
     price: "$21.000",
   },
   {
+    menuId: "h-tres-carnes",
     img:   "assets/Platos/hamburguesa-3-carnes.jpg",
     emoji: "🍔",
     badge: "🍔 Hamburguesas",
@@ -152,6 +167,8 @@ const CARTA_DESTACADA_MAS = [
     price: "$36.000",
   },
   {
+    menuId: "pz-familiar",
+    img:   "assets/Platos/pizza-familiar.jpg",
     emoji: "🍕",
     badge: "🍕 Pizzas & Lasañas",
     title: "Pizza Familiar",
@@ -230,7 +247,7 @@ const MENU = [
     options:[{label:"Artesanal",price:36000}] },
 
   /* ---------- 2. PERROS CALIENTES (combo +$9.000) ---------- */
-  { id:"p-clasico", cat:"perros", combo:true, emoji:"🌭",
+  { id:"p-clasico", cat:"perros", combo:true, emoji:"🌭", img:"assets/Platos/perro-clasico.jpg",
     name:"Clásico", desc:"Pan artesanal, salchicha americana, cebolla grille, papa en fósforo, salsas, queso y dos huevos de codorniz.",
     options:[{label:"Porción",price:15000}] },
   { id:"p-choriperro", cat:"perros", combo:true, emoji:"🌭",
@@ -285,10 +302,10 @@ const MENU = [
   { id:"s-doble", cat:"salchipapas", combo:false, emoji:"🍟", img:"assets/Platos/salchipapa-doble.jpg",
     name:"Salchipapa Doble", desc:"Doble papa y doble salchicha americana.",
     options:[{label:"Estándar",price:20000},{label:"Con Codorniz",price:25500}] },
-  { id:"s-salchipollo", cat:"salchipapas", combo:false, emoji:"🍟",
+  { id:"s-salchipollo", cat:"salchipapas", combo:false, emoji:"🍟", img:"assets/Platos/salchipollo.jpg",
     name:"Salchipollo", desc:"Doble papa, salchicha americana, cubos de pollo y queso.",
     options:[{label:"Estándar",price:22000},{label:"Con Codorniz",price:27500}] },
-  { id:"s-mixta", cat:"salchipapas", combo:false, emoji:"🍟", badge:"🍟 Para compartir",
+  { id:"s-mixta", cat:"salchipapas", combo:false, emoji:"🍟", img:"assets/Platos/salchipapa-mixta.jpg", badge:"🍟 Para compartir",
     name:"Salchipapa Mixta", desc:"Papa francesa, salchicha, pollo, res, plátano maduro frito y queso.",
     options:[{label:"Estándar",price:35000},{label:"Con Codorniz",price:40500}] },
   { id:"s-salchicosta", cat:"salchipapas", combo:false, emoji:"🍟",
@@ -305,7 +322,7 @@ const MENU = [
   { id:"pz-mediana", cat:"pizzas", combo:false, emoji:"🍕", pizza:true, maxFlavors:3, slices:["x8","x10","x12"],
     name:"Pizza Mediana", desc:"40cm · 8-10 porciones. Elige hasta 3 sabores.",
     options:[{label:"Mediana",price:56000}] },
-  { id:"pz-familiar", cat:"pizzas", combo:false, emoji:"🍕", pizza:true, maxFlavors:3, slices:["x8","x10","x12","x16"],
+  { id:"pz-familiar", cat:"pizzas", combo:false, emoji:"🍕", img:"assets/Platos/pizza-familiar.jpg", pizza:true, maxFlavors:3, slices:["x8","x10","x12","x16"],
     name:"Pizza Familiar", desc:"50cm · 8-16 porciones. Elige hasta 3 sabores.",
     options:[{label:"Familiar",price:69000}] },
   { id:"l-pollo", cat:"pizzas", combo:false, emoji:"🍝",
