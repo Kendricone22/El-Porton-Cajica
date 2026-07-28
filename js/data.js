@@ -1,4 +1,4 @@
-/* ============================================================= */
+﻿/* ============================================================= */
 /* EL PORTÓN CAJICÁ — DATA (FUENTE ÚNICA DE VERDAD)              */
 /* ============================================================= */
 /* NOTA: El menú completo (categorías, productos, adiciones) se   */
@@ -11,15 +11,25 @@ const BRAND = {
   prefix:   "[WEB-PORTON-CAJICA]",
 };
 
-/* ---------- BLOQUE 2: HERO — 4 productos estrella (rotación aleatoria) ---------- */
-/* Texto EXACTO del PRD. El emoji hace de "imagen" hasta tener las fotos reales. */
-/* Soporta `video:` (cinemagraph mp4 en loop; `img` hace de poster). Pendiente:  */
-/* generar el video requiere plan Basic de Higgsfield — cuando exista el mp4,   */
-/* soltarlo en assets/ y agregar video:"assets/..." al producto.                */
+/* ---------- BLOQUE 2: HERO — productos estrella (rotación aleatoria) ---------- */
+/* Los 7 productos que tienen su foto panorámica extendida (21:9). El emoji solo */
+/* hace de respaldo si algún día se agrega uno sin foto.                         */
+/*                                                                               */
+/* `img` = 1920px (Full HD) e `img4k` = 3840px; app.js las sirve con srcset para  */
+/* que el navegador elija según la pantalla. La 4K importa sobre todo en móvil:   */
+/* al ser una foto tan panorámica dentro de una pantalla vertical, el recorte     */
+/* (object-fit: cover) la amplía mucho y con menos píxeles se ve borrosa.         */
+/*                                                                               */
+/* Soporta `video:` (cinemagraph mp4 en loop; `img` hace de poster). Pendiente:   */
+/* generar el video requiere plan Basic de Higgsfield — cuando exista el mp4,     */
+/* soltarlo en assets/ y agregar video:"assets/..." al producto.                  */
 const HERO_PRODUCTS = [
   {
     emoji:   "🌭",
     img:     "assets/Platos/perro-todo-terreno-wide.jpg",
+    img4k:   "assets/Platos/perro-todo-terreno-wide-4k.jpg",
+    imgTall: "assets/Platos/perro-todo-terreno-tall.jpg",   /* version vertical para movil */
+    posMobile: "62%",   /* encuadre del recorte en movil */
     tagline: "🔥 ¡LA REINA DE LA CASA!",
     title:   "PERRO TODO TERRENO",
     desc:    "Pan artesanal mega suave, DOBLE salchicha americana premium, 10 huevos de codorniz, papas en fósforo y doble queso.",
@@ -28,21 +38,42 @@ const HERO_PRODUCTS = [
   {
     emoji:   "🍔",
     img:     "assets/Platos/hamburguesa-montanera-wide.jpg",
+    img4k:   "assets/Platos/hamburguesa-montanera-wide-4k.jpg",
+    imgTall: "assets/Platos/hamburguesa-montanera-tall.jpg",   /* version vertical para movil */
+    posMobile: "70%",   /* encuadre del recorte en movil */
     tagline: "🍔 ¡SABOR CRIOLLO BRUTAL!",
     title:   "HAMBURGUESA MONTAÑERA",
     desc:    "Carne artesanal de res de 200gr madurada, doble queso fundido, tocineta ahumada crujiente, plátano maduro frito en su punto, huevo frito y un toque de crema agria artesanal.",
     price:   "Desde $29.000",
   },
   {
-    emoji:   "🌽",
-    tagline: "🌽 ¡EL ANTOJO PERFECTO!",
-    title:   "MAZORCADA COLOMBIANA",
-    desc:    "Maíz tierno desgranado a la plancha, cubos dorados de plátano maduro, chorizo 100% de cerdo premium, queso costeño rallado y salsa de ajo. ⚠️ (NO CONTIENE PAPA FOSFORO)",
-    price:   "$26.000",
+    emoji:   "🍔",
+    img:     "assets/Platos/hamburguesa-3-carnes-wide.jpg",
+    img4k:   "assets/Platos/hamburguesa-3-carnes-wide-4k.jpg",
+    imgTall: "assets/Platos/hamburguesa-3-carnes-tall.jpg",   /* version vertical para movil */
+    posMobile: "64%",   /* encuadre del recorte en movil */
+    tagline: "🍔 ¡TRIPLE CARNE, TRIPLE ANTOJO!",
+    title:   "HAMBURGUESA TRES CARNES",
+    desc:    "Triple carne de res 100%, triple queso fundido, lechuga, cebolla grille, tomate y salsas de la casa.",
+    price:   "$36.000",
+  },
+  {
+    emoji:   "🍔",
+    img:     "assets/Platos/hamburguesa-cheese-bacon-wide.jpg",
+    img4k:   "assets/Platos/hamburguesa-cheese-bacon-wide-4k.jpg",
+    imgTall: "assets/Platos/hamburguesa-cheese-bacon-tall.jpg",   /* version vertical para movil */
+    posMobile: "70%",   /* encuadre del recorte en movil */
+    tagline: "🧀 ¡BAÑADA EN CHEDDAR!",
+    title:   "HAMBURGUESA CHEESE BACON",
+    desc:    "Carne, queso, papa cabello de ángel y pepinillos, bañada en queso cheddar, con topping de tocineta y cebollín.",
+    price:   "Desde $29.000",
   },
   {
     emoji:   "🍟",
     img:     "assets/Platos/salchipapa-mixta-wide.jpg",
+    img4k:   "assets/Platos/salchipapa-mixta-wide-4k.jpg",
+    imgTall: "assets/Platos/salchipapa-mixta-tall.jpg",   /* version vertical para movil */
+    posMobile: "70%",   /* encuadre del recorte en movil */
     tagline: "🍟 ¡PARA COMPARTIR O MORIR EN EL INTENTO!",
     title:   "SALCHIPAPA MIXTA",
     desc:    "Cama de papas francesas doradas, salchicha americana premium, jugosos trozos de pollo y res saltados a la plancha, plátano maduro y una capa masiva de queso gratinado.",
@@ -52,6 +83,9 @@ const HERO_PRODUCTS = [
   {
     emoji:   "🍕",
     img:     "assets/Platos/pizza-familiar-wide.jpg",
+    img4k:   "assets/Platos/pizza-familiar-wide-4k.jpg",
+    imgTall: "assets/Platos/pizza-familiar-tall.jpg",   /* version vertical para movil */
+    posMobile: "66%",   /* encuadre del recorte en movil */
     tagline: "🍕 ¡PARA TODA LA MESA!",
     title:   "PIZZA FAMILIAR",
     desc:    "50cm de masa artesanal recién horneada (8 a 16 porciones). Elige hasta 3 sabores: Pepperoni, Pollo BBQ, Hawaiana, Carnes, Margarita y más.",
@@ -60,17 +94,13 @@ const HERO_PRODUCTS = [
   {
     emoji:   "🍔",
     img:     "assets/Platos/hamburguesa-golosa-wide.jpg",
+    img4k:   "assets/Platos/hamburguesa-golosa-wide-4k.jpg",
+    imgTall: "assets/Platos/hamburguesa-golosa-tall.jpg",   /* version vertical para movil */
+    posMobile: "72%",   /* encuadre del recorte en movil */
     tagline: "🍔 ¡COMBO COMPLETO!",
     title:   "HAMBURGUESA GOLOSA EN COMBO",
     desc:    "Carne, doble queso, pollo desmechado en BBQ, tocineta, chorizo y papa cabello de ángel + papas a la francesa y bebida. El combo más cargado.",
     price:   "Desde $39.000",
-  },
-  {
-    emoji:   "🌭",
-    tagline: "🌭 ¡PERRO EN COMBO!",
-    title:   "PERRO CALLEJERO EN COMBO",
-    desc:    "Pan artesanal, DOBLE salchicha americana, tocineta, doble queso, huevos de codorniz y papa en fósforo + papas a la francesa y bebida.",
-    price:   "$33.000",
   },
 ];
 
@@ -396,3 +426,5 @@ const CAT_DESC = {
     { emoji:"🍔", title:"Carne 100% Artesanal", text:"Carne de res preparada en nuestro restaurante, elaborada con ingredientes seleccionados y sin procesos industriales para ofrecer un sabor casero, jugoso y auténtico." },
   ],
 };
+
+

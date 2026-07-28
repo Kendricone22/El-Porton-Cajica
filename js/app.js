@@ -120,7 +120,23 @@ window.PortonTrack = (function () {
     elMedia.innerHTML = `<video class="hero-photo" autoplay muted loop playsinline ${pick.img ? `poster="${pick.img}"` : ''} src="${pick.video}"></video>
       <span class="hero-video-pill">Video en loop</span>`;
   } else if (pick.img) {
-    elMedia.innerHTML = `<img class="hero-photo" src="${pick.img}" alt="${pick.title}">`;
+    // srcset: la foto es 21:9 pero el hero la recorta a pantalla completa, así que
+    // el navegador la amplía bastante (sobre todo en móvil, que es vertical). Por eso
+    // `sizes` declara bastante más de 100vw: es el ancho que la foto ocupa YA ampliada,
+    // no el del viewport, y sin eso el navegador pediría la chica y se vería borrosa.
+    const srcset = pick.img4k ? ` srcset="${pick.img} 1920w, ${pick.img4k} 3840w" sizes="(max-width: 900px) 460vw, 160vw"` : '';
+    // Encuadre del recorte en móvil, ajustado plato por plato (ver --hero-pos-x en el CSS).
+    // Solo actúa cuando se usa la foto panorámica (móvil en horizontal); con la
+    // versión vertical no hay sobrante que recortar a lo ancho, así que da igual.
+    const pos = pick.posMobile ? ` style="--hero-pos-x:${pick.posMobile}"` : '';
+    // Móvil en vertical: se sirve una foto compuesta aparte (`-tall`) donde el plato
+    // entra COMPLETO. Con la panorámica no hay forma: en una pantalla 9:19.5 solo se
+    // ve alto_foto × ratio_pantalla ≈ 753px de ancho, y platos como la pizza (1229px)
+    // se salen sí o sí, se recorte por donde se recorte.
+    const tall = pick.imgTall
+      ? `<source media="(max-width: 900px) and (orientation: portrait)" srcset="${pick.imgTall}">`
+      : '';
+    elMedia.innerHTML = `<picture>${tall}<img class="hero-photo" src="${pick.img}"${srcset}${pos} alt="${pick.title}"></picture>`;
   } else {
     elMedia.classList.add('hero-media--fallback');
     elMedia.innerHTML = `<span class="hero-media-emoji" aria-hidden="true">${pick.emoji}</span>`;

@@ -258,21 +258,31 @@ html { scroll-behavior: smooth; }
   inset: 0;
   z-index: 0;
 }
+/* <picture> envuelve a la foto para poder servir una versión vertical en móvil;
+   tiene que ocupar todo el hueco igual que hacía el <img> suelto. */
+.hero-media picture {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
 .hero-photo {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Las fotos panorámicas traen el plato entre el 49% y el 81% del ancho.
-     Móvil recorta muchísimo (solo se ve ~20% del ancho), así que el encuadre
-     se centra en el plato para que se vea de cerca. */
-  object-position: 65% center;
+  /* Las fotos panorámicas traen el plato entre el 50% y el 82% del ancho.
+     Móvil recorta muchísimo (de los 21:9 solo se ve ~20% del ancho), así que el
+     encuadre se centra en el plato para que se vea de cerca. Cada producto trae
+     su propio ajuste en `--hero-pos-x` (lo pone app.js desde HERO_PRODUCTS),
+     porque el plato no cae exactamente igual en todas las fotos. */
+  object-position: var(--hero-pos-x, 65%) center;
 }
 @media (min-width: 768px) {
   .hero-photo {
     /* Escritorio: se corre el encuadre para empujar el plato a la derecha y
-       dejarle limpio el lado izquierdo al texto. */
+       dejarle limpio el lado izquierdo al texto. Gana sobre `--hero-pos-x`,
+       que solo aplica al recorte cerrado del móvil. */
     object-position: 50% center;
   }
 }
