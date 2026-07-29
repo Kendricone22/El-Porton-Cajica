@@ -390,10 +390,26 @@ window.PortonTrack = (function () {
     return (item.options.length > 1 ? '<small>Desde</small>' : '') + fmt(min);
   };
 
+  /* Texto del botón: "Personalizar" solo si el plato tiene algo que elegir.
+     Una cerveza o un agua no se personalizan, así que ahí dice "Agregar"
+     (el PRD contempla los dos textos). El modal se abre igual en ambos casos:
+     sirve para la cantidad y las notas. */
+  const esPersonalizable = (item) =>
+    item.options.length > 1 || !!item.choices || !!item.proteins || !!item.pizza ||
+    !!item.slices || !!item.combo || ADICIONES.some((a) => a.cats.includes(item.cat));
+
   // --- Tabs (sin "Todos"; arranca en la primera categoría) ---
-  tabsBox.innerHTML = CATEGORIES.map((c, i) =>
-    `<button class="filtro-tab${i === 0 ? ' is-active' : ''}" data-cat="${c.key}" role="tab">${c.emoji} ${c.label}</button>`
-  ).join('');
+  // Solo se pintan las categorías que tienen algo que mostrar: si el menú en vivo
+  // de Supabase todavía no trae una categoría (o se agotó entera), su pestaña no
+  // aparece, en vez de abrir una sección vacía. Se repinta con el catálogo.
+  function buildTabs() {
+    const cats = CATEGORIES.filter((c) => MENU.some((i) => i.cat === c.key && i.available !== false));
+    const lista = cats.length ? cats : CATEGORIES;
+    if (!lista.some((c) => c.key === currentCat)) currentCat = lista[0].key;
+    tabsBox.innerHTML = lista.map((c) =>
+      `<button class="filtro-tab${c.key === currentCat ? ' is-active' : ''}" data-cat="${c.key}" role="tab">${c.emoji} ${c.label}</button>`
+    ).join('');
+  }
 
   // --- Tarjetas (buildGrid se puede re-ejecutar si el menú se actualiza en vivo
   //     desde Supabase; oculta los productos marcados como no disponibles) ---
@@ -412,7 +428,7 @@ window.PortonTrack = (function () {
             <p class="cat-card-desc">${item.desc}</p>
             <div class="cat-card-foot">
               <span class="cat-card-price">${priceHTML(item)}</span>
-              <button class="cat-card-btn" data-id="${item.id}">Personalizar</button>
+              <button class="cat-card-btn" data-id="${item.id}">${esPersonalizable(item) ? 'Personalizar' : 'Agregar'}</button>
             </div>
           </div>
         </article>`;
@@ -424,6 +440,7 @@ window.PortonTrack = (function () {
   // --- Filtrado + vista colapsada ("Mostrar más") ---
   const LIMIT = 8;               // platos visibles antes de "Mostrar más"
   let currentCat = CATEGORIES[0].key;   // arranca en la primera categoría
+  buildTabs();                          // (después de currentCat: lo usa para marcar la activa)
   let expanded = false;
   const fadeEl    = document.getElementById('catalogo-fade');
   const moreWrap  = document.getElementById('catalogo-more');
@@ -511,16 +528,30 @@ window.PortonTrack = (function () {
   // Permite re-pintar el catálogo cuando el menú se actualiza en vivo
   // (initMenuSync reemplaza MENU y llama a esto), conservando la categoría
   // activa y el estado colapsado/expandido.
-  window.rerenderCatalog = () => { buildGrid(); applyView(); };
+  window.rerenderCatalog = () => { buildGrid(); buildTabs(); applyView(); };
 })();
 
 /* ============================================================= */
-/* MENÚ EN VIVO: si hay menú en Supabase, reemplaza al del código  */
+/* MENÚ EN VIVO: el menú de Supabase se FUSIONA con el del código  */
 /* Estrategia "stale-while-revalidate": la página ya se pintó al   */
 /* instante con el MENU del código (rápido y offline-safe); esto   */
-/* corre en segundo plano y, SOLO si Supabase devuelve un menú no  */
-/* vacío, lo reemplaza y re-pinta. Si falla, no hay tabla o está   */
-/* vacía, se queda con el del código. Nunca rompe nada.            */
+/* corre en segundo plano y, si Supabase responde, mezcla y        */
+/* re-pinta. Si falla o está vacía, se queda con el del código.    */
+/*                                                                 */
+/* Se FUSIONA, no se reemplaza: antes Supabase pisaba el menú      */
+/* entero, así que cualquier plato nuevo que se agregara aquí en   */
+/* data.js quedaba invisible en la web hasta que el dueño entrara  */
+/* al panel a darle "Importar menú actual" (le pasó a las fotos    */
+/* del catálogo y a la categoría de bebidas). Ahora:               */
+/*   · el CÓDIGO manda en qué platos existen y cómo son por        */
+/*     defecto  →  lo nuevo aparece solo, sin importar nada;       */
+/*   · SUPABASE manda en lo que el dueño edita desde el panel      */
+/*     (precios, descripciones, agotados, fotos)  →  sus cambios   */
+/*     siguen ganando, y los platos que cree él también salen.     */
+/* OJO: por esto mismo, borrar desde el panel un plato que siga    */
+/* en data.js no lo quita de la web (vuelve a salir en la          */
+/* siguiente carga). Para esconderlo, "Agotar"; para eliminarlo    */
+/* de verdad, hay que quitarlo también del código.                 */
 /* ============================================================= */
 (async function initMenuSync() {
   if (typeof SUPABASE_URL !== 'string' || !SUPABASE_URL || typeof MENU === 'undefined') return;
@@ -539,10 +570,29 @@ window.PortonTrack = (function () {
       .filter((r) => r && r.data)
       .map((r) => Object.assign({}, r.data, { available: r.available }));
     if (!items.length) return;
-    // Reemplaza el contenido de MENU EN SU LUGAR (misma referencia), para que
+
+    // Se ignoran las claves sin valor que traiga Supabase: si un plato se
+    // importó al panel antes de que aquí se le pusiera, por ejemplo, la foto,
+    // no debe borrar la que ya tiene el código.
+    const conValor = (obj) => {
+      const out = {};
+      Object.keys(obj).forEach((k) => { if (obj[k] !== undefined && obj[k] !== null) out[k] = obj[k]; });
+      return out;
+    };
+
+    const remotos = new Map(items.filter((it) => it && it.id).map((it) => [it.id, it]));
+    const fusion = [];
+    MENU.forEach((base) => {                       // 1) todo lo que existe en el código…
+      const r = remotos.get(base.id);
+      fusion.push(r ? Object.assign({}, base, conValor(r)) : base);   // …con lo editado en el panel encima
+      remotos.delete(base.id);
+    });
+    remotos.forEach((r) => fusion.push(r));        // 2) y los platos creados desde el panel
+
+    // Se reemplaza el contenido de MENU EN SU LUGAR (misma referencia), para que
     // el modal/carrito (que leen MENU por id) usen los datos frescos.
     MENU.length = 0;
-    items.forEach((it) => MENU.push(it));
+    fusion.forEach((it) => MENU.push(it));
     window.rerenderCatalog?.();
   } catch (e) { /* red caída / abort → se queda con el menú del código */ }
 })();

@@ -210,7 +210,7 @@ const CARTA_DESTACADA_MAS = [
 
 /* ============================================================= */
 /* BLOQUE 3: MENÚ COMPLETO (FUENTE ÚNICA DE VERDAD)             */
-/* Categorías 1-6 (SIN bebidas). Precios reales del PRD.        */
+/* Categorías 1-7 del PRD. Precios reales del PRD.              */
 /* `options` = variantes (proteína/tamaño/porción) para el modal */
 /* `combo` = elegible a Combo +$9.000 (solo hamburguesas/perros) */
 /* ============================================================= */
@@ -221,6 +221,7 @@ const CATEGORIES = [
   { key: "salchipapas",  label: "Salchipapas",       emoji: "🍟" },
   { key: "pizzas",       label: "Pizzas & Lasañas",  emoji: "🍕" },
   { key: "infantil",     label: "Menú Infantil",     emoji: "🧒" },
+  { key: "bebidas",      label: "Bebidas & Cervezas", emoji: "🥤" },
 ];
 
 // Sabores de pizza (compartidos por todos los tamaños)
@@ -372,6 +373,63 @@ const MENU = [
   { id:"i-perro", cat:"infantil", combo:false, emoji:"🌭",
     name:"Mini Perro", desc:"Pan, salchicha, salsas, papa fósforo y dos huevos de codorniz. Incluye papas, Chocolatina Gol y jugo.",
     options:[{label:"Porción",price:21000}] },
+
+  /* ---------- 7. BEBIDAS & CERVEZAS ---------- */
+  /* Precios del PRD. Ninguna lleva combo ni adiciones (ADICIONES no las      */
+  /* incluye en `cats`, así que el modal no muestra esa sección).             */
+  { id:"b-gaseosa", cat:"bebidas", combo:false, emoji:"🥤",
+    name:"Gaseosa Coca-Cola", desc:"Elige tamaño y sabor.",
+    /* El sabor no cambia el precio: va como `choices` (mismos que en el combo). */
+    choices:[{ title:"🥤 Sabor", options:["Coca-Cola","Coca-Cola Zero","Quatro","Sprite","Ginger","Cola Román"] }],
+    options:[{label:"350ml",price:3700},{label:"400ml",price:4000},{label:"500ml",price:5000},{label:"Lata",price:4500},{label:"1.5 Lt",price:8000}] },
+  { id:"b-bretana", cat:"bebidas", combo:false, emoji:"💧",
+    name:"Bretaña", desc:"Botella.",
+    options:[{label:"Porción",price:4500}] },
+  { id:"b-agua", cat:"bebidas", combo:false, emoji:"💧",
+    name:"Agua", desc:"Botella.",
+    options:[{label:"Porción",price:4500}] },
+  { id:"b-fuze-te", cat:"bebidas", combo:false, emoji:"🧋",
+    name:"Fuze Té", desc:"Botella.",
+    options:[{label:"Porción",price:4000}] },
+  { id:"b-pony-malta", cat:"bebidas", combo:false, emoji:"🍯",
+    name:"Pony Malta", desc:"Botella.",
+    options:[{label:"Porción",price:3800}] },
+  { id:"b-jugo-valle", cat:"bebidas", combo:false, emoji:"🧃",
+    name:"Jugo del Valle", desc:"Botella.",
+    options:[{label:"Porción",price:3500}] },
+  { id:"b-te-hatsu", cat:"bebidas", combo:false, emoji:"🍵",
+    name:"Té Hatsu", desc:"Botella.",
+    options:[{label:"Porción",price:6500}] },
+  { id:"b-soda-hatsu", cat:"bebidas", combo:false, emoji:"🫧",
+    name:"Soda Hatsu", desc:"Botella.",
+    options:[{label:"Porción",price:6000}] },
+  { id:"b-limonada", cat:"bebidas", combo:false, emoji:"🍋",
+    name:"Limonada Natural", desc:"Preparada al momento.",
+    options:[{label:"Porción",price:5500}] },
+  { id:"b-zumo-limon", cat:"bebidas", combo:false, emoji:"🍋",
+    name:"Zumo de Limón", desc:"Zumo de limón.",
+    options:[{label:"Porción",price:2000}] },
+  /* --- Cervezas (una tarjeta por marca) --- */
+  { id:"b-poker", cat:"bebidas", combo:false, emoji:"🍺",
+    name:"Cerveza Poker", desc:"Cerveza.",
+    options:[{label:"Porción",price:4500}] },
+  { id:"b-aguila", cat:"bebidas", combo:false, emoji:"🍺",
+    name:"Cerveza Águila", desc:"Cerveza. Disponible normal o Light.",
+    /* El PRD las da juntas y al mismo precio, así que se elige aquí. */
+    choices:[{ title:"🍺 Presentación", options:["Normal","Light"] }],
+    options:[{label:"Porción",price:4500}] },
+  { id:"b-club-colombia", cat:"bebidas", combo:false, emoji:"🍺",
+    name:"Cerveza Club Colombia", desc:"Cerveza.",
+    options:[{label:"Porción",price:5000}] },
+  { id:"b-corona", cat:"bebidas", combo:false, emoji:"🍺",
+    name:"Cerveza Corona", desc:"Cerveza.",
+    options:[{label:"Porción",price:8000}] },
+  { id:"b-coronita", cat:"bebidas", combo:false, emoji:"🍺",
+    name:"Coronita", desc:"Cerveza.",
+    options:[{label:"Porción",price:6000}] },
+  { id:"b-cola-pola", cat:"bebidas", combo:false, emoji:"🍺",
+    name:"Cola y Pola", desc:"Cerveza con gaseosa.",
+    options:[{label:"Porción",price:4000}] },
 ];
 
 
