@@ -1931,3 +1931,223 @@ html { scroll-behavior: smooth; }
   .hamburger                      { display: none; }
   #mobile-overlay, #mobile-drawer { display: none; }
 }
+
+
+/* ============================================================= */
+/* MOTOR DE INGRESOS — estado en vivo, cross-sell, programación   */
+/* y aviso de recuperación.                                       */
+/* CSS a mano (no Tailwind) a propósito: css/tailwind-built.css    */
+/* está compilado y purgado, así que una clase nueva de utilidad   */
+/* no existiría sin volver a compilar. Esto funciona tal cual.     */
+/* ============================================================= */
+
+/* ---------- Píldora de estado "Abierto / Cerrado" ---------- */
+.estado-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.75rem 0.32rem 0.62rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  line-height: 1;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10, 10, 12, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #d4d4d8;
+  white-space: nowrap;
+}
+.estado-pill b    { font-weight: 700; color: #fff; }
+.estado-pill span { color: #a1a1aa; }
+.estado-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex: 0 0 auto;
+  background: currentColor;
+}
+.estado-on   .estado-dot { color: #22C55E; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.75); animation: estado-latido 2.2s infinite; }
+.estado-warn .estado-dot { color: #F59E0B; box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);  animation: estado-latido 2.2s infinite; }
+.estado-off  .estado-dot { color: #71717A; }
+.estado-on   { border-color: rgba(34, 197, 94, 0.30); }
+.estado-warn { border-color: rgba(245, 158, 11, 0.32); }
+
+@keyframes estado-latido {
+  0%   { box-shadow: 0 0 0 0   rgba(255, 255, 255, 0.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(255, 255, 255, 0);    }
+  100% { box-shadow: 0 0 0 0   rgba(255, 255, 255, 0);    }
+}
+@media (prefers-reduced-motion: reduce) {
+  .estado-dot { animation: none !important; }
+}
+
+/* En el hero se separa del titular; en Contacto va en su propia línea. */
+.hero-content > .estado-pill { margin-bottom: 0.85rem; }
+.info-value   > .estado-pill { margin-top: 0.5rem; }
+
+/* ---------- Banner de estado dentro del carrito ---------- */
+.cart-estado {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.85rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.7rem;
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.cart-estado b    { font-size: 0.84rem; color: #fff; }
+.cart-estado span { color: #b4b4bb; }
+.cart-estado.is-warn { background: rgba(245, 158, 11, 0.10); border-color: rgba(245, 158, 11, 0.32); }
+.cart-estado.is-off  { background: rgba(229, 62, 62, 0.10);  border-color: rgba(229, 62, 62, 0.30);  }
+
+/* ---------- Selector de "para cuándo" (pedido programado) ---------- */
+.cart-programar { margin-bottom: 0.85rem; }
+.cart-programar label {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #d4d4d8;
+  margin-bottom: 0.4rem;
+}
+.cart-programar select {
+  width: 100%;
+  background: #1f1f23;
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.6rem;
+  padding: 0.7rem 0.75rem;
+  font-size: 0.86rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.2rem;
+}
+.cart-programar select:focus { outline: none; border-color: var(--rojo); }
+.cart-programar.field-error select { border-color: #E53E3E; }
+
+/* ---------- Cross-sell ("te falta con qué pasarla") ---------- */
+.crossell {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.09);
+}
+.crossell-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e4e4e7;
+  margin-bottom: 0.65rem;
+}
+.crossell-row {
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.crossell-row::-webkit-scrollbar { display: none; }
+.crossell-chip {
+  position: relative;
+  flex: 0 0 auto;
+  width: 6.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.6rem 0.4rem 0.55rem;
+  background: #17171a;
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .2s ease, transform .2s ease, background .2s ease;
+}
+.crossell-chip:hover {
+  border-color: rgba(229, 62, 62, 0.55);
+  background: rgba(229, 62, 62, 0.07);
+  transform: translateY(-2px);
+}
+.crossell-chip:active { transform: translateY(0) scale(0.97); }
+.crossell-media {
+  width: 2.7rem; height: 2.7rem;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: #222226;
+  font-size: 1.3rem;
+  flex: 0 0 auto;
+}
+.crossell-media img { width: 100%; height: 100%; object-fit: cover; }
+.crossell-name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #e4e4e7;
+  line-height: 1.25;
+}
+.crossell-price { font-size: 0.72rem; font-weight: 700; color: var(--rojo); }
+.crossell-add {
+  position: absolute;
+  top: 0.32rem; right: 0.36rem;
+  width: 1.15rem; height: 1.15rem;
+  border-radius: 50%;
+  background: var(--rojo);
+  color: #fff;
+  font-size: 0.85rem; font-weight: 700; line-height: 1.05;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---------- Aviso flotante (pedido sin enviar / reseña) ---------- */
+.nudge-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 1.1rem;
+  z-index: 60;
+  width: min(26rem, calc(100vw - 1.6rem));
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.8rem 0.7rem 0.9rem;
+  border-radius: 0.9rem;
+  background: rgba(20, 20, 23, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 44px -12px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(-50%) translateY(120%);
+  transition: opacity .3s ease, transform .35s cubic-bezier(.22,1,.36,1);
+}
+.nudge-bar.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.nudge-bar.is-gold { border-color: rgba(212, 175, 55, 0.42); }
+.nudge-emoji { font-size: 1.35rem; flex: 0 0 auto; }
+.nudge-text  { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; flex: 1 1 auto; }
+.nudge-text b    { font-size: 0.82rem; color: #fff; }
+.nudge-text span { font-size: 0.74rem; color: #a1a1aa; }
+.nudge-cta {
+  flex: 0 0 auto;
+  font-size: 0.76rem; font-weight: 700; color: #fff;
+  background: var(--rojo);
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.55rem;
+  white-space: nowrap;
+}
+.is-gold .nudge-cta { background: var(--oro); color: #1a1a1a; }
+.nudge-x {
+  flex: 0 0 auto;
+  width: 1.55rem; height: 1.55rem;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  color: #71717a; font-size: 0.8rem;
+  cursor: pointer;
+  transition: color .2s ease, background .2s ease;
+}
+.nudge-x:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+
+/* El carrito flotante vive abajo a la derecha: se le hace campo. */
+@media (max-width: 640px) {
+  .nudge-bar { bottom: 5.6rem; }
+}

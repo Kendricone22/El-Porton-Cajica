@@ -415,7 +415,9 @@
       $('orders-list').innerHTML = '<p class="loading">Cargando pedidos…</p>';
       const [{ data: orders, error: oErr }, { data: events }] = await Promise.all([
         sb.from('orders').select('*').order('created_at', { ascending: false }),
-        sb.from('events').select('type, created_at'),
+        // `meta` trae el subtotal de los carritos abandonados: sin eso no se
+        // puede poner precio a la plata que se está yendo.
+        sb.from('events').select('type, meta, created_at'),
       ]);
       if (oErr) { $('orders-list').innerHTML = '<p class="empty-state">Error al leer pedidos: ' + oErr.message + '</p>'; return; }
       lastOrders = orders || [];
@@ -483,18 +485,29 @@
       const hoy = orders.filter((o) => new Date(o.created_at) >= startToday).length;
       const ticket = active.length ? Math.round(ingreso / active.length) : 0;
 
+      // Plata que se quedó en carritos que nunca se enviaron. No es ingreso
+      // perdido garantizado (nadie compra el 100%), pero es el tamaño real
+      // de la fuga: si esta cifra es grande, ahí está la próxima venta.
+      const abandonados = events.filter((e) => e.type === 'cart_abandoned');
+      const perdido = abandonados.reduce((s, e) => s + ((e.meta && +e.meta.subtotal) || 0), 0);
+
       $('kpis').innerHTML = [
         ['Pedidos totales', orders.length],
         ['Pedidos hoy', hoy],
         ['Ingreso (sin cancelados)', fmt(ingreso)],
         ['Ticket promedio', fmt(ticket)],
+        ['En carritos sin enviar', fmt(perdido)],
       ].map(([l, v]) => '<div class="kpi"><div class="kpi-num">' + v + '</div><div class="kpi-label">' + l + '</div></div>').join('');
 
       const count = (t) => events.filter((e) => e.type === t).length;
       const steps = [
         ['Agregó al carrito', count('add_to_cart')],
         ['Abrió el carrito', count('checkout_opened')],
+        ['Aceptó una sugerencia', count('crossell_added')],
         ['Envió el pedido', count('order_sent')],
+        ['— de esos, programados', count('order_scheduled')],
+        ['Dejó el carrito botado', abandonados.length],
+        ['Volvió a retomarlo', count('cart_recovered')],
       ];
       const max = Math.max(1, ...steps.map((s) => s[1]));
       $('funnel').innerHTML = steps.map(([l, v]) =>
