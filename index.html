@@ -154,6 +154,11 @@
     </nav>
   </header>
 
+  <!-- Estado del negocio en tiempo real: fijo arriba a la izquierda,
+       visible siempre (no se va con el scroll). Lo llena el motor de
+       horario en js/app.js. -->
+  <div id="estado-negocio" class="estado-flotante" hidden></div>
+
   <!-- ---------- OVERLAY + DRAWER MÓVIL ---------- -->
   <div id="mobile-overlay" class="lg:hidden"></div>
 
@@ -191,8 +196,6 @@
       <div class="hero-scrim" aria-hidden="true"></div>
 
       <div id="hero-content" class="hero-content">
-        <!-- Estado en vivo del negocio (lo llena el motor de horario). -->
-        <span class="estado-pill" data-estado-pill hidden></span>
         <p  id="hero-tagline" class="hero-tagline">&nbsp;</p>
         <h1 id="hero-title"   class="hero-title">&nbsp;</h1>
         <p  id="hero-desc"    class="hero-desc">&nbsp;</p>
@@ -366,7 +369,7 @@
           </div>
           <div class="info-item">
             <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            <div class="info-text"><span class="info-label">Horarios</span><span class="info-value">Martes a Domingo · 1:00 PM – 10:00 PM.<br>Lunes cerrado — abrimos solo en lunes festivos.<br><span class="estado-pill" data-estado-pill hidden></span></span></div>
+            <div class="info-text"><span class="info-label">Horarios</span><span class="info-value">Martes a Domingo · 1:00 PM – 10:00 PM.<br>Lunes cerrado — abrimos solo en lunes festivos.</span></div>
           </div>
           <div class="info-item">
             <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
@@ -427,10 +430,6 @@
         <button id="cart-empty-btn" class="cart-empty-btn" type="button">Ver el menú</button>
       </div>
 
-      <!-- Cross-sell: sugerencias de un toque. Solo aparece cuando al
-           pedido de verdad le falta algo (ver CROSS_SELL en data.js). -->
-      <div id="cart-crossell" class="crossell" hidden></div>
-
       <form id="cart-form" class="cart-form" autocomplete="on">
         <h3 class="cart-form-title">📦 Datos de envío</h3>
         <label class="cart-field"><span>Nombre completo</span>
@@ -460,18 +459,8 @@
     </div>
 
     <footer class="cart-foot">
-      <!-- Estado del servicio justo donde se decide la compra. -->
-      <div id="cart-estado" class="cart-estado" hidden></div>
-
       <div class="cart-total-row"><span>Total productos</span><span id="cart-total" class="cart-total">$0</span></div>
       <p class="cart-foot-note">El valor del domicilio lo calcula el asesor.</p>
-
-      <!-- Fuera de horario el pedido no se pierde: se programa. -->
-      <div id="cart-programar" class="cart-programar" hidden>
-        <label for="programar-slot">📅 ¿Para cuándo lo quieres?</label>
-        <select id="programar-slot"></select>
-      </div>
-
       <button id="cart-send" class="cart-send" type="button"><span aria-hidden="true">🟢</span> Enviar pedido por WhatsApp</button>
     </footer>
   </aside>
@@ -526,12 +515,6 @@
       <aside id="lightbox-info" class="lightbox-info" hidden></aside>
     </div>
   </div>
-
-  <!-- ============================================================= -->
-  <!-- AVISO FLOTANTE: recupera el pedido que quedó sin enviar y, si   -->
-  <!-- no hay ninguno, invita a dejar reseña en Google tras un pedido. -->
-  <!-- ============================================================= -->
-  <div id="nudge-bar" class="nudge-bar" hidden></div>
 
   <!-- ===== Scripts ===== -->
   <script src="js/config.js"></script>

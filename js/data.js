@@ -12,40 +12,22 @@ const BRAND = {
 };
 
 /* ============================================================= */
-/* NEGOCIO — datos operativos (horario, ubicación, reputación).   */
-/* Fuente única de verdad para TRES cosas a la vez:               */
+/* NEGOCIO — datos operativos (horario + URL del sitio).          */
+/* Fuente única de verdad para DOS cosas a la vez:                */
 /*   1. el estado "Abierto / Cerrado" en vivo de la web,          */
-/*   2. la programación de pedidos fuera de horario,              */
-/*   3. los datos estructurados de Google (JSON-LD).              */
-/* Si cambian los horarios, se cambian AQUÍ y todo se actualiza   */
-/* solo (incluido lo que ve Google).                              */
+/*   2. las URLs absolutas de los datos estructurados (JSON-LD).  */
+/* Si cambian los horarios, se cambian AQUÍ y el indicador se      */
+/* actualiza solo (no hay que tocar el HTML).                     */
 /* ============================================================= */
 const BUSINESS = {
   timeZone: "America/Bogota",     /* el estado no depende del reloj del visitante */
   siteUrl:  "https://el-porton-cajica.vercel.app",
-  phone:    "+573138214752",
-
-  address: {
-    street:  "Calle 11 A Sur #10-75, Camino entrada Fagua, sector Canelón",
-    city:    "Cajicá",
-    region:  "Cundinamarca",
-    country: "CO",
-  },
-
-  maps:      "https://maps.app.goo.gl/B1Yka6GRnqEvMZ6u6",
-  instagram: "https://instagram.com/elportoncajica",
-
-  /* Calificación real del negocio en Google (la misma que muestra la web). */
-  rating: { value: 4.4, count: 236 },
-
-  priceRange: "$$",
-  cuisines: ["Comida rápida", "Hamburguesas", "Pizza", "Colombiana"],
 
   /* Horario de atención. Clave = día de la semana (0 = domingo … 6 = sábado).
      `null` = cerrado ese día. Formato 24 h. */
   hours: {
     0: { open: "13:00", close: "22:00" },   /* Domingo   */
-    1: null,                                 /* Lunes — cerrado (ver holidayHours) */
+    1: null,                                 /* Lunes — cerrado (ver holidayMondayHours) */
     2: { open: "13:00", close: "22:00" },   /* Martes    */
     3: { open: "13:00", close: "22:00" },   /* Miércoles */
     4: { open: "13:00", close: "22:00" },   /* Jueves    */
@@ -57,10 +39,6 @@ const BUSINESS = {
      festivo colombiano, se aplica este horario. El cálculo de festivos vive
      en app.js (incluye Ley Emiliani y los festivos móviles de Pascua). */
   holidayMondayHours: { open: "13:00", close: "22:00" },
-
-  /* Los domicilios cierran antes que el local: 22:00 − 20 min = 9:40 p.m.,
-     que es exactamente lo que anuncia la sección de contacto. */
-  lastDeliveryOffsetMin: 20,
 };
 
 /* ---------- BLOQUE 2: HERO — productos estrella (rotación aleatoria) ---------- */
@@ -512,27 +490,6 @@ const ADICIONES = [
   { name:"Papa cabello de ángel",      price:1500, cats:["hamburguesas","mazorcadas"] },
   { name:"Cheddar 100gr",              price:6000, cats:["hamburguesas"] },
 ];
-
-/* ============================================================= */
-/* CROSS-SELL DEL CARRITO ("¿Le falta algo?")                    */
-/* Sugerencias de UN TOQUE dentro del carrito. Solo apuntan a     */
-/* productos que YA existen en el MENU: el precio nunca se        */
-/* escribe aquí, se lee del producto real, así que jamás se       */
-/* desincroniza con la carta ni con el editor del panel admin.    */
-/* La regla de negocio es honesta y no es spam: la bebida solo se */
-/* ofrece cuando al pedido le faltan bebidas para sus platos.     */
-/* ============================================================= */
-const CROSS_SELL = {
-  /* Se ofrecen cuando hay platos sin bebida que los acompañe. */
-  bebidas: [
-    { id: "b-gaseosa",  option: "400ml",   choices: ["Coca-Cola"] },
-    { id: "b-limonada", option: "Porción" },
-    { id: "b-poker",    option: "Porción" },
-  ],
-  /* Si el pedido SOLO tiene bebidas, se sugieren los tres platos insignia
-     (abren el modal para que el cliente los personalice). */
-  platos: ["p-todo-terreno", "h-montanera", "s-mixta"],
-};
 
 /* ============================================================= */
 /* TESTIMONIOS (prueba social) — RESEÑAS REALES de Google Maps.   */

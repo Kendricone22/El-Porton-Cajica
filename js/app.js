@@ -1112,8 +1112,6 @@ function flyToCart(fromEl, img, emoji) {
       return false;
     }
     consentWrap?.classList.remove('field-error');
-    // Fuera de horario el pedido va programado: exige elegir día y hora.
-    if (typeof window.PortonValidarHorario === 'function' && !window.PortonValidarHorario()) return false;
     return ok;
   }
   sendBtn.addEventListener('click', () => {
@@ -1150,13 +1148,7 @@ function flyToCart(fromEl, img, emoji) {
   // Arma el mensaje del pedido (primera línea = prefijo de rastreo)
   function buildMessage() {
     const div = '━━━━━━━━━━━━━━━━━━';
-    /* Si llegó fuera de horario, el cliente eligió para cuándo lo quiere.
-       El encabezado lo canta de una para que en cocina no se confunda con
-       un pedido para ya. */
-    const prog = typeof window.PortonPedidoProgramado === 'function' ? window.PortonPedidoProgramado() : null;
-    const L = prog
-      ? ['[WEB-PORTON-CAJICA]', '📅 *PEDIDO PROGRAMADO*', `*Para:* ${prog.label}`, div, '']
-      : ['[WEB-PORTON-CAJICA]', '🔔 *¡NUEVO PEDIDO RECIBIDO!*', div, ''];
+    const L = ['[WEB-PORTON-CAJICA]', '🔔 *¡NUEVO PEDIDO RECIBIDO!*', div, ''];
 
     cartState.forEach((it) => {
       L.push(`• (${it.qty})x ${it.name} — ${fmt(it.unitPrice * it.qty)}`);
@@ -1461,16 +1453,16 @@ function flyToCart(fromEl, img, emoji) {
 /* ============================================================= */
 /* MOTOR DE HORARIO — "¿estamos abiertos AHORA?"                 */
 /* ============================================================= */
-/* Por qué existe: el visitante que llega a las 11 p.m., arma su  */
-/* pedido y lo manda a un WhatsApp que nadie va a contestar es un */
-/* cliente perdido DOS veces (no compra hoy y queda con mala      */
-/* experiencia). Este módulo sabe la hora real de Cajicá —no la   */
-/* del celular del visitante— y alimenta el estado en vivo y la   */
-/* programación de pedidos.                                       */
-/*                                                                */
-/* El caso difícil es "Lunes cerrado, abrimos solo en lunes       */
-/* festivos": obliga a conocer el calendario festivo colombiano.  */
-/* Se calcula, no se lista a mano, así que sirve para siempre.    */
+/* Por qué existe: el visitante que llega a las 11 p.m. y arma su */
+/* pedido igual lo manda a un WhatsApp que nadie va a contestar,   */
+/* sin saber que el negocio ya cerró. Este módulo sabe la hora     */
+/* real de Cajicá —no la del celular del visitante— y alimenta el  */
+/* indicador "Abierto / Cerrado" que se ve siempre en la esquina    */
+/* superior izquierda.                                              */
+/*                                                                  */
+/* El caso difícil es "Lunes cerrado, abrimos solo en lunes         */
+/* festivos": obliga a conocer el calendario festivo colombiano.    */
+/* Se calcula, no se lista a mano, así que sirve para siempre.      */
 /* ============================================================= */
 window.PortonHorario = (function () {
   const B  = (typeof BUSINESS === 'object' && BUSINESS) ? BUSINESS : null;
@@ -1573,8 +1565,8 @@ window.PortonHorario = (function () {
   const capitalizar = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
   /* ---------- Días de servicio hacia adelante ----------
-     Devuelve descriptores {y,m,d,dow,abre,cierra,ultimaLlamada,esHoy}
-     de los próximos días en que sí se atiende. */
+     Devuelve descriptores {y,m,d,dow,abre,cierra,esHoy} de los próximos
+     días en que sí se atiende (salta los días cerrados). */
   function proximosDias(desde, cuantos) {
     const base = Date.UTC(desde.y, desde.m - 1, desde.d);
     const out = [];
@@ -1584,14 +1576,7 @@ window.PortonHorario = (function () {
       const y = x.getUTCFullYear(), m = x.getUTCMonth() + 1, d = x.getUTCDate(), dow = x.getUTCDay();
       const h = horarioDe(y, m, d, dow);
       if (!h) continue;
-      const cierra = aMin(h.close);
-      out.push({
-        ms: ms, y: y, m: m, d: d, dow: dow,
-        abre: aMin(h.open),
-        cierra: cierra,
-        ultimaLlamada: cierra - ((B && B.lastDeliveryOffsetMin) || 0),
-        esHoy: n === 0,
-      });
+      out.push({ ms: ms, y: y, m: m, d: d, dow: dow, abre: aMin(h.open), cierra: aMin(h.close), esHoy: n === 0 });
     }
     return out;
   }
@@ -1603,485 +1588,71 @@ window.PortonHorario = (function () {
     return capitalizar(fmtDia.format(new Date(dia.ms)).replace(/,/g, ''));
   }
 
-  /* ---------- Estado actual ----------
-     fase:
-       'abierto'        → atendiendo y tomando domicilios
-       'ultima-llamada' → abierto, pero quedan pocos minutos de domicilios
-       'sin-domicilio'  → el local sigue abierto, los domicilios ya cerraron
-       'cerrado'        → fuera de horario */
+  /* ---------- Estado actual: solo lo que necesita el indicador ----------
+     { abierto: bool, cierraA: "10:00 p.m." (si está abierto),
+       proxima: { etiqueta, hora } (si está cerrado) } */
   function estado(ahora) {
     const L = local(ahora);
     const hoy = horarioDe(L.y, L.m, L.d, L.dow);
-    let fase = 'cerrado', abierto = false, domicilios = false, minutosRestantes = 0, cierraA = '', ultimaLlamadaA = '';
+    let abierto = false, cierraA = '';
 
     if (hoy) {
       const abre = aMin(hoy.open), cierra = aMin(hoy.close);
-      const ultima = cierra - ((B && B.lastDeliveryOffsetMin) || 0);
-      cierraA = hora12(hoy.close);
-      ultimaLlamadaA = hora12(deMin(ultima));
       abierto = L.mins >= abre && L.mins < cierra;
-      domicilios = L.mins >= abre && L.mins < ultima;
-      if (domicilios) {
-        minutosRestantes = ultima - L.mins;
-        fase = minutosRestantes <= 45 ? 'ultima-llamada' : 'abierto';
-      } else if (abierto) {
-        fase = 'sin-domicilio';
-        minutosRestantes = cierra - L.mins;
-      }
+      cierraA = hora12(hoy.close);
     }
 
-    /* Próxima apertura útil para domicilios. */
     let proxima = null;
-    const dias = proximosDias(L, 3);
-    for (let i = 0; i < dias.length; i++) {
-      const dia = dias[i];
-      if (dia.esHoy && L.mins >= dia.ultimaLlamada) continue;   /* hoy ya no da tiempo */
-      const desde = dia.esHoy ? Math.max(dia.abre, L.mins) : dia.abre;
-      proxima = { dia: dia, desdeMin: desde, etiqueta: etiquetaDia(dia, L), hora: hora12(deMin(dia.abre)) };
-      break;
-    }
-
-    return {
-      fase: fase,
-      abierto: abierto,
-      domicilios: domicilios,
-      minutosRestantes: minutosRestantes,
-      cierraA: cierraA,
-      ultimaLlamadaA: ultimaLlamadaA,
-      proxima: proxima,
-      local: L,
-    };
-  }
-
-  /* ---------- Franjas para programar un pedido ----------
-     Bloques de 30 minutos desde la próxima apertura hasta la última
-     llamada de domicilios, cubriendo los próximos días de servicio. */
-  function franjas(maxDias, maxFranjas) {
-    const L = local();
-    const dias = proximosDias(L, maxDias || 3);
-    const out = [];
-    for (let i = 0; i < dias.length && out.length < (maxFranjas || 24); i++) {
-      const dia = dias[i];
-      let t = dia.abre;
-      if (dia.esHoy) {
-        /* Nunca ofrecer una franja en el pasado: se arranca desde el próximo
-           bloque de 30 min con al menos 30 min de margen para cocina. */
-        const minimo = L.mins + 30;
-        if (minimo > t) t = Math.ceil(minimo / 30) * 30;
-      }
-      const etiqueta = etiquetaDia(dia, L);
-      for (; t <= dia.ultimaLlamada && out.length < (maxFranjas || 24); t += 30) {
-        out.push({
-          value: dia.y + '-' + String(dia.m).padStart(2, '0') + '-' + String(dia.d).padStart(2, '0') + 'T' + deMin(t),
-          label: capitalizar(etiqueta) + ' · ' + hora12(deMin(t)),
-          largo: capitalizar(fmtDia.format(new Date(dia.ms)).replace(/,/g, '')) + ', ' + hora12(deMin(t)),
-        });
+    if (!abierto) {
+      const dias = proximosDias(L, 3);
+      for (let i = 0; i < dias.length; i++) {
+        const dia = dias[i];
+        if (dia.esHoy && L.mins >= dia.cierra) continue;   /* hoy, pero ya cerró */
+        proxima = { etiqueta: etiquetaDia(dia, L), hora: hora12(deMin(dia.abre)) };
+        break;
       }
     }
-    return out;
+
+    return { abierto: abierto, cierraA: cierraA, proxima: proxima, local: L };
   }
 
-  return {
-    estado: estado,
-    franjas: franjas,
-    esFestivo: esFestivo,
-    hora12: hora12,
-    _local: local,          /* expuesto para verificación */
-    _festivos: festivos,    /* expuesto para verificación */
-  };
+  return { estado: estado };
 })();
 
+/* ============================================================= */
+/* ESTADO DEL NEGOCIO — insignia fija "Abierto / Cerrado"        */
+/* ============================================================= */
+/* Insignia SIEMPRE visible arriba a la izquierda (fija, no se va  */
+/* con el scroll) que muestra si el negocio está atendiendo en     */
+/* este momento, con la hora real de Cajicá. Se refresca sola cada */
+/* minuto, sin que el visitante tenga que recargar la página.      */
+/* ============================================================= */
+(function initEstadoNegocio() {
+  const H  = window.PortonHorario;
+  const el = document.getElementById('estado-negocio');
+  if (!H || !el) return;
 
-/* ============================================================= */
-/* MOTOR DE INGRESOS                                              */
-/* ============================================================= */
-/* Tres fugas de plata que la web tenía abiertas:                 */
-/*                                                                */
-/*  1. FUERA DE HORARIO. El que llega cerrado se va y no vuelve.   */
-/*     Ahora ve el estado real y puede PROGRAMAR el pedido: la     */
-/*     venta se aplaza en vez de perderse.                         */
-/*  2. TICKET BAJO. Un pedido de comida rápida sin bebida es       */
-/*     dinero que se queda en la mesa. Sugerencia de un toque,     */
-/*     solo cuando de verdad falta.                                */
-/*  3. CARRITOS ABANDONADOS. El carrito ya sobrevivía en el        */
-/*     navegador pero nadie invitaba a volver, y nadie medía       */
-/*     cuánta plata se estaba yendo.                               */
-/* ============================================================= */
-(function initMotorIngresos() {
-  const H = window.PortonHorario;
-  const fmt = (n) => '$' + Number(n || 0).toLocaleString('es-CO');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const $ = (id) => document.getElementById(id);
 
-  const drawer     = $('cart-drawer');
-  const overlay    = $('cart-overlay');
-  const sendBtn    = $('cart-send');
-  const estadoBox  = $('cart-estado');
-  const programar  = $('cart-programar');
-  const slotSel    = $('programar-slot');
-  const crossell   = $('cart-crossell');
-  const nudge      = $('nudge-bar');
-
-  /* OJO: `cartState` se declara con `let` en el ámbito global, así que NO
-     es propiedad de `window`. Se lee siempre por el identificador (y en
-     cada llamada, porque el carrito se reasigna al borrar ítems). */
-  const carrito = () => (typeof cartState !== 'undefined' && cartState) ? cartState : [];
-  const subtotalCarrito = () => carrito().reduce((s, i) => s + i.unitPrice * i.qty, 0);
-
-  /* ============================================================ */
-  /* 1. ESTADO EN VIVO + PROGRAMACIÓN DE PEDIDOS                  */
-  /* ============================================================ */
-  let est = H ? H.estado() : null;
-
-  const TEXTOS = {
-    'abierto':        (e) => ['on',   'Abierto ahora',        'cierra ' + e.cierraA],
-    'ultima-llamada': (e) => ['warn', 'Últimos domicilios',   'quedan ' + e.minutosRestantes + ' min'],
-    'sin-domicilio':  (e) => ['warn', 'Domicilios cerrados',  'el local cierra ' + e.cierraA],
-    'cerrado':        (e) => ['off',  'Cerrado ahora',        e.proxima ? 'abrimos ' + e.proxima.etiqueta + ' ' + e.proxima.hora : ''],
-  };
-
-  function pintarPills() {
-    if (!est) return;
-    const [tono, titulo, detalle] = (TEXTOS[est.fase] || TEXTOS.cerrado)(est);
-    document.querySelectorAll('[data-estado-pill]').forEach((el) => {
-      el.className = 'estado-pill estado-' + tono;
-      el.innerHTML = '<i class="estado-dot" aria-hidden="true"></i><b>' + esc(titulo) + '</b>' +
-                     (detalle ? '<span>· ' + esc(detalle) + '</span>' : '');
-      el.hidden = false;
-    });
-  }
-
-  /* ¿Este pedido va programado? Solo si el bloque de programación está
-     visible (o sea: no hay domicilios ahora mismo) y hay franja elegida. */
-  function pedidoProgramado() {
-    if (!programar || programar.hidden || !slotSel || !slotSel.value) return null;
-    const op = slotSel.options[slotSel.selectedIndex];
-    return { value: slotSel.value, label: op ? (op.dataset.largo || op.textContent) : slotSel.value };
-  }
-  window.PortonPedidoProgramado = pedidoProgramado;
-
-  /* El carrito llama a esto antes de enviar (ver validate() del Bloque 5). */
-  window.PortonValidarHorario = function () {
-    if (programar && !programar.hidden && slotSel && !slotSel.value) {
-      programar.classList.add('field-error');
-      programar.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      showToast('Elige para cuándo quieres tu pedido 📅');
-      return false;
-    }
-    programar?.classList.remove('field-error');
-    return true;
-  };
-
-  function llenarFranjas() {
-    if (!slotSel || !H) return;
-    const previo = slotSel.value;
-    const f = H.franjas(3, 40);
-    slotSel.innerHTML = '<option value="">Elige día y hora…</option>' +
-      f.map((x) => '<option value="' + esc(x.value) + '" data-largo="' + esc(x.largo) + '">' + esc(x.label) + '</option>').join('');
-    if (previo && f.some((x) => x.value === previo)) slotSel.value = previo;
-  }
-
-  function pintarCarrito() {
-    if (!est || !estadoBox || !sendBtn) return;
-    const programable = est.fase === 'cerrado' || est.fase === 'sin-domicilio';
-
-    if (est.fase === 'abierto') {
-      estadoBox.hidden = true;
+  function pintar() {
+    const e = H.estado();
+    el.hidden = false;
+    if (e.abierto) {
+      el.className = 'estado-flotante estado-on';
+      el.innerHTML = '<i class="estado-dot" aria-hidden="true"></i><b>Abierto</b>' +
+        (e.cierraA ? '<span>· cierra ' + esc(e.cierraA) + '</span>' : '');
     } else {
-      estadoBox.hidden = false;
-      estadoBox.className = 'cart-estado ' + (est.fase === 'cerrado' ? 'is-off' : 'is-warn');
-      if (est.fase === 'ultima-llamada') {
-        estadoBox.innerHTML = '<b>⏳ Última llamada</b><span>Quedan ' + est.minutosRestantes +
-          ' min para pedir domicilio hoy. Envíalo ya y lo alcanzamos.</span>';
-      } else if (est.fase === 'sin-domicilio') {
-        estadoBox.innerHTML = '<b>🛵 Los domicilios de hoy ya cerraron</b><span>El último salió a las ' +
-          esc(est.ultimaLlamadaA) + '. Deja tu pedido programado y lo tenemos listo.</span>';
-      } else {
-        estadoBox.innerHTML = '<b>🌙 Ahora estamos cerrados</b><span>' +
-          /* `hora` ya termina en "p.m." — no se le agrega otro punto detrás. */
-          (est.proxima ? 'Abrimos ' + esc(est.proxima.etiqueta) + ' a la ' + esc(est.proxima.hora) +
-                         ' Deja tu pedido programado y arrancamos con él.'
-                       : 'Escríbenos y te confirmamos el próximo turno.') + '</span>';
-      }
+      el.className = 'estado-flotante estado-off';
+      el.innerHTML = '<i class="estado-dot" aria-hidden="true"></i><b>Cerrado</b>' +
+        (e.proxima ? '<span>· abre ' + esc(e.proxima.etiqueta) + ' ' + esc(e.proxima.hora) + '</span>' : '');
     }
-
-    if (programar) {
-      const cambio = programar.hidden === programable;   /* pasó de oculto a visible */
-      programar.hidden = !programable;
-      if (programable && cambio) llenarFranjas();
-    }
-
-    sendBtn.innerHTML = programable
-      ? '<span aria-hidden="true">📅</span> Programar mi pedido'
-      : '<span aria-hidden="true">🟢</span> Enviar pedido por WhatsApp';
   }
 
-  function refrescarEstado() {
-    if (!H) return;
-    const antes = est ? est.fase : null;
-    est = H.estado();
-    pintarPills();
-    pintarCarrito();
-    /* Si cambió de fase mientras el carrito está abierto, se recargan las
-       franjas para no ofrecer una hora que ya pasó. */
-    if (antes !== est.fase && programar && !programar.hidden) llenarFranjas();
-  }
-
-  if (H) {
-    pintarPills();
-    pintarCarrito();
-    setInterval(refrescarEstado, 60000);                     /* el reloj corre solo */
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) refrescarEstado(); });
-  }
-
-  /* ============================================================ */
-  /* 2. CROSS-SELL DEL CARRITO                                    */
-  /* ============================================================ */
-  /* Construye un ítem de carrito idéntico al que produciría el modal
-     de personalización (mismo `hash`), para que si el cliente ya tenía
-     ese producto se sume la cantidad en vez de duplicar la línea. */
-  function itemDeProducto(cfg) {
-    if (typeof MENU === 'undefined') return null;
-    const p = MENU.find((x) => x.id === cfg.id);
-    if (!p || !p.options || !p.options.length) return null;
-    const opt = p.options.find((o) => o.label === cfg.option) || p.options[0];
-    const choices = (p.choices || []).map((ch, k) => (cfg.choices && cfg.choices[k]) || ch.options[0]);
-    const ci = {
-      id: p.id, name: p.name, cat: p.cat, emoji: p.emoji, img: p.img || null,
-      option: opt.label, combo: false, drink: null, proteins: [], flavors: [], slice: '',
-      choices: choices, adiciones: [], notes: '', unitPrice: opt.price, qty: 1,
-    };
-    ci.hash = [ci.id, ci.option, ci.combo, ci.drink, '', '', '', choices.join('+'), '', ''].join('|');
-    return ci;
-  }
-
-  function sugerencias() {
-    const cart = carrito();
-    if (!cart.length || typeof CROSS_SELL === 'undefined') return null;
-
-    const platos  = cart.filter((it) => it.cat !== 'bebidas').reduce((s, i) => s + i.qty, 0);
-    /* Un combo ya trae bebida incluida: cuenta como bebida servida. */
-    const bebidas = cart.reduce((s, it) => s + (it.cat === 'bebidas' ? it.qty : 0) + (it.combo ? it.qty : 0), 0);
-
-    if (platos === 0) {
-      /* Solo bebidas en el carrito → proponer los platos insignia. */
-      const items = (CROSS_SELL.platos || [])
-        .map((id) => (typeof MENU !== 'undefined' ? MENU.find((p) => p.id === id) : null))
-        .filter(Boolean)
-        .filter((p) => !cart.some((it) => it.id === p.id))
-        .slice(0, 3)
-        .map((p) => ({
-          tipo: 'plato', id: p.id, emoji: p.emoji, img: p.img,
-          nombre: p.name, precio: Math.min.apply(null, p.options.map((o) => o.price)), desde: p.options.length > 1,
-        }));
-      return items.length ? { titulo: '🍔 ¿Y para acompañar?', items: items } : null;
-    }
-
-    if (platos > bebidas) {
-      const items = (CROSS_SELL.bebidas || [])
-        .map(itemDeProducto)
-        .filter(Boolean)
-        .filter((ci) => !cart.some((it) => it.hash === ci.hash))
-        .slice(0, 3)
-        .map((ci) => ({
-          tipo: 'bebida', ci: ci, emoji: ci.emoji, img: ci.img,
-          nombre: ci.name + (ci.option && ci.option !== 'Porción' ? ' ' + ci.option : ''),
-          precio: ci.unitPrice, desde: false,
-        }));
-      return items.length ? { titulo: '🥤 Te falta con qué pasarla', items: items } : null;
-    }
-    return null;
-  }
-
-  function pintarCrossell() {
-    if (!crossell) return;
-    const s = sugerencias();
-    if (!s) { crossell.hidden = true; crossell.innerHTML = ''; return; }
-    crossell.hidden = false;
-    crossell.innerHTML =
-      '<p class="crossell-title">' + esc(s.titulo) + '</p>' +
-      '<div class="crossell-row">' + s.items.map((x, i) =>
-        '<button type="button" class="crossell-chip" data-i="' + i + '">' +
-          '<span class="crossell-media">' + (x.img ? '<img src="' + esc(x.img) + '" alt="" loading="lazy">' : esc(x.emoji || '🍽️')) + '</span>' +
-          '<span class="crossell-name">' + esc(x.nombre) + '</span>' +
-          '<span class="crossell-price">' + (x.desde ? 'desde ' : '') + fmt(x.precio) + '</span>' +
-          '<span class="crossell-add" aria-hidden="true">+</span>' +
-        '</button>').join('') +
-      '</div>';
-    crossell._items = s.items;
-  }
-
-  crossell?.addEventListener('click', (e) => {
-    const chip = e.target.closest('.crossell-chip');
-    if (!chip || !crossell._items) return;
-    const x = crossell._items[+chip.dataset.i];
-    if (!x) return;
-    if (x.tipo === 'plato') {
-      /* Los platos se personalizan (proteína, combo, adiciones): abre el modal. */
-      drawer?.classList.remove('open');
-      overlay?.classList.remove('open');
-      document.body.style.overflow = '';
-      window.openProductModal?.(x.id);
-      window.PortonTrack?.event('crossell_click', { id: x.id, tipo: 'plato' });
-      return;
-    }
-    /* Las bebidas no tienen nada que elegir: entran de un toque. */
-    addToCart(JSON.parse(JSON.stringify(x.ci)));
-    flyToCart(chip, x.ci.img, x.ci.emoji);
-    showToast('✓ ' + x.nombre + ' agregada');
-    window.PortonTrack?.event('crossell_added', { id: x.ci.id, precio: x.ci.unitPrice });
-  });
-
-  /* ============================================================ */
-  /* 3. RECUPERACIÓN DEL PEDIDO + RESEÑAS                         */
-  /* ============================================================ */
-  const K = {
-    ts:       'porton_cart_ts',
-    pedido:   'porton_last_order',
-    resena:   'porton_review_asked',
-    abandono: 'porton_abandon_sent',
-  };
-  const leer = (k, s) => { try { return (s ? sessionStorage : localStorage).getItem(k); } catch (e) { return null; } };
-  const guardar = (k, v, s) => { try { (s ? sessionStorage : localStorage).setItem(k, v); } catch (e) { /* no-op */ } };
-
-  /* Cuándo se tocó el carrito por última vez, leído UNA sola vez y ya:
-     el primer renderCart() de la carga refresca esa marca, así que si se
-     consultara después siempre daría "hace un segundo" y el aviso de
-     recuperación no aparecería jamás. */
-  const tsCarritoAlCargar = +(leer(K.ts) || 0);
-
-  function mostrarNudge(html, onClick, tono) {
-    if (!nudge) return;
-    nudge.className = 'nudge-bar' + (tono ? ' ' + tono : '');
-    nudge.innerHTML = html + '<button type="button" class="nudge-x" aria-label="Cerrar">✕</button>';
-    nudge.hidden = false;
-    requestAnimationFrame(() => nudge.classList.add('show'));
-    nudge._go = onClick;
-  }
-  function ocultarNudge() {
-    if (!nudge) return;
-    nudge.classList.remove('show');
-    setTimeout(() => { nudge.hidden = true; }, 300);
-  }
-  nudge?.addEventListener('click', (e) => {
-    if (e.target.closest('.nudge-x')) { ocultarNudge(); return; }
-    const go = nudge._go;
-    ocultarNudge();
-    if (typeof go === 'function') go();
-  });
-
-  /* (a) Pedido armado que nunca se envió. El carrito ya sobrevivía en el
-         navegador; lo que faltaba era invitar a terminarlo. */
-  function nudgeCarrito() {
-    const cart = carrito();
-    if (!cart.length) return false;
-    if (!tsCarritoAlCargar || Date.now() - tsCarritoAlCargar < 15 * 60 * 1000) return false;   /* muy reciente: no molestar */
-    mostrarNudge(
-      '<span class="nudge-emoji" aria-hidden="true">🛒</span>' +
-      '<span class="nudge-text"><b>Dejaste un pedido sin enviar</b>' +
-      '<span>' + cart.reduce((s, i) => s + i.qty, 0) + ' producto(s) · ' + fmt(subtotalCarrito()) + '</span></span>' +
-      '<span class="nudge-cta">Continuar</span>',
-      () => {
-        document.getElementById('cart-fab')?.click();
-        window.PortonTrack?.event('cart_recovered', { subtotal: subtotalCarrito() });
-      }
-    );
-    return true;
-  }
-
-  /* (b) Reseña en Google. Más reseñas = mejor posición local = más pedidos,
-         y se compone mes a mes. Se pide en la visita SIGUIENTE al pedido
-         (ya comió), una sola vez, y nunca si hay un carrito pendiente. */
-  function nudgeResena() {
-    if (typeof BUSINESS === 'undefined' || !BUSINESS.maps) return false;
-    if (leer(K.resena)) return false;
-    const ts = +(leer(K.pedido) || 0);
-    if (!ts || Date.now() - ts < 3 * 60 * 60 * 1000) return false;
-    mostrarNudge(
-      '<span class="nudge-emoji" aria-hidden="true">⭐</span>' +
-      '<span class="nudge-text"><b>¿Cómo te fue con tu pedido?</b>' +
-      '<span>Tu reseña en Google nos ayuda muchísimo.</span></span>' +
-      '<span class="nudge-cta">Calificar</span>',
-      () => {
-        guardar(K.resena, '1');
-        window.PortonTrack?.event('review_click', null);
-        window.open(BUSINESS.maps, '_blank', 'noopener');
-      },
-      'is-gold'
-    );
-    /* Se marca como pedida aunque la cierren: no se insiste. */
-    nudge?.querySelector('.nudge-x')?.addEventListener('click', () => guardar(K.resena, '1'), { once: true });
-    return true;
-  }
-
-  /* (c) Medir la plata que se va. Sin esto, el dueño no sabe que existe. */
-  function registrarAbandono() {
-    const cart = carrito();
-    if (!cart.length || leer(K.abandono, true)) return;
-    guardar(K.abandono, '1', true);
-    window.PortonTrack?.event('cart_abandoned', {
-      subtotal: subtotalCarrito(),
-      items: cart.length,
-      fase: est ? est.fase : null,
-    });
-  }
-  window.addEventListener('pagehide', registrarAbandono);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) registrarAbandono(); });
-
-  /* ============================================================ */
-  /* CABLEADO                                                     */
-  /* ============================================================ */
-  /* renderCart() es el único punto por el que pasa TODO cambio del
-     carrito, así que se envuelve una sola vez en lugar de regar
-     listeners por el código. */
-  const renderOriginal = window.renderCart;
-  window.renderCart = function () {
-    if (typeof renderOriginal === 'function') renderOriginal();
-    guardar(K.ts, String(Date.now()));
-    pintarCrossell();
-    pintarCarrito();
-  };
-
-  /* Al enviar: se recuerda la fecha (para pedir reseña después) y se
-     registra aparte si el pedido quedó programado. Se lee el subtotal
-     ANTES porque el envío vacía el carrito. */
-  const enviarOriginal = window.sendOrderWhatsApp;
-  if (typeof enviarOriginal === 'function') {
-    window.sendOrderWhatsApp = function () {
-      const prog = pedidoProgramado();
-      const subtotal = subtotalCarrito();
-      enviarOriginal();
-      if (carrito().length) return;   /* no salió (carrito vacío / anti-spam) */
-      guardar(K.pedido, String(Date.now()));
-      guardar(K.abandono, '1', true);
-      if (prog) window.PortonTrack?.event('order_scheduled', { para: prog.value, subtotal: subtotal });
-      if (slotSel) slotSel.value = '';
-    };
-  }
-
-  window.renderCart();
-
-  /* El aviso flotante NO sale de una: en móvil quedaría justo encima del
-     botón "Ordenar Ahora" del hero, tapando la llamada a la acción
-     principal. Espera a que el visitante pase del hero —ahí abajo ya no
-     estorba nada— o a que hayan pasado 15 s, que es tiempo de sobra para
-     haber leído la portada. */
-  (function esperarMomentoOportuno(mostrar) {
-    let listo = false;
-    const alScroll = () => { if (window.scrollY > window.innerHeight * 0.5) disparar(); };
-    let reloj = null;
-    function disparar() {
-      if (listo) return;
-      listo = true;
-      window.removeEventListener('scroll', alScroll);
-      clearTimeout(reloj);
-      mostrar();
-    }
-    reloj = setTimeout(disparar, 15000);
-    window.addEventListener('scroll', alScroll, { passive: true });
-    setTimeout(alScroll, 2500);   /* por si la página se recargó ya desplazada */
-  })(() => { if (!nudgeCarrito()) nudgeResena(); });
+  pintar();
+  setInterval(pintar, 60000);      /* el reloj corre solo, sin recargar */
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) pintar(); });
 })();
+
 
 
 /* ============================================================= */
