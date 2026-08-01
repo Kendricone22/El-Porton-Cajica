@@ -11,6 +11,36 @@ const BRAND = {
   prefix:   "[WEB-PORTON-CAJICA]",
 };
 
+/* ============================================================= */
+/* NEGOCIO — datos operativos (horario + URL del sitio).          */
+/* Fuente única de verdad para DOS cosas a la vez:                */
+/*   1. el estado "Abierto / Cerrado" en vivo de la web,          */
+/*   2. las URLs absolutas de los datos estructurados (JSON-LD).  */
+/* Si cambian los horarios, se cambian AQUÍ y el indicador se      */
+/* actualiza solo (no hay que tocar el HTML).                     */
+/* ============================================================= */
+const BUSINESS = {
+  timeZone: "America/Bogota",     /* el estado no depende del reloj del visitante */
+  siteUrl:  "https://el-porton-cajica.vercel.app",
+
+  /* Horario de atención. Clave = día de la semana (0 = domingo … 6 = sábado).
+     `null` = cerrado ese día. Formato 24 h. */
+  hours: {
+    0: { open: "13:00", close: "22:00" },   /* Domingo   */
+    1: null,                                 /* Lunes — cerrado (ver holidayMondayHours) */
+    2: { open: "13:00", close: "22:00" },   /* Martes    */
+    3: { open: "13:00", close: "22:00" },   /* Miércoles */
+    4: { open: "13:00", close: "22:00" },   /* Jueves    */
+    5: { open: "13:00", close: "22:00" },   /* Viernes   */
+    6: { open: "13:00", close: "22:00" },   /* Sábado    */
+  },
+
+  /* "Lunes cerrado — abrimos solo en lunes festivos": cuando el lunes cae en
+     festivo colombiano, se aplica este horario. El cálculo de festivos vive
+     en app.js (incluye Ley Emiliani y los festivos móviles de Pascua). */
+  holidayMondayHours: { open: "13:00", close: "22:00" },
+};
+
 /* ---------- BLOQUE 2: HERO — productos estrella (rotación aleatoria) ---------- */
 /* Los 7 productos que tienen su foto panorámica extendida (21:9). El emoji solo */
 /* hace de respaldo si algún día se agrega uno sin foto.                         */

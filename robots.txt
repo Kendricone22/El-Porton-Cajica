@@ -1,0 +1,9 @@
+# El Portón Cajicá — https://el-porton-cajica.vercel.app
+# Todo el sitio público es rastreable. El panel administrativo no:
+# no aporta nada en búsqueda y no tiene por qué aparecer indexado.
+
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://el-porton-cajica.vercel.app/sitemap.xml

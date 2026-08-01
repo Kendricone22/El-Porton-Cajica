@@ -1931,3 +1931,57 @@ html { scroll-behavior: smooth; }
   .hamburger                      { display: none; }
   #mobile-overlay, #mobile-drawer { display: none; }
 }
+
+
+
+/* ============================================================= */
+/* ESTADO DEL NEGOCIO — insignia fija "Abierto / Cerrado"        */
+/* Fija arriba a la izquierda (independiente del scroll), con la  */
+/* hora real de Cajicá. CSS a mano (no Tailwind) a propósito:      */
+/* css/tailwind-built.css está compilado y purgado, así que una    */
+/* clase de utilidad nueva no existiría sin recompilar.            */
+/* ============================================================= */
+.estado-flotante {
+  position: fixed;
+  top: calc(9rem + 0.65rem);   /* justo debajo de la barra de navegación (h-36 = 9rem) */
+  left: 1rem;
+  z-index: 40;                 /* debajo del navbar (z-50) y del drawer, sobre el contenido */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.75rem 0.32rem 0.62rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  line-height: 1;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10, 10, 12, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #d4d4d8;
+  white-space: nowrap;
+}
+.estado-flotante b    { font-weight: 700; color: #fff; }
+.estado-flotante span { color: #a1a1aa; }
+.estado-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex: 0 0 auto;
+  background: currentColor;
+}
+.estado-on  .estado-dot { color: #22C55E; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.75); animation: estado-latido 2.2s infinite; }
+.estado-off .estado-dot { color: #71717A; }
+.estado-on  { border-color: rgba(34, 197, 94, 0.30); }
+
+@keyframes estado-latido {
+  0%   { box-shadow: 0 0 0 0   rgba(255, 255, 255, 0.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(255, 255, 255, 0);    }
+  100% { box-shadow: 0 0 0 0   rgba(255, 255, 255, 0);    }
+}
+@media (prefers-reduced-motion: reduce) {
+  .estado-dot { animation: none !important; }
+}
+
+/* En móvil se aleja un poco del borde para no pegarse a la muesca/notch. */
+@media (max-width: 480px) {
+  .estado-flotante { left: 0.75rem; font-size: 0.74rem; }
+}

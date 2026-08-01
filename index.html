@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>El Portón Cajicá — Comidas Rápidas & Pizzería Artesanal</title>
   <meta name="description" content="El Portón Cajicá: hamburguesas, perros, mazorcadas, salchipapas y pizzas artesanales. Pide fácil y rápido por WhatsApp." />
+  <link rel="canonical" href="https://el-porton-cajica.vercel.app/" />
 
   <!-- ===== Favicon ===== -->
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
@@ -24,6 +25,70 @@
   <meta name="twitter:title" content="El Portón Cajicá — Comidas Rápidas & Pizzería Artesanal" />
   <meta name="twitter:description" content="Hamburguesas, perros, mazorcadas, salchipapas y pizzas artesanales. Pide fácil y rápido por WhatsApp." />
   <meta name="twitter:image" content="https://el-porton-cajica.vercel.app/assets/og-image.jpg" />
+
+  <!-- ============================================================= -->
+  <!-- DATOS ESTRUCTURADOS (schema.org) — cómo Google entiende que   -->
+  <!-- esto es un RESTAURANTE de Cajicá, con horario, teléfono y      -->
+  <!-- calificación, y no una página cualquiera. Habilita resultados  -->
+  <!-- enriquecidos y refuerza el paquete local ("cerca de mí").      -->
+  <!--                                                                -->
+  <!-- Va estático a propósito: los rastreadores que NO ejecutan       -->
+  <!-- JavaScript (Bing, previews de WhatsApp/Facebook, buscadores     -->
+  <!-- con IA) igual lo leen. La CARTA, en cambio, se inyecta desde     -->
+  <!-- js/app.js sobre el nodo #menu que aquí se referencia, porque     -->
+  <!-- son +45 productos y cambian desde el panel admin.                -->
+  <!--                                                                -->
+  <!-- ⚠️ Si cambian horarios/dirección, actualízalos TAMBIÉN en        -->
+  <!--    BUSINESS dentro de js/data.js (de ahí sale el estado          -->
+  <!--    "Abierto/Cerrado" que ve el cliente).                         -->
+  <!-- ============================================================= -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "@id": "https://el-porton-cajica.vercel.app/#restaurante",
+    "name": "El Portón Cajicá",
+    "description": "Comidas rápidas y pizzería artesanal en Cajicá: hamburguesas con carne de res madurada, perros calientes, mazorcadas, salchipapas y pizzas. Más de 11 años de tradición.",
+    "url": "https://el-porton-cajica.vercel.app/",
+    "telephone": "+573138214752",
+    "image": "https://el-porton-cajica.vercel.app/assets/og-image.jpg",
+    "logo": "https://el-porton-cajica.vercel.app/assets/logo-final.png",
+    "priceRange": "$$",
+    "currenciesAccepted": "COP",
+    "paymentAccepted": "Efectivo, Tarjeta, Transferencia",
+    "servesCuisine": ["Comida rápida", "Hamburguesas", "Pizza", "Colombiana"],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Calle 11 A Sur #10-75, Camino entrada Fagua, sector Canelón",
+      "addressLocality": "Cajicá",
+      "addressRegion": "Cundinamarca",
+      "addressCountry": "CO"
+    },
+    "areaServed": { "@type": "City", "name": "Cajicá" },
+    "hasMap": "https://maps.app.goo.gl/B1Yka6GRnqEvMZ6u6",
+    "sameAs": [
+      "https://instagram.com/elportoncajica",
+      "https://maps.app.goo.gl/B1Yka6GRnqEvMZ6u6"
+    ],
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "13:00",
+        "closes": "22:00"
+      }
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.4",
+      "reviewCount": "236",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "acceptsReservations": "False",
+    "hasMenu": { "@id": "https://el-porton-cajica.vercel.app/#menu" }
+  }
+  </script>
 
   <!-- ===== Tailwind CSS v4 (compilado y purgado — sin runtime CDN) ===== -->
   <link rel="stylesheet" href="css/tailwind-built.css" />
@@ -88,6 +153,11 @@
       </div>
     </nav>
   </header>
+
+  <!-- Estado del negocio en tiempo real: fijo arriba a la izquierda,
+       visible siempre (no se va con el scroll). Lo llena el motor de
+       horario en js/app.js. -->
+  <div id="estado-negocio" class="estado-flotante" hidden></div>
 
   <!-- ---------- OVERLAY + DRAWER MÓVIL ---------- -->
   <div id="mobile-overlay" class="lg:hidden"></div>
@@ -377,6 +447,14 @@
         </div>
         <label id="cash-field" class="cart-field" hidden><span>¿Con cuánto vas a pagar?</span>
           <input type="text" name="cambio" inputmode="numeric" placeholder="Ej: $50.000" /></label>
+
+        <!-- Autorización de datos personales (Ley 1581 de 2012 · Habeas Data).
+             Obligatoria en Colombia para recoger nombre, teléfono y dirección.
+             validate() en js/app.js la exige antes de dejar enviar el pedido. -->
+        <label class="cart-consent">
+          <input type="checkbox" name="consent" />
+          <span>Autorizo a <strong>El Portón Cajicá</strong> a tratar mis datos personales (nombre, teléfono y dirección) con la única finalidad de gestionar, entregar y hacer seguimiento a este pedido, conforme a la Ley 1581 de 2012. Puedo pedir su consulta, actualización o supresión en cualquier momento por WhatsApp.</span>
+        </label>
       </form>
     </div>
 

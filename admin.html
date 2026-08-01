@@ -42,6 +42,14 @@
     .admin-top .spacer { margin-left:auto; }
     .btn-ghost { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); color:#e4e4e7; font-size:.82rem; font-weight:600; padding:.5rem .9rem; border-radius:.6rem; cursor:pointer; transition:background .2s; }
     .btn-ghost:hover { background:rgba(255,255,255,.12); }
+    /* En pantallas angostas los 3 botones + logo no caben y "Salir" se salía
+       del borde (provocaba scroll horizontal en toda la página). Se aprietan
+       y se permite que bajen de línea. */
+    @media (max-width:560px) {
+      .admin-top { gap:.5rem; padding:.7rem .8rem; flex-wrap:wrap; }
+      .admin-top img { height:32px; }
+      .btn-ghost { font-size:.75rem; padding:.42rem .6rem; }
+    }
     .admin-wrap { max-width:60rem; margin:0 auto; padding:1.2rem 1rem 4rem; }
 
     .tabs { display:flex; gap:.5rem; margin-bottom:1.3rem; }
@@ -66,6 +74,81 @@
     .top-item { display:flex; justify-content:space-between; font-size:.86rem; padding:.4rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
     .top-item:last-child { border-bottom:none; }
     .top-item span:last-child { color:var(--rojo); font-weight:700; }
+
+    /* ---------- VISITAS ---------- */
+    .vis-cards { display:grid; grid-template-columns:1fr; gap:.7rem; margin-bottom:1.2rem; }
+    @media(min-width:640px){ .vis-cards { grid-template-columns:repeat(3,1fr); } }
+    .vis-card { background:#0e0e11; border:1px solid rgba(255,255,255,.07); border-radius:.8rem; padding:.9rem 1rem; }
+    .vis-card h4 { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:#a1a1aa; margin-bottom:.6rem; }
+    .vis-row { display:flex; justify-content:space-between; align-items:baseline; padding:.18rem 0; }
+    .vis-row span { font-size:.78rem; color:#a1a1aa; }
+    .vis-row b { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; line-height:1; color:#fff; }
+    .vis-row.is-main b { color:var(--rojo); font-size:1.9rem; }
+    /* Gráfica de barras: una barra por día, sin librerías. */
+    .chart { display:flex; align-items:flex-end; gap:2px; height:7rem; margin-top:.4rem; }
+    .chart-col { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:flex-end; height:100%; }
+    .chart-bar { width:100%; background:linear-gradient(180deg,var(--rojo),#7a1f1f); border-radius:2px 2px 0 0; min-height:2px; transition:height .4s; }
+    .chart-bar.is-cero { background:#26262b; }
+    .chart-axis { display:flex; justify-content:space-between; font-size:.68rem; color:#71717a; margin-top:.4rem; }
+    .vis-nota { font-size:.72rem; color:#71717a; margin-top:.9rem; line-height:1.5; }
+    .vis-aviso { background:#1a1408; border:1px solid rgba(234,179,8,.3); border-radius:.7rem; padding:.9rem 1rem; font-size:.82rem; color:#fde68a; line-height:1.6; }
+    .vis-aviso code { background:rgba(0,0,0,.35); padding:.1rem .35rem; border-radius:.25rem; }
+
+    /* ---------- VENTAS (gráficos) ----------
+       Una sola serie de datos → un solo color (el rojo de marca). Nada de
+       pintar cada barra de un tono distinto: eso codificaría el tamaño dos
+       veces (largo + color) y gasta el único canal libre que queda. */
+    .vt-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:.6rem; margin-bottom:1.1rem; }
+    .vt-seg { display:inline-flex; background:#0e0e11; border:1px solid rgba(255,255,255,.07); border-radius:999px; padding:.2rem; }
+    .vt-seg button { border:0; background:transparent; color:#a1a1aa; font-size:.78rem; padding:.36rem .9rem; border-radius:999px; cursor:pointer; font-family:inherit; transition:background .18s, color .18s; }
+    .vt-seg button:hover { color:#e4e4e7; }
+    .vt-seg button.active { background:var(--rojo); color:#fff; font-weight:600; }
+    .vt-link { margin-left:auto; background:none; border:0; color:#a1a1aa; font-size:.75rem; cursor:pointer; text-decoration:underline; font-family:inherit; padding:.3rem; }
+    .vt-link:hover { color:#fff; }
+
+    .vt-grid-cols { display:grid; grid-template-columns:1fr; gap:1.6rem; }
+    @media(min-width:900px){ .vt-grid-cols { grid-template-columns:1.4fr 1fr; } }
+    .vt-h4 { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:#a1a1aa; }
+    /* Valor del encabezado: sans, NO la display (Bebas) — una tipografía de
+       titular en una cifra de dato se lee como decoración. */
+    .vt-total { font-size:1.35rem; font-weight:600; color:#fff; line-height:1.2; margin:.15rem 0 .1rem; }
+    .vt-sub { font-size:.72rem; color:#71717a; margin-bottom:.5rem; }
+
+    .vt-plot { position:relative; }
+    .vt-plot svg { display:block; width:100%; }
+    .vt-gridline { stroke:#2c2c31; stroke-width:1; }          /* hairline, sólida, recesiva */
+    .vt-axis     { fill:#71717a; font-size:10px; font-variant-numeric:tabular-nums; }
+    .vt-line     { fill:none; stroke:var(--rojo); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .vt-dot      { fill:var(--rojo); stroke:#131316; stroke-width:2; }   /* anillo de 2px en color de superficie */
+    .vt-cross    { stroke:#52525b; stroke-width:1; }
+    .vt-endlabel { fill:#fff; font-size:11px; font-weight:600; }
+    /* Animación de entrada: la línea se dibuja, el área y el punto aparecen. */
+    .vt-line.is-anim { transition:stroke-dashoffset 900ms cubic-bezier(.22,.61,.36,1); }
+    .vt-area, .vt-dot, .vt-endlabel { opacity:0; transition:opacity 420ms ease 520ms; }
+    .vt-plot.is-listo .vt-area, .vt-plot.is-listo .vt-dot, .vt-plot.is-listo .vt-endlabel { opacity:1; }
+
+    .vt-tip { position:absolute; pointer-events:none; background:#000; border:1px solid rgba(255,255,255,.14); border-radius:.5rem; padding:.45rem .6rem; font-size:.74rem; line-height:1.45; white-space:nowrap; opacity:0; transition:opacity .12s; z-index:5; }
+    .vt-tip.is-on { opacity:1; }
+    .vt-tip b { color:#fff; }
+    .vt-tip span { color:#a1a1aa; }
+
+    /* Barras horizontales de productos: ≤24px de grosor, punta redondeada
+       de 4px y base cuadrada, todas del mismo color. */
+    .vt-bar-row { display:flex; align-items:center; gap:.7rem; margin-bottom:.55rem; }
+    .vt-bar-name { width:8.5rem; flex:0 0 auto; font-size:.78rem; color:#d4d4d8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .vt-bar-track { flex:1; min-width:0; height:14px; background:#0e0e11; border-radius:0 4px 4px 0; }
+    .vt-bar-fill { height:100%; width:0; background:var(--rojo); border-radius:0 4px 4px 0; transition:width 700ms cubic-bezier(.22,.61,.36,1); }
+    .vt-bar-val { width:3.6rem; flex:0 0 auto; text-align:right; font-size:.78rem; font-weight:600; color:#fff; font-variant-numeric:tabular-nums; }
+
+    .vt-tabla { width:100%; border-collapse:collapse; font-size:.78rem; }
+    .vt-tabla th, .vt-tabla td { text-align:right; padding:.35rem .5rem; border-bottom:1px solid rgba(255,255,255,.05); font-variant-numeric:tabular-nums; }
+    .vt-tabla th { color:#a1a1aa; font-weight:600; }
+    .vt-tabla th:first-child, .vt-tabla td:first-child { text-align:left; font-variant-numeric:normal; }
+    .vt-vacio { color:#71717a; font-size:.85rem; padding:1.4rem 0; text-align:center; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .vt-line.is-anim, .vt-bar-fill, .vt-area, .vt-dot, .vt-endlabel { transition:none !important; }
+    }
 
     /* ---------- PEDIDOS ---------- */
     .order-card { background:#131316; border:1px solid rgba(255,255,255,.07); border-radius:.9rem; padding:1rem 1.1rem; margin-bottom:.8rem; }
@@ -202,12 +285,26 @@
         </div>
         <div class="kpis" id="kpis"></div>
         <div class="panel-box">
-          <h3>Embudo (acciones registradas)</h3>
-          <div id="funnel"></div>
+          <h3>Ventas</h3>
+          <!-- Un solo selector de periodo para TODO el bloque: la gráfica y los
+               productos se mueven juntos, nunca cada uno por su lado. -->
+          <div class="vt-toolbar">
+            <div class="vt-seg" id="vt-seg" role="group" aria-label="Periodo">
+              <button type="button" data-gran="dia" class="active">Diario</button>
+              <button type="button" data-gran="semana">Semanal</button>
+              <button type="button" data-gran="mes">Mensual</button>
+            </div>
+            <button type="button" class="vt-link" id="vt-toggle-tabla">Ver tabla</button>
+          </div>
+          <div id="ventas"><p class="loading">Cargando ventas…</p></div>
         </div>
         <div class="panel-box">
-          <h3>Productos más pedidos</h3>
-          <div id="top-products"></div>
+          <h3>Visitas a la página</h3>
+          <div id="visitas"><p class="loading">Cargando visitas…</p></div>
+        </div>
+        <div class="panel-box">
+          <h3>Embudo (acciones registradas)</h3>
+          <div id="funnel"></div>
         </div>
       </section>
 
@@ -413,14 +510,96 @@
     let lastOrders = [];   // cache para el export CSV
     async function loadAll() {
       $('orders-list').innerHTML = '<p class="loading">Cargando pedidos…</p>';
-      const [{ data: orders, error: oErr }, { data: events }] = await Promise.all([
+      const [{ data: orders, error: oErr }, { data: events }, totales] = await Promise.all([
         sb.from('orders').select('*').order('created_at', { ascending: false }),
         sb.from('events').select('type, created_at'),
+        sb.rpc('ventas_totales'),
       ]);
       if (oErr) { $('orders-list').innerHTML = '<p class="empty-state">Error al leer pedidos: ' + oErr.message + '</p>'; return; }
       lastOrders = orders || [];
       renderOrders(orders || []);
-      renderStats(orders || [], events || []);
+      /* Si la función aún no existe (falta analitica-setup.sql), renderStats
+         cae al cálculo de antes en vez de quedarse en blanco. */
+      renderStats(orders || [], events || [], (!totales.error && totales.data && totales.data[0]) || null);
+      loadVisitas();   // aparte: si aún no se corrió visitas-setup.sql, no debe tumbar el resto
+      loadVentas();
+    }
+
+    /* ---------- visitas ----------
+       Los conteos se hacen en Postgres (funciones visitas_*), no aquí:
+       PostgREST corta en 1000 filas y las personas únicas no se pueden
+       sumar por día (quien entra lunes y martes es 1 persona, no 2). */
+    async function loadVisitas() {
+      const [resumen, serie, recurrencia] = await Promise.all([
+        sb.rpc('visitas_resumen'),
+        sb.rpc('visitas_serie', { dias: 30 }),
+        sb.rpc('visitas_recurrencia', { dias: 30 }),
+      ]);
+      renderVisitas(resumen, serie, recurrencia);
+    }
+
+    /* Separado de la carga para poder verificar el render sin iniciar sesión
+       (mismo patrón que window.__testExportCSV). */
+    function renderVisitas(resumen, serie, recurrencia) {
+      const box = $('visitas');
+
+      if (resumen.error) {
+        const falta = /does not exist|schema cache|could not find/i.test(resumen.error.message || '');
+        box.innerHTML = '<div class="vis-aviso">' + (falta
+          ? '📋 Falta activar el registro de visitas. Corre <code>visitas-setup.sql</code> en Supabase → SQL Editor y vuelve a entrar.'
+          : 'No se pudieron leer las visitas: ' + esc(resumen.error.message)) + '</div>';
+        return;
+      }
+
+      const porPeriodo = {};
+      (resumen.data || []).forEach((r) => { porPeriodo[r.periodo] = r; });
+      const tarjeta = (titulo, r) => {
+        r = r || { personas: 0, visitas: 0, vistas: 0 };
+        return '<div class="vis-card"><h4>' + titulo + '</h4>' +
+          '<div class="vis-row is-main"><span>Personas</span><b>' + (r.personas || 0) + '</b></div>' +
+          '<div class="vis-row"><span>Visitas</span><b>' + (r.visitas || 0) + '</b></div>' +
+          '<div class="vis-row"><span>Vistas de página</span><b>' + (r.vistas || 0) + '</b></div>' +
+        '</div>';
+      };
+
+      let html = '<div class="vis-cards">' +
+        tarjeta('Hoy', porPeriodo.hoy) +
+        tarjeta('Últimos 7 días', porPeriodo.semana) +
+        tarjeta('Últimos 30 días', porPeriodo.mes) +
+      '</div>';
+
+      const dias = serie.data || [];
+      if (dias.length) {
+        const max = Math.max(1, ...dias.map((d) => Number(d.personas) || 0));
+        const dLabel = (s) => { const p = String(s).split('-'); return p[2] + '/' + p[1]; };
+        html += '<h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#a1a1aa">Personas por día (30 días)</h4>' +
+          '<div class="chart">' + dias.map((d) => {
+            const n = Number(d.personas) || 0;
+            return '<div class="chart-col" title="' + dLabel(d.dia) + ': ' + n + ' personas, ' + (d.visitas || 0) + ' visitas">' +
+              '<div class="chart-bar' + (n ? '' : ' is-cero') + '" style="height:' + (n ? Math.max(4, n / max * 100) : 2) + '%"></div></div>';
+          }).join('') + '</div>' +
+          '<div class="chart-axis"><span>' + dLabel(dias[0].dia) + '</span><span>' + dLabel(dias[dias.length - 1].dia) + '</span></div>';
+      }
+
+      const rec = recurrencia.data || [];
+      const totalRec = rec.reduce((s, r) => s + Number(r.personas || 0), 0);
+      if (totalRec) {
+        html += '<h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#a1a1aa;margin-top:1.2rem">' +
+                'Cuántas veces volvieron (30 días)</h4>';
+        html += rec.map((r) => {
+          const n = Number(r.personas) || 0;
+          return '<div class="funnel-row"><span class="funnel-label">' + esc(r.tramo) + '</span>' +
+            '<div class="funnel-bar-wrap"><div class="funnel-bar" style="width:' + (n / totalRec * 100) + '%"></div></div>' +
+            '<span class="funnel-val">' + n + '</span></div>';
+        }).join('');
+      }
+
+      html += '<p class="vis-nota"><b>Personas</b> = navegadores distintos, no seres humanos: el mismo cliente ' +
+        'en celular y computador cuenta 2, y si limpia el navegador vuelve a contar como nuevo. ' +
+        '<b>Visitas</b> = sesiones, se cortan a los 30 min de inactividad. ' +
+        '<b>Vistas</b> = cargas de página. No se guarda IP ni ningún dato personal.</p>';
+
+      box.innerHTML = html;
     }
 
     /* ---------- pedidos ---------- */
@@ -476,15 +655,27 @@
     }
 
     /* ---------- analítica ---------- */
-    function renderStats(orders, events) {
-      const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
-      const active = orders.filter((o) => o.status !== 'cancelado');
-      const ingreso = active.reduce((s, o) => s + (o.subtotal || 0), 0);
-      const hoy = orders.filter((o) => new Date(o.created_at) >= startToday).length;
-      const ticket = active.length ? Math.round(ingreso / active.length) : 0;
+    function renderStats(orders, events, totales) {
+      /* `totales` viene de la función ventas_totales() en Postgres y es exacto
+         aunque haya más de 1000 pedidos (la API corta ahí). Si todavía no se
+         corrió analitica-setup.sql, se calcula aquí como antes. */
+      let pedidosTotales, hoy, ingreso, ticket;
+      if (totales) {
+        pedidosTotales = totales.pedidos_totales;
+        hoy            = totales.pedidos_hoy;
+        ingreso        = totales.ingreso;
+        ticket         = totales.ticket;
+      } else {
+        const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+        const active = orders.filter((o) => o.status !== 'cancelado');
+        ingreso = active.reduce((s, o) => s + (o.subtotal || 0), 0);
+        pedidosTotales = orders.length;
+        hoy = orders.filter((o) => new Date(o.created_at) >= startToday).length;
+        ticket = active.length ? Math.round(ingreso / active.length) : 0;
+      }
 
       $('kpis').innerHTML = [
-        ['Pedidos totales', orders.length],
+        ['Pedidos totales', pedidosTotales],
         ['Pedidos hoy', hoy],
         ['Ingreso (sin cancelados)', fmt(ingreso)],
         ['Ticket promedio', fmt(ticket)],
@@ -503,13 +694,280 @@
         '<span class="funnel-val">' + v + '</span></div>'
       ).join('');
 
-      const tally = {};
-      orders.forEach((o) => (o.items || []).forEach((it) => { tally[it.name] = (tally[it.name] || 0) + (it.qty || 1); }));
-      const top = Object.entries(tally).sort((a, b) => b[1] - a[1]).slice(0, 8);
-      $('top-products').innerHTML = top.length
-        ? top.map(([n, q]) => '<div class="top-item"><span>' + esc(n) + '</span><span>' + q + '</span></div>').join('')
-        : '<p style="color:#71717a;font-size:.85rem">Sin datos todavía.</p>';
     }
+
+    /* ============================================================= */
+    /* VENTAS — gráfica de dinero + productos más pedidos            */
+    /* ============================================================= */
+    /* Una sola ventana con dos lecturas del mismo periodo: cuánto entró
+       (área en el tiempo) y qué se vendió (barras). El selector de arriba
+       mueve las dos a la vez, nunca por separado. Los totales se calculan
+       en Postgres, así que no dependen del tope de 1000 filas de la API. */
+    const VT = { gran: 'dia', serie: [], top: [], tabla: false };
+    const VT_PERIODOS = { dia: 30, semana: 12, mes: 12 };
+    const VT_TITULO   = { dia: 'Últimos 30 días', semana: 'Últimas 12 semanas', mes: 'Últimos 12 meses' };
+    const VT_UNIDAD   = { dia: 'día', semana: 'semana', mes: 'mes' };
+
+    async function loadVentas() {
+      const n = VT_PERIODOS[VT.gran];
+      const [serie, top] = await Promise.all([
+        sb.rpc('ventas_serie', { p_gran: VT.gran, p_periodos: n }),
+        sb.rpc('ventas_top',   { p_gran: VT.gran, p_periodos: n, p_limite: 8 }),
+      ]);
+      renderVentas(serie, top);
+    }
+
+    /* Fecha corta para los ejes: 05/08 por día, "sem 05/08", "ago 26" por mes. */
+    function vtEtiqueta(iso, gran) {
+      const p = String(iso).split('-');
+      const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      if (gran === 'mes') return meses[(+p[1]) - 1] + ' ' + p[0].slice(2);
+      return p[2] + '/' + p[1];
+    }
+
+    /* Escala redonda para el eje Y: 0 / 250k / 500k… en vez de 0 / 183.412. */
+    function vtEscala(max) {
+      if (!(max > 0)) return { tope: 1000, paso: 250 };
+      const mag  = Math.pow(10, Math.floor(Math.log10(max)));
+      const n    = max / mag;
+      const paso = (n <= 1 ? 0.25 : n <= 2 ? 0.5 : n <= 5 ? 1 : 2) * mag;
+      return { tope: Math.ceil(max / paso) * paso, paso };
+    }
+
+    /* Formato compacto para las marcas del eje ($1,2M / $250k). */
+    function vtCorto(v) {
+      if (v >= 1e6) return '$' + (v / 1e6).toFixed(v % 1e6 === 0 ? 0 : 1).replace('.', ',') + 'M';
+      if (v >= 1e3) return '$' + Math.round(v / 1e3) + 'k';
+      return '$' + v;
+    }
+
+    function renderVentas(serie, top) {
+      const box = $('ventas');
+
+      if (serie.error) {
+        const falta = /does not exist|schema cache|could not find/i.test(serie.error.message || '');
+        box.innerHTML = '<div class="vis-aviso">' + (falta
+          ? '📋 Falta activar los gráficos de ventas. Corre <code>analitica-setup.sql</code> en Supabase → SQL Editor y vuelve a entrar.'
+          : 'No se pudieron leer las ventas: ' + esc(serie.error.message)) + '</div>';
+        return;
+      }
+
+      VT.serie = (serie.data || []).map((d) => ({
+        inicio: d.inicio, ingreso: Number(d.ingreso) || 0, pedidos: Number(d.pedidos) || 0,
+      }));
+      VT.top = (top && !top.error ? (top.data || []) : []).map((t) => ({
+        producto: t.producto, categoria: t.categoria,
+        unidades: Number(t.unidades) || 0, ingreso: Number(t.ingreso) || 0,
+      }));
+
+      const totalPeriodo = VT.serie.reduce((s, d) => s + d.ingreso, 0);
+      const pedidosPeriodo = VT.serie.reduce((s, d) => s + d.pedidos, 0);
+
+      box.innerHTML =
+        '<div class="vt-grid-cols">' +
+          '<div>' +
+            '<div class="vt-h4">Ingreso · ' + VT_TITULO[VT.gran] + '</div>' +
+            '<div class="vt-total">' + fmt(totalPeriodo) + '</div>' +
+            '<div class="vt-sub">' + pedidosPeriodo + ' pedido' + (pedidosPeriodo === 1 ? '' : 's') +
+              ' · sin contar cancelados</div>' +
+            '<div class="vt-plot" id="vt-plot"></div>' +
+          '</div>' +
+          '<div>' +
+            '<div class="vt-h4">Productos más pedidos</div>' +
+            '<div class="vt-sub">' + VT_TITULO[VT.gran] + ' · por unidades vendidas</div>' +
+            '<div id="vt-top"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div id="vt-tabla-wrap" hidden></div>';
+
+      dibujarArea();
+      dibujarTop();
+      if (VT.tabla) dibujarTabla();
+    }
+
+    /* ---------- gráfica de área ----------
+       Se dibuja al ancho real del contenedor (no con un viewBox escalado):
+       así el texto de los ejes mide lo mismo en el celular que en el
+       escritorio, en vez de encogerse hasta ser ilegible. */
+    function dibujarArea() {
+      const cont = $('vt-plot');
+      if (!cont) return;
+      const datos = VT.serie;
+      if (!datos.length) { cont.innerHTML = '<p class="vt-vacio">Sin ventas en este periodo.</p>'; return; }
+
+      const w = Math.max(260, cont.clientWidth || 320);
+      const h = 240, padL = 54, padR = 14, padT = 12, padB = 26;
+      const pw = w - padL - padR, ph = h - padT - padB;
+      const maxV = Math.max(...datos.map((d) => d.ingreso));
+      const esc2 = vtEscala(maxV);
+      const x = (i) => padL + (datos.length === 1 ? pw / 2 : (i / (datos.length - 1)) * pw);
+      const y = (v) => padT + ph - (esc2.tope ? (v / esc2.tope) * ph : 0);
+
+      let grid = '', ejeY = '';
+      for (let v = 0; v <= esc2.tope + 1; v += esc2.paso) {
+        const yy = y(v);
+        grid += '<line class="vt-gridline" x1="' + padL + '" y1="' + yy + '" x2="' + (w - padR) + '" y2="' + yy + '"/>';
+        ejeY += '<text class="vt-axis" x="' + (padL - 8) + '" y="' + (yy + 3) + '" text-anchor="end">' + vtCorto(v) + '</text>';
+      }
+
+      /* Etiquetas del eje X espaciadas: con 30 días no caben todas. */
+      const paso = Math.max(1, Math.ceil(datos.length / 6));
+      let ejeX = '';
+      datos.forEach((d, i) => {
+        if (i % paso && i !== datos.length - 1) return;
+        ejeX += '<text class="vt-axis" x="' + x(i) + '" y="' + (h - 8) + '" text-anchor="middle">' +
+                vtEtiqueta(d.inicio, VT.gran) + '</text>';
+      });
+
+      const linea = datos.map((d, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(d.ingreso).toFixed(1)).join(' ');
+      const area  = linea + ' L' + x(datos.length - 1).toFixed(1) + ' ' + (padT + ph) +
+                    ' L' + x(0).toFixed(1) + ' ' + (padT + ph) + ' Z';
+
+      const ult = datos[datos.length - 1];
+      const ultX = x(datos.length - 1), ultY = y(ult.ingreso);
+      /* Se rotula SOLO el último punto: un número sobre cada punto es ruido. */
+      const etiquetaFin = ult.ingreso > 0
+        ? '<text class="vt-endlabel" x="' + (ultX - 6) + '" y="' + (ultY - 10) + '" text-anchor="end">' + fmt(ult.ingreso) + '</text>'
+        : '';
+
+      cont.innerHTML =
+        '<svg width="' + w + '" height="' + h + '" role="img" aria-label="Ingreso por ' + VT_UNIDAD[VT.gran] + '">' +
+          '<defs><linearGradient id="vtGrad" x1="0" y1="0" x2="0" y2="1">' +
+            '<stop offset="0%" stop-color="#E53E3E" stop-opacity="0.22"/>' +
+            '<stop offset="100%" stop-color="#E53E3E" stop-opacity="0"/>' +
+          '</linearGradient></defs>' +
+          grid + ejeY + ejeX +
+          '<path class="vt-area" d="' + area + '" fill="url(#vtGrad)"/>' +
+          '<path class="vt-line" id="vt-linea" d="' + linea + '"/>' +
+          '<line class="vt-cross" id="vt-cross" x1="0" y1="' + padT + '" x2="0" y2="' + (padT + ph) + '" style="display:none"/>' +
+          '<circle class="vt-dot" id="vt-hoverdot" r="4.5" style="display:none"/>' +
+          '<circle class="vt-dot" cx="' + ultX + '" cy="' + ultY + '" r="4.5"/>' +
+          etiquetaFin +
+          '<rect id="vt-hit" x="' + padL + '" y="' + padT + '" width="' + pw + '" height="' + ph + '" fill="transparent"/>' +
+        '</svg>' +
+        '<div class="vt-tip" id="vt-tip"></div>';
+
+      /* Dibujado progresivo de la línea. Con "reducir movimiento" activo el
+         navegador ignora la transición y queda dibujada de una vez. */
+      const path = document.getElementById('vt-linea');
+      const largo = path.getTotalLength();
+      path.style.strokeDasharray  = largo;
+      path.style.strokeDashoffset = largo;
+      path.classList.add('is-anim');
+      requestAnimationFrame(() => { path.style.strokeDashoffset = '0'; cont.classList.add('is-listo'); });
+      setTimeout(() => cont.classList.add('is-listo'), 60);   // red de seguridad si no hay rAF
+
+      montarHover(cont, datos, x, y, padL, padT, ph, pw);
+    }
+
+    function montarHover(cont, datos, x, y, padL, padT, ph, pw) {
+      const hit   = document.getElementById('vt-hit');
+      const cross = document.getElementById('vt-cross');
+      const dot   = document.getElementById('vt-hoverdot');
+      const tip   = document.getElementById('vt-tip');
+      if (!hit) return;
+
+      const mover = (ev) => {
+        const r = hit.getBoundingClientRect();
+        const px = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+        const i = Math.max(0, Math.min(datos.length - 1,
+                  Math.round((px / (r.width || pw)) * (datos.length - 1))));
+        const d = datos[i];
+        const cx = x(i), cy = y(d.ingreso);
+        cross.setAttribute('x1', cx); cross.setAttribute('x2', cx); cross.style.display = '';
+        dot.setAttribute('cx', cx);   dot.setAttribute('cy', cy);   dot.style.display = '';
+        tip.innerHTML = '<b>' + fmt(d.ingreso) + '</b><br><span>' + vtEtiqueta(d.inicio, VT.gran) +
+                        ' · ' + d.pedidos + ' pedido' + (d.pedidos === 1 ? '' : 's') + '</span>';
+        tip.classList.add('is-on');
+        const tw = tip.offsetWidth || 120;
+        tip.style.left = Math.max(0, Math.min(cont.clientWidth - tw, cx - tw / 2)) + 'px';
+        tip.style.top  = Math.max(0, cy - tip.offsetHeight - 12) + 'px';
+      };
+      const salir = () => { cross.style.display = 'none'; dot.style.display = 'none'; tip.classList.remove('is-on'); };
+
+      hit.addEventListener('mousemove', mover);
+      hit.addEventListener('mouseleave', salir);
+      hit.addEventListener('touchstart', mover, { passive: true });
+      hit.addEventListener('touchmove',  mover, { passive: true });
+      hit.addEventListener('touchend',   salir);
+    }
+
+    /* ---------- barras de productos ---------- */
+    function dibujarTop() {
+      const cont = $('vt-top');
+      if (!cont) return;
+      if (!VT.top.length) { cont.innerHTML = '<p class="vt-vacio">Sin pedidos en este periodo.</p>'; return; }
+      const max = Math.max(...VT.top.map((t) => t.unidades)) || 1;
+
+      cont.innerHTML = VT.top.map((t) => (
+        '<div class="vt-bar-row" title="' + esc(t.producto) + ' — ' + t.unidades +
+          ' unidades · ' + fmt(t.ingreso) + '">' +
+          '<span class="vt-bar-name">' + esc(t.producto) + '</span>' +
+          '<span class="vt-bar-track"><span class="vt-bar-fill" data-w="' +
+            Math.max(2, (t.unidades / max) * 100) + '"></span></span>' +
+          '<span class="vt-bar-val">' + t.unidades + '</span>' +
+        '</div>'
+      )).join('');
+
+      /* Crecen escalonadas: se lee el orden en vez de aparecer todas de golpe. */
+      const fills = cont.querySelectorAll('.vt-bar-fill');
+      requestAnimationFrame(() => fills.forEach((f, i) => {
+        f.style.transitionDelay = (i * 55) + 'ms';
+        f.style.width = f.dataset.w + '%';
+      }));
+      setTimeout(() => fills.forEach((f) => { f.style.width = f.dataset.w + '%'; }), 80);
+    }
+
+    /* ---------- vista de tabla (todo valor legible sin depender del hover) ---------- */
+    function dibujarTabla() {
+      const wrap = $('vt-tabla-wrap');
+      if (!wrap) return;
+      wrap.hidden = false;
+      wrap.innerHTML =
+        '<table class="vt-tabla"><caption class="vt-sub" style="text-align:left;padding:.6rem 0">Ingreso por ' +
+          VT_UNIDAD[VT.gran] + '</caption>' +
+          '<thead><tr><th>Periodo</th><th>Pedidos</th><th>Ingreso</th></tr></thead><tbody>' +
+          VT.serie.map((d) => '<tr><td>' + vtEtiqueta(d.inicio, VT.gran) + '</td><td>' + d.pedidos +
+            '</td><td>' + fmt(d.ingreso) + '</td></tr>').join('') +
+          '</tbody></table>' +
+        (VT.top.length
+          ? '<table class="vt-tabla" style="margin-top:1rem"><caption class="vt-sub" style="text-align:left;padding:.6rem 0">Productos más pedidos</caption>' +
+            '<thead><tr><th>Producto</th><th>Unidades</th><th>Ingreso</th></tr></thead><tbody>' +
+            VT.top.map((t) => '<tr><td>' + esc(t.producto) + '</td><td>' + t.unidades + '</td><td>' +
+              fmt(t.ingreso) + '</td></tr>').join('') +
+            '</tbody></table>'
+          : '');
+    }
+
+    /* Selector de periodo + interruptor de tabla */
+    document.getElementById('vt-seg')?.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-gran]');
+      if (!b || b.dataset.gran === VT.gran) return;
+      VT.gran = b.dataset.gran;
+      [...b.parentElement.children].forEach((x) => x.classList.toggle('active', x === b));
+      $('ventas').style.opacity = '.45';           // se sostiene lo anterior, sin salto de layout
+      loadVentas().finally(() => { $('ventas').style.opacity = ''; });
+    });
+    document.getElementById('vt-toggle-tabla')?.addEventListener('click', (e) => {
+      VT.tabla = !VT.tabla;
+      e.target.textContent = VT.tabla ? 'Ocultar tabla' : 'Ver tabla';
+      const wrap = $('vt-tabla-wrap');
+      if (!wrap) return;
+      if (VT.tabla) dibujarTabla(); else { wrap.hidden = true; wrap.innerHTML = ''; }
+    });
+
+    /* Al cambiar el ancho hay que volver a dibujar: el SVG se construye en
+       píxeles reales, no con un viewBox que se estire. */
+    let vtResize;
+    window.addEventListener('resize', () => {
+      clearTimeout(vtResize);
+      vtResize = setTimeout(() => { if (VT.serie.length && !$('ventas').hidden) dibujarArea(); }, 180);
+    });
+
+    /* Hook de verificación: permite probar el render de visitas con datos
+       de mentira, sin credenciales. No expone ningún dato real. */
+    window.__testVisitas = renderVisitas;
+    window.__testVentas  = renderVentas;
 
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
 

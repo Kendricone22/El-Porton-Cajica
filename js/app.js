@@ -28,11 +28,87 @@ window.PortonTrack = (function () {
       }).catch(() => {});               // silencioso: nunca afecta al cliente
     } catch (e) { /* no-op */ }
   }
+  /* ---------- Identidad del visitante (solo para contar) ----------
+     Dos identificadores aleatorios, sin un solo dato personal:
+       · porton_vid — vive en localStorage y no caduca → cuenta PERSONAS
+                      (en realidad navegadores: el mismo cliente en celular
+                      y computador cuenta 2, y si limpia datos vuelve a 1).
+       · porton_sid — caduca a los 30 min de inactividad → cuenta VISITAS.
+     No se guarda IP, ni nombre, ni huella del dispositivo. */
+  const SESION_MS = 30 * 60 * 1000;
+
+  function uuid() {
+    try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) { /* sigue al respaldo */ }
+    /* Respaldo para navegadores viejos o contextos sin https. */
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : ((r & 0x3) | 0x8)).toString(16);
+    });
+  }
+
+  /* localStorage puede lanzar (modo privado de Safari, cookies bloqueadas).
+     Si no se puede guardar nada, se desiste de contar en vez de romper. */
+  function guardado(clave, generar) {
+    try {
+      let v = localStorage.getItem(clave);
+      if (!v) { v = generar(); localStorage.setItem(clave, v); }
+      return v;
+    } catch (e) { return null; }
+  }
+
+  function sesionActual() {
+    try {
+      const ahora = Date.now();
+      const previo = +(localStorage.getItem('porton_sid_ts') || 0);
+      let sid = localStorage.getItem('porton_sid');
+      if (!sid || !previo || (ahora - previo) > SESION_MS) { sid = uuid(); localStorage.setItem('porton_sid', sid); }
+      localStorage.setItem('porton_sid_ts', String(ahora));
+      return sid;
+    } catch (e) { return null; }
+  }
+
+  /* Rastreadores y automatización: no son visitas reales y falsearían
+     el conteo. Se descartan sin ruido. */
+  function esBot() {
+    try {
+      if (navigator.webdriver) return true;
+      return /bot|crawl|spider|slurp|bingpreview|headless|lighthouse|preview|facebookexternalhit|whatsapp/i
+        .test(navigator.userAgent || '');
+    } catch (e) { return false; }
+  }
+
+  function pageView() {
+    if (!ready || esBot()) return;
+    const vid = guardado('porton_vid', uuid);
+    const sid = sesionActual();
+    if (!vid || !sid) return;              // sin almacenamiento no se cuenta
+    let origen = null;
+    try {
+      /* Solo el DOMINIO de origen (instagram.com, google.com…). La URL
+         completa podría llevar datos de más y no aporta al conteo. */
+      if (document.referrer) {
+        const h = new URL(document.referrer).hostname;
+        if (h && h !== location.hostname) origen = h;
+      }
+    } catch (e) { /* referrer raro: se ignora */ }
+    post('visits', {
+      visitor_id: vid,
+      session_id: sid,
+      path: location.pathname || '/',
+      referrer: origen,
+    });
+  }
+
   return {
     event: (type, meta) => post('events', { type: type, meta: meta || null }),
     order: (order) => post('orders', order),
+    pageView: pageView,
   };
 })();
+
+/* Registra la carga de la página. Va aquí arriba a propósito: si el
+   visitante se va a los 3 segundos, la visita igual quedó contada. */
+window.PortonTrack?.pageView();
 
 /* ============================================================= */
 /* COMPONENTE 1: NAVBAR                                          */
@@ -1447,4 +1523,294 @@ function flyToCart(fromEl, img, emoji) {
 (function () {
   const y = document.getElementById('footer-year');
   if (y) y.textContent = new Date().getFullYear();
+})();
+
+
+/* ============================================================= */
+/* MOTOR DE HORARIO — "¿estamos abiertos AHORA?"                 */
+/* ============================================================= */
+/* Por qué existe: el visitante que llega a las 11 p.m. y arma su */
+/* pedido igual lo manda a un WhatsApp que nadie va a contestar,   */
+/* sin saber que el negocio ya cerró. Este módulo sabe la hora     */
+/* real de Cajicá —no la del celular del visitante— y alimenta el  */
+/* indicador "Abierto / Cerrado" que se ve siempre en la esquina    */
+/* superior izquierda.                                              */
+/*                                                                  */
+/* El caso difícil es "Lunes cerrado, abrimos solo en lunes         */
+/* festivos": obliga a conocer el calendario festivo colombiano.    */
+/* Se calcula, no se lista a mano, así que sirve para siempre.      */
+/* ============================================================= */
+window.PortonHorario = (function () {
+  const B  = (typeof BUSINESS === 'object' && BUSINESS) ? BUSINESS : null;
+  const TZ = (B && B.timeZone) || 'America/Bogota';
+  const DAY = 86400000;
+
+  /* ---------- Fecha y hora tal como se viven EN CAJICÁ ----------
+     Se leen las partes ya convertidas a la zona del negocio, así el
+     estado es idéntico para un visitante en Bogotá, en Madrid o con
+     el reloj del celular mal puesto. */
+  const dtf = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+  function local(date) {
+    const p = {};
+    dtf.formatToParts(date || new Date()).forEach((x) => { if (x.type !== 'literal') p[x.type] = x.value; });
+    let hh = +p.hour;
+    if (hh === 24) hh = 0;                 /* algunos motores dan "24" a medianoche */
+    const y = +p.year, m = +p.month, d = +p.day, mm = +p.minute;
+    return {
+      y: y, m: m, d: d, hh: hh, mm: mm,
+      mins: hh * 60 + mm,
+      dow: new Date(Date.UTC(y, m - 1, d)).getUTCDay(),
+    };
+  }
+
+  /* ---------- Festivos de Colombia ----------
+     Tres familias:
+       · Fijos que NO se mueven (Año Nuevo, Trabajo, Independencia…).
+       · Fijos que se corren al lunes siguiente (Ley Emiliani 51 de 1983).
+       · Móviles atados a la Pascua: Jueves y Viernes Santo (no se mueven)
+         y Ascensión / Corpus Christi / Sagrado Corazón (sí se corren).
+     La Pascua sale del cómputo gregoriano anónimo (Meeus/Jones/Butcher).
+     Todo se hace en UTC para que la aritmética de días sea exacta. */
+  function easterUTC(y) {
+    const a = y % 19,
+          b = Math.floor(y / 100), c = y % 100,
+          d = Math.floor(b / 4),   e = b % 4,
+          f = Math.floor((b + 8) / 25),
+          g = Math.floor((b - f + 1) / 3),
+          h = (19 * a + b - d - g + 15) % 30,
+          i = Math.floor(c / 4),   k = c % 4,
+          l = (32 + 2 * e + 2 * i - h - k) % 7,
+          m = Math.floor((a + 11 * h + 22 * l) / 451),
+          mes = Math.floor((h + l - 7 * m + 114) / 31),
+          dia = ((h + l - 7 * m + 114) % 31) + 1;
+    return Date.UTC(y, mes - 1, dia);
+  }
+  /* Ley Emiliani: el festivo se traslada al lunes siguiente (si ya cae
+     lunes, se queda donde está). */
+  function aLunes(ms) {
+    const w = new Date(ms).getUTCDay();
+    return ms + ((8 - w) % 7) * DAY;
+  }
+  const clave = (ms) => { const x = new Date(ms); return (x.getUTCMonth() + 1) + '-' + x.getUTCDate(); };
+
+  const cacheFestivos = {};
+  function festivos(y) {
+    if (cacheFestivos[y]) return cacheFestivos[y];
+    const s = new Set(['1-1', '5-1', '7-20', '8-7', '12-8', '12-25']);
+    /* Fijos que se corren al lunes: Reyes, San José, San Pedro y San Pablo,
+       Asunción, Día de la Raza, Todos los Santos, Independencia de Cartagena. */
+    [[1, 6], [3, 19], [6, 29], [8, 15], [10, 12], [11, 1], [11, 11]]
+      .forEach((md) => s.add(clave(aLunes(Date.UTC(y, md[0] - 1, md[1])))));
+    const E = easterUTC(y);
+    s.add(clave(E - 3 * DAY));   /* Jueves Santo  */
+    s.add(clave(E - 2 * DAY));   /* Viernes Santo */
+    /* Ascensión (Pascua+39), Corpus (+60) y Sagrado Corazón (+68) siempre
+       corren al lunes siguiente → +43, +64 y +71. */
+    [43, 64, 71].forEach((n) => s.add(clave(E + n * DAY)));
+    cacheFestivos[y] = s;
+    return s;
+  }
+  function esFestivo(y, m, d) { return festivos(y).has(m + '-' + d); }
+
+  /* ---------- Horario que aplica a un día del calendario ---------- */
+  function horarioDe(y, m, d, dow) {
+    if (!B || !B.hours) return null;
+    const h = B.hours[dow];
+    if (h) return h;
+    /* Lunes: cerrado, salvo que sea festivo. */
+    if (dow === 1 && B.holidayMondayHours && esFestivo(y, m, d)) return B.holidayMondayHours;
+    return null;
+  }
+
+  const aMin  = (s) => { const p = String(s).split(':'); return (+p[0]) * 60 + (+p[1] || 0); };
+  const deMin = (n) => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
+
+  /* "13:30" → "1:30 p.m." */
+  function hora12(hhmm) {
+    const p = String(hhmm).split(':');
+    const h = +p[0], m = +p[1] || 0;
+    const sufijo = h >= 12 ? 'p.m.' : 'a.m.';
+    const h12 = (h % 12) === 0 ? 12 : (h % 12);
+    return h12 + ':' + String(m).padStart(2, '0') + ' ' + sufijo;
+  }
+
+  const fmtDia = new Intl.DateTimeFormat('es-CO', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' });
+  const capitalizar = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  /* ---------- Días de servicio hacia adelante ----------
+     Devuelve descriptores {y,m,d,dow,abre,cierra,esHoy} de los próximos
+     días en que sí se atiende (salta los días cerrados). */
+  function proximosDias(desde, cuantos) {
+    const base = Date.UTC(desde.y, desde.m - 1, desde.d);
+    const out = [];
+    for (let n = 0; n < 14 && out.length < cuantos; n++) {
+      const ms = base + n * DAY;
+      const x  = new Date(ms);
+      const y = x.getUTCFullYear(), m = x.getUTCMonth() + 1, d = x.getUTCDate(), dow = x.getUTCDay();
+      const h = horarioDe(y, m, d, dow);
+      if (!h) continue;
+      out.push({ ms: ms, y: y, m: m, d: d, dow: dow, abre: aMin(h.open), cierra: aMin(h.close), esHoy: n === 0 });
+    }
+    return out;
+  }
+
+  function etiquetaDia(dia, hoy) {
+    if (dia.esHoy) return 'hoy';
+    const manana = Date.UTC(hoy.y, hoy.m - 1, hoy.d) + DAY;
+    if (dia.ms === manana) return 'mañana';
+    return capitalizar(fmtDia.format(new Date(dia.ms)).replace(/,/g, ''));
+  }
+
+  /* ---------- Estado actual: solo lo que necesita el indicador ----------
+     { abierto: bool, cierraA: "10:00 p.m." (si está abierto),
+       proxima: { etiqueta, hora } (si está cerrado) } */
+  function estado(ahora) {
+    const L = local(ahora);
+    const hoy = horarioDe(L.y, L.m, L.d, L.dow);
+    let abierto = false, cierraA = '';
+
+    if (hoy) {
+      const abre = aMin(hoy.open), cierra = aMin(hoy.close);
+      abierto = L.mins >= abre && L.mins < cierra;
+      cierraA = hora12(hoy.close);
+    }
+
+    let proxima = null;
+    if (!abierto) {
+      const dias = proximosDias(L, 3);
+      for (let i = 0; i < dias.length; i++) {
+        const dia = dias[i];
+        if (dia.esHoy && L.mins >= dia.cierra) continue;   /* hoy, pero ya cerró */
+        proxima = { etiqueta: etiquetaDia(dia, L), hora: hora12(deMin(dia.abre)) };
+        break;
+      }
+    }
+
+    return { abierto: abierto, cierraA: cierraA, proxima: proxima, local: L };
+  }
+
+  return { estado: estado };
+})();
+
+/* ============================================================= */
+/* ESTADO DEL NEGOCIO — insignia fija "Abierto / Cerrado"        */
+/* ============================================================= */
+/* Insignia SIEMPRE visible arriba a la izquierda (fija, no se va  */
+/* con el scroll) que muestra si el negocio está atendiendo en     */
+/* este momento, con la hora real de Cajicá. Se refresca sola cada */
+/* minuto, sin que el visitante tenga que recargar la página.      */
+/* ============================================================= */
+(function initEstadoNegocio() {
+  const H  = window.PortonHorario;
+  const el = document.getElementById('estado-negocio');
+  if (!H || !el) return;
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function pintar() {
+    const e = H.estado();
+    el.hidden = false;
+    if (e.abierto) {
+      el.className = 'estado-flotante estado-on';
+      el.innerHTML = '<i class="estado-dot" aria-hidden="true"></i><b>Abierto</b>' +
+        (e.cierraA ? '<span>· cierra ' + esc(e.cierraA) + '</span>' : '');
+    } else {
+      el.className = 'estado-flotante estado-off';
+      el.innerHTML = '<i class="estado-dot" aria-hidden="true"></i><b>Cerrado</b>' +
+        (e.proxima ? '<span>· abre ' + esc(e.proxima.etiqueta) + ' ' + esc(e.proxima.hora) + '</span>' : '');
+    }
+  }
+
+  pintar();
+  setInterval(pintar, 60000);      /* el reloj corre solo, sin recargar */
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) pintar(); });
+})();
+
+
+
+/* ============================================================= */
+/* SEO LOCAL — LA CARTA COMPLETA, EN EL IDIOMA DE GOOGLE          */
+/* ============================================================= */
+/* El bloque <script type="application/ld+json"> del <head> declara   */
+/* el negocio (dirección, horario, calificación). Este módulo         */
+/* declara la CARTA: +45 platos con foto, descripción y precio, y      */
+/* se arma desde el mismo MENU que ve el cliente —incluidos los        */
+/* cambios que el dueño haga desde el panel admin—, así que nunca      */
+/* se desincroniza. Se engancha al nodo #menu que el <head> ya         */
+/* referencia con hasMenu.                                             */
+/*                                                                     */
+/* Para qué sirve: un restaurante que le entrega a Google su carta      */
+/* estructurada compite por resultados enriquecidos y por las           */
+/* búsquedas de intención ("hamburguesa artesanal Cajicá") en vez de    */
+/* depender de que alguien ya sepa el nombre del negocio.               */
+/* ============================================================= */
+(function initDatosEstructurados() {
+  if (typeof BUSINESS === 'undefined' || typeof MENU === 'undefined') return;
+
+  const base = String(BUSINESS.siteUrl || '').replace(/\/$/, '');
+  const abs  = (ruta) => (ruta ? base + '/' + String(ruta).replace(/^\//, '') : undefined);
+
+  function construir() {
+    const cats = (typeof CATEGORIES !== 'undefined' ? CATEGORIES : []);
+    const secciones = cats.map((c) => {
+      const items = MENU.filter((p) => p.cat === c.key).map((p) => {
+        const ofertas = (p.options || []).map((o) => ({
+          '@type': 'Offer',
+          /* "Koller", "Artesanal", "1.5 Lt"… solo aporta si distingue variantes. */
+          name: o.label && o.label !== 'Porción' ? o.label : undefined,
+          price: String(o.price),
+          priceCurrency: 'COP',
+          availability: 'https://schema.org/InStock',
+        }));
+        return {
+          '@type': 'MenuItem',
+          name: p.name,
+          description: p.desc || undefined,
+          image: p.img ? abs(p.img) : undefined,
+          offers: ofertas.length === 1 ? ofertas[0] : ofertas,
+        };
+      });
+      if (!items.length) return null;
+      return { '@type': 'MenuSection', name: c.label, hasMenuItem: items };
+    }).filter(Boolean);
+
+    if (!secciones.length) return null;
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Menu',
+      '@id': base + '/#menu',
+      name: 'Carta de ' + (BRAND && BRAND.name ? BRAND.name : 'El Portón Cajicá'),
+      inLanguage: 'es-CO',
+      url: base + '/#menu-catalogo',
+      hasMenuSection: secciones,
+    };
+  }
+
+  function publicar() {
+    const data = construir();
+    if (!data) return;
+    let el = document.getElementById('ld-menu');
+    if (!el) {
+      el = document.createElement('script');
+      el.type = 'application/ld+json';
+      el.id = 'ld-menu';
+      document.head.appendChild(el);
+    }
+    /* JSON.stringify quita solas las claves `undefined`. */
+    el.textContent = JSON.stringify(data);
+  }
+
+  publicar();
+
+  /* El menú también llega desde Supabase unos segundos después (initMenuSync).
+     Se republica cuando eso pasa, para que Google vea la carta viva y no la
+     que venía quemada en el código. */
+  const rerenderOriginal = window.rerenderCatalog;
+  window.rerenderCatalog = function () {
+    if (typeof rerenderOriginal === 'function') rerenderOriginal();
+    publicar();
+  };
 })();
