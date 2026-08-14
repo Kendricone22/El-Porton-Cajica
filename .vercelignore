@@ -1,0 +1,9 @@
+# Archivos que SÍ van en git pero NO deben subirse al sitio público.
+#
+# db/    -> esquema de la base de datos (solo se ejecuta a mano en Supabase)
+# docs/  -> legal.html todavía tiene 3 campos [COMPLETAR]; no puede salir en vivo
+# css/tailwind-input.css -> fuente de Tailwind; lo que se sirve es tailwind-built.css
+
+db/
+docs/
+css/tailwind-input.css
