@@ -4,6 +4,11 @@
 # docs/  -> legal.html todavía tiene 3 campos [COMPLETAR]; no puede salir en vivo
 # css/tailwind-input.css -> fuente de Tailwind; lo que se sirve es tailwind-built.css
 
+# porton-next/ -> la version en Next, en construccion. El sitio en vivo sigue
+#                 siendo los archivos estaticos de la raiz. Cuando este a la par
+#                 se crea un proyecto Vercel aparte con Root Directory=porton-next.
+
 db/
 docs/
 css/tailwind-input.css
+porton-next/
