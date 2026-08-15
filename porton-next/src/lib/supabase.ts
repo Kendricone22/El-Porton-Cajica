@@ -48,30 +48,44 @@ function clave(cred: Credencial): string {
   return exigir('NEXT_PUBLIC_SUPABASE_ANON_KEY', CLAVE_PUBLICA);
 }
 
+/** Tiempo máximo por defecto. Una petición colgada es peor que una que falla. */
+export const TIMEOUT_MS = 4000;
+
 /**
  * Llamada cruda a la API REST de Supabase (PostgREST).
  *
  * @param ruta  p.ej. '/rest/v1/menu_items?select=data,available'
  * @param cred  qué credencial usar. Por defecto la pública: el permiso
  *              amplio hay que pedirlo a propósito, nunca por descuido.
+ *
+ * Siempre lleva tiempo límite. Sin él, una caída de red que no cierra la
+ * conexión dejaría al cliente esperando hasta que Vercel corte la
+ * función — el peor de los fallos posibles, porque el usuario no sabe
+ * si su pedido entró o no.
  */
 export async function supabaseRest(
   ruta: string,
-  init: RequestInit = {},
+  init: RequestInit & { timeoutMs?: number } = {},
   cred: Credencial = 'publica',
 ): Promise<Response> {
   const base = exigir('NEXT_PUBLIC_SUPABASE_URL', URL_BASE);
   const k = clave(cred);
+  const { timeoutMs = TIMEOUT_MS, ...resto } = init;
+
+  // Si quien llama no dice nada sobre caché, no se cachea: por defecto
+  // los datos son vivos. La lectura del menú SÍ pide caché a propósito.
+  const politicaCache: RequestInit =
+    'cache' in resto || 'next' in (resto as Record<string, unknown>) ? {} : { cache: 'no-store' };
 
   return fetch(base + ruta, {
-    ...init,
+    ...resto,
+    ...politicaCache,
+    signal: resto.signal ?? AbortSignal.timeout(timeoutMs),
     headers: {
       apikey: k,
       Authorization: `Bearer ${k}`,
       'Content-Type': 'application/json',
-      ...(init.headers ?? {}),
+      ...(resto.headers ?? {}),
     },
-    // El menú y los pedidos son datos vivos: nunca se sirven de caché.
-    cache: 'no-store',
   });
 }

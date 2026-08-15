@@ -4,30 +4,78 @@ import { validarPedido } from '@/lib/precio';
 import { supabaseRest } from '@/lib/supabase';
 
 /* =============================================================
- * POST /api/pedidos
+ * POST /api/pedidos — la única puerta por la que entra un pedido.
  *
- * La ÚNICA puerta por la que debe entrar un pedido.
+ * LA IDEA CENTRAL, que resuelve la tensión entre las dos cosas que no
+ * pueden fallar:
  *
- * Recibe lo que el cliente cree que pidió, lo revalida contra el menú
- * real, recalcula el total con precios del servidor y solo entonces lo
- * guarda. Devuelve el pedido ya validado para que el mensaje de
- * WhatsApp se arme con los números del servidor, no con los del
- * navegador.
+ *   VALIDAR el precio y GUARDAR el pedido son pasos independientes.
  *
- * ⚠️ Este endpoint no sirve de nada mientras `anon` conserve el permiso
- * de INSERT sobre `orders` (ver db/revocar-insert-anon.sql). Ese SQL se
- * corre EL DÍA DEL CAMBIO, no antes: hoy es el permiso que usa el sitio
- * en vivo para registrar sus pedidos.
+ * La validación ocurre ANTES de tocar la base de datos y no depende de
+ * que la escritura funcione. Por eso se pueden garantizar las dos cosas
+ * a la vez:
+ *
+ *   · El precio SIEMPRE lo decide el servidor. Sin excepción.
+ *   · Que la base de datos falle NUNCA impide que el cliente envíe su
+ *     pedido: se devuelven igualmente los números correctos para que
+ *     WhatsApp se abra con ellos, marcando `guardado: false`.
+ *
+ * Un pedido solo se rechaza cuando los datos están mal (producto que no
+ * existe, adición que no aplica, cantidad imposible). Nunca por una
+ * caída de infraestructura.
  * ============================================================= */
 
-/** Nunca se cachea: cada pedido es único y se escribe en la base. */
 export const dynamic = 'force-dynamic';
 
 const MAX_TEXTO = 200;
 const MAX_NOTAS = 500;
+const INTENTOS_INSERT = 3;
 
 const limpiar = (v: unknown, max: number): string =>
   typeof v === 'string' ? v.trim().slice(0, max) : '';
+
+const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+type Guardado = { id: string | null; error: string | null };
+
+/**
+ * Guarda el pedido con reintentos y espera creciente (300ms, 900ms).
+ * Nunca lanza: devuelve el error para que quien llama decida.
+ */
+async function guardarPedido(fila: unknown): Promise<Guardado> {
+  let ultimo = 'sin intentos';
+
+  for (let intento = 1; intento <= INTENTOS_INSERT; intento++) {
+    try {
+      const res = await supabaseRest(
+        '/rest/v1/orders',
+        {
+          method: 'POST',
+          body: JSON.stringify(fila),
+          headers: { Prefer: 'return=representation' },
+        },
+        'servidor',
+      );
+
+      if (res.ok) {
+        const filas = (await res.json()) as { id: string }[];
+        return { id: filas?.[0]?.id ?? null, error: null };
+      }
+
+      ultimo = `HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`;
+
+      // 4xx = la petición está mal formada; reintentar daría igual.
+      // Solo se reintentan los fallos del servidor (5xx) y los de red.
+      if (res.status < 500) break;
+    } catch (e) {
+      ultimo = e instanceof Error ? e.message : String(e);
+    }
+
+    if (intento < INTENTOS_INSERT) await esperar(300 * intento ** 2);
+  }
+
+  return { id: null, error: ultimo };
+}
 
 export async function POST(req: Request) {
   /* ---------- 1. cuerpo ---------- */
@@ -58,38 +106,31 @@ export async function POST(req: Request) {
     );
   }
 
-  /* ---------- 3. el menú real ---------- */
-  let menu;
-  try {
-    menu = await obtenerMenu();
-  } catch (e) {
-    // A propósito NO se cae al menú del código: cobrar con precios
-    // posiblemente desactualizados es justo lo que hay que evitar.
-    console.error('[pedidos] no se pudo leer el menú:', e);
-    return NextResponse.json(
-      { ok: false, errores: ['No se pudo verificar el menú en este momento. Intenta de nuevo en un minuto.'] },
-      { status: 503 },
-    );
-  }
+  /* ---------- 3. el menú (nunca falla: tres capas de respaldo) ---------- */
+  const { menu, origen, edadMs } = await obtenerMenu();
 
-  /* ---------- 4. LA VALIDACIÓN ---------- */
+  /* ---------- 4. LA VALIDACIÓN ----------
+     Esto es lógica pura: no toca la red, no puede caerse por una
+     incidencia de infraestructura. Aquí sí se rechaza, porque un
+     rechazo aquí significa que los datos del pedido están mal. */
   const r = validarPedido(cuerpo.items, menu);
   if (!r.ok) {
     return NextResponse.json({ ok: false, errores: r.errores }, { status: 422 });
   }
 
-  // Si el navegador mandó precios distintos, queda registrado en el log
-  // del servidor. Puede ser una caché vieja tras un cambio de precios…
-  // o alguien trasteando.
   if (r.avisos.length) {
     console.warn('[pedidos] precios del navegador distintos a los reales:', r.avisos.join(' | '));
   }
+  if (origen !== 'supabase') {
+    console.warn(
+      `[pedidos] precio validado con el menú de "${origen}"` +
+        (edadMs ? ` (${Math.round(edadMs / 1000)}s de antigüedad)` : '') +
+        '. Si el dueño editó precios hace poco, podrían no estar aplicados.',
+    );
+  }
 
-  /* ---------- 5. guardar (aquí sí, con la clave de servidor) ---------- */
-  // `validarPedido` recorre `items` en orden y solo devuelve ok:true
-  // cuando TODAS pasaron, así que lineas[i] corresponde a items[i].
+  /* ---------- 5. guardar ---------- */
   const entrantes = cuerpo.items as Record<string, unknown>[];
-
   const fila = {
     ...cliente,
     subtotal: r.subtotal,
@@ -113,35 +154,29 @@ export async function POST(req: Request) {
     })),
   };
 
-  try {
-    const res = await supabaseRest(
-      '/rest/v1/orders',
-      { method: 'POST', body: JSON.stringify(fila), headers: { Prefer: 'return=representation' } },
-      'servidor',
-    );
+  const guardado = await guardarPedido(fila);
 
-    if (!res.ok) {
-      const detalle = await res.text();
-      console.error('[pedidos] Supabase rechazó el insert:', res.status, detalle);
-      return NextResponse.json(
-        { ok: false, errores: ['No se pudo registrar el pedido.'] },
-        { status: 502 },
-      );
-    }
-
-    const [guardado] = (await res.json()) as { id: string }[];
-
-    /* ---------- 6. respuesta ----------
-       Se devuelven los números del SERVIDOR para que el mensaje de
-       WhatsApp se arme con ellos y no con los del navegador. */
-    return NextResponse.json({
-      ok: true,
-      pedidoId: guardado?.id ?? null,
-      subtotal: r.subtotal,
-      lineas: r.lineas,
-    });
-  } catch (e) {
-    console.error('[pedidos] error inesperado al guardar:', e);
-    return NextResponse.json({ ok: false, errores: ['No se pudo registrar el pedido.'] }, { status: 502 });
+  if (guardado.error) {
+    // NO se bloquea el pedido. El cliente recibe los números correctos
+    // (calculados por el servidor) y puede seguir a WhatsApp. Lo único
+    // que se pierde es el registro, y queda en el log para recuperarlo.
+    console.error('[pedidos] NO SE PUDO GUARDAR. Pedido completo:', JSON.stringify(fila));
+    console.error('[pedidos] motivo:', guardado.error);
   }
+
+  /* ---------- 6. respuesta ----------
+     Los números son SIEMPRE los del servidor, se haya guardado o no.
+     El mensaje de WhatsApp se arma con estos, nunca con los del
+     navegador. */
+  return NextResponse.json({
+    ok: true,
+    guardado: guardado.id !== null,
+    pedidoId: guardado.id,
+    subtotal: r.subtotal,
+    lineas: r.lineas,
+    origenPrecio: origen,
+    advertencia: guardado.error
+      ? 'El pedido es válido y puede enviarse por WhatsApp, pero no se pudo registrar en la base de datos.'
+      : null,
+  });
 }

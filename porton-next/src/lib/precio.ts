@@ -81,8 +81,14 @@ export function validarPedido(items: unknown, menu: ProductoMenu[]): Resultado {
     if (!item) return fallo(`el producto "${linea.id}" no existe en el menú.`);
     if (item.available === false) return fallo(`"${item.name}" está agotado.`);
 
-    /* --- cantidad --- */
-    const qty = linea.qty ?? 1;
+    /* --- cantidad ---
+       `null` y `undefined` se tratan igual: "no especificado" → 1.
+       Es DELIBERADO y no es un descuido del operador `??`: rechazar un
+       pedido por un campo mal formado sería perder una venta, y 1 es el
+       mínimo posible, así que esta leniencia nunca puede inflar el cobro.
+       Cualquier otro valor raro (0, negativo, decimal, texto) SÍ se
+       rechaza, porque ahí ya no se puede adivinar la intención. */
+    const qty = linea.qty === undefined || linea.qty === null ? 1 : linea.qty;
     if (!esEnteroEntre(qty, 1, MAX_QTY)) {
       return fallo(`cantidad inválida para "${item.name}" (debe ser un entero entre 1 y ${MAX_QTY}).`);
     }
