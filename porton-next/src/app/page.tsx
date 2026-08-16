@@ -2,22 +2,39 @@ import { CATEGORIES } from '@/data/menu';
 import { obtenerMenu } from '@/lib/menu-servidor';
 import Navbar from '@/componentes/Navbar';
 import Hero from '@/componentes/Hero';
+import Vitrina from '@/componentes/Vitrina';
 import Tienda from '@/componentes/Tienda';
+import RevelarAlScroll from '@/componentes/RevelarAlScroll';
+import {
+  ComoPedir,
+  Contacto,
+  EncabezadoCarta,
+  Nosotros,
+  PieDePagina,
+  Testimonios,
+} from '@/componentes/Secciones';
 
 /* =============================================================
- * PORTADA — en construcción
+ * PORTADA
  *
  * Componente de SERVIDOR: hace `await` sobre el menú directamente,
  * sin useEffect ni estados de carga. Cuando el HTML sale hacia el
  * navegador, los productos ya van dentro.
  *
- * Portado hasta ahora: navbar, hero, catálogo, modal y carrito.
- * Falta: vitrina (#carta), cómo pedir, testimonios, nosotros,
- * contacto, pie, lightbox, partículas, insignia de horario y JSON-LD.
+ * El orden de las secciones es el que fijó el cliente y no se toca:
+ *   Hero → "Cada plato, una historia" → vitrina → cómo pedir →
+ *   "Lo que nos hace únicos" → catálogo → testimonios → nosotros →
+ *   contacto → pie.
+ *
+ * `.page-dark` envuelve nosotros/contacto: es un fondo negro opaco que
+ * tapa el lienzo de partículas de ahí hacia abajo.
+ *
+ * Falta por portar: lightbox con ficha, partículas, insignia de
+ * horario y JSON-LD.
  * ============================================================= */
 
 export default async function Portada() {
-  const { menu, origen, edadMs } = await obtenerMenu();
+  const { menu } = await obtenerMenu();
 
   return (
     <>
@@ -26,18 +43,36 @@ export default async function Portada() {
       <main>
         <Hero />
 
-        <section id="menu-catalogo" className="carta-header">
-          <h2 className="carta-header-title font-display">CONOCE LA CARTA</h2>
-          <p className="carta-header-sub">Cada plato, una historia</p>
-        </section>
+        <EncabezadoCarta
+          eyebrow="Conoce la carta"
+          titulo="Cada plato, una historia"
+          sub="Ingredientes seleccionados, sazón real, hecho con orgullo colombiano."
+        />
+
+        <Vitrina />
+
+        <ComoPedir />
+
+        <EncabezadoCarta
+          id="menu-catalogo"
+          eyebrow="Nuestra carta"
+          titulo="Lo que nos hace únicos"
+          sub="Ingredientes artesanales, sazón colombiana auténtica. Cada plato es una experiencia."
+        />
 
         <Tienda menu={menu} categorias={CATEGORIES} />
+
+        <Testimonios />
+
+        <div className="page-dark">
+          <Nosotros />
+          <Contacto />
+        </div>
       </main>
 
-      <p style={{ color: '#52525b', fontSize: '.8rem', padding: '3rem 1.5rem 1.5rem', textAlign: 'center' }}>
-        menú servido desde <b>{origen}</b>
-        {edadMs ? ` (${Math.round(edadMs / 1000)}s)` : ''} · {menu.length} productos
-      </p>
+      <PieDePagina />
+
+      <RevelarAlScroll />
     </>
   );
 }

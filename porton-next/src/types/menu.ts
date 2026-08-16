@@ -99,6 +99,26 @@ export type Categoria = {
  *              de ancho y los platos anchos se salen sí o sí
  *   posMobile→ encuadre del recorte, medido plato por plato
  */
+/** Fila de la vitrina (`#carta`): foto grande + texto, alternando lado. */
+export type ProductoVitrina = {
+  badge: string;
+  title: string;
+  desc: string;
+  price: string;
+  emoji: string;
+  img?: string;
+  /** Id del plato en MENU, para que el lightbox arme su ficha. */
+  menuId?: string;
+};
+
+/** Reseña real de Google, mostrada en la sección de testimonios. */
+export type Testimonio = {
+  name: string;
+  stars: number;
+  text: string;
+  source?: string;
+};
+
 export type ProductoHero = {
   emoji: string;
   tagline: string;
