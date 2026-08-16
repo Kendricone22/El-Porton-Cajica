@@ -1,87 +1,54 @@
 import Image from 'next/image';
-import { MENU, CATEGORIES, BRAND } from '@/data/menu';
+import { CATEGORIES } from '@/data/menu';
+import { obtenerMenu } from '@/lib/menu-servidor';
+import Catalogo from '@/componentes/Catalogo';
 import BancoDePruebasCarrito from './BancoDePruebasCarrito';
 
 /* =============================================================
- * PÁGINA TEMPORAL DE COMPROBACIÓN
+ * PORTADA — en construcción
  *
- * No es la página final. Existe para verificar que la base de la
- * migración está bien montada antes de portar un solo componente:
- * fuentes auto-alojadas, hoja de estilos v1, variables de marca,
- * assets servidos y los datos del menú accesibles.
+ * Es un COMPONENTE DE SERVIDOR (no lleva 'use client'), así que puede
+ * hacer `await` directamente sobre la base de datos. Nada de useEffect
+ * ni de estados de carga para traer el menú: cuando el HTML sale hacia
+ * el navegador, los productos ya están dentro.
  *
- * La sustituirá la portada real (navbar → hero → carta → catálogo…).
+ * ⚠️ ESTO ES UNA MEJORA REAL SOBRE v1, NO UN CAMBIO DE ESTILO:
+ * hoy el catálogo lo construye el JavaScript después de cargar la
+ * página, así que quien mire el código fuente —o Google, o WhatsApp al
+ * generar la vista previa de un enlace— ve un hueco vacío. Aquí los 59
+ * productos van en el HTML.
+ *
+ * Faltan por portar: navbar, hero, vitrina, cómo pedir, testimonios,
+ * nosotros, contacto, pie, modal, carrito y lightbox.
  * ============================================================= */
 
-export default function Comprobacion() {
-  const marca = BRAND as { whatsapp?: string };
+export default async function Portada() {
+  const { menu, origen, edadMs } = await obtenerMenu();
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-16">
+    <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <Image
         src="/assets/logo-final.png"
         alt="El Portón Cajicá"
-        width={360}
-        height={144}
+        width={300}
+        height={120}
         priority
-        className="mb-10"
       />
 
-      <h1 className="font-display" style={{ fontSize: '3.5rem', lineHeight: 1 }}>
-        BASE DE LA MIGRACIÓN
-      </h1>
+      <section id="menu-catalogo" className="carta-header" style={{ marginTop: '2rem' }}>
+        <h2 className="carta-header-title font-display">CONOCE LA CARTA</h2>
+        <p className="carta-header-sub">Cada plato, una historia</p>
+      </section>
 
-      <p className="font-serif-vintage" style={{ color: 'var(--crema)', fontSize: '1.35rem' }}>
-        Playfair Display — la fuente de los rótulos
-      </p>
-
-      <p style={{ color: 'var(--gris)', marginTop: '0.5rem' }}>
-        Inter — el texto corrido del sitio. Si las tres se ven distintas, next/font está
-        sirviendo las fuentes desde tu propio dominio.
-      </p>
-
-      <div className="mt-10 flex flex-wrap gap-3">
-        {(['--negro', '--rojo', '--rojo-dark', '--gris', '--crema', '--oro'] as const).map((v) => (
-          <div key={v} className="text-center">
-            <div
-              style={{
-                background: `var(${v})`,
-                width: 88,
-                height: 56,
-                borderRadius: 8,
-                border: '1px solid #27272a',
-              }}
-            />
-            <small style={{ color: '#71717a', fontSize: '.7rem' }}>{v}</small>
-          </div>
-        ))}
-      </div>
-
-      <dl className="mt-12 grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3">
-        <Dato etiqueta="Productos en el menú" valor={String(MENU.length)} />
-        <Dato etiqueta="Categorías" valor={String(CATEGORIES.length)} />
-        <Dato etiqueta="Con foto" valor={String(MENU.filter((p) => p.img).length)} />
-        <Dato etiqueta="WhatsApp" valor={marca.whatsapp ?? '—'} />
-      </dl>
+      <Catalogo menu={menu} categorias={CATEGORIES} />
 
       <BancoDePruebasCarrito />
 
-      <p className="mt-12" style={{ color: '#52525b', fontSize: '.85rem' }}>
-        Endpoints activos: <code>/api/salud</code> · <code>/api/pedidos</code>
+      <p className="mt-12" style={{ color: '#52525b', fontSize: '.8rem' }}>
+        menú servido desde <b>{origen}</b>
+        {edadMs ? ` (${Math.round(edadMs / 1000)}s)` : ''} · {menu.length} productos ·{' '}
+        <code>/api/salud</code> · <code>/api/pedidos</code>
       </p>
     </main>
-  );
-}
-
-function Dato({ etiqueta, valor }: { etiqueta: string; valor: string }) {
-  return (
-    <div>
-      <dt style={{ color: '#71717a', fontSize: '.75rem', textTransform: 'uppercase', letterSpacing: '.08em' }}>
-        {etiqueta}
-      </dt>
-      <dd className="font-display" style={{ color: 'var(--rojo)', fontSize: '2rem', lineHeight: 1.1 }}>
-        {valor}
-      </dd>
-    </div>
   );
 }
