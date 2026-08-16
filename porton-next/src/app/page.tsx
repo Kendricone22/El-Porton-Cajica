@@ -5,6 +5,9 @@ import Hero from '@/componentes/Hero';
 import Vitrina from '@/componentes/Vitrina';
 import Tienda from '@/componentes/Tienda';
 import RevelarAlScroll from '@/componentes/RevelarAlScroll';
+import Lightbox from '@/componentes/Lightbox';
+import InsigniaHorario from '@/componentes/InsigniaHorario';
+import DatosEstructurados from '@/componentes/DatosEstructurados';
 import {
   ComoPedir,
   Contacto,
@@ -38,7 +41,10 @@ export default async function Portada() {
 
   return (
     <>
+      <DatosEstructurados menu={menu} />
+
       <Navbar />
+      <InsigniaHorario />
 
       <main>
         <Hero />
@@ -72,6 +78,7 @@ export default async function Portada() {
 
       <PieDePagina />
 
+      <Lightbox menu={menu} />
       <RevelarAlScroll />
     </>
   );
