@@ -15,6 +15,7 @@
 
 import { useState } from 'react';
 import type { Categoria, ProductoMenu } from '@/types/menu';
+import Carrito from './Carrito';
 import Catalogo from './Catalogo';
 import ModalProducto from './ModalProducto';
 
@@ -32,6 +33,7 @@ export default function Tienda({
     <>
       <Catalogo menu={menu} categorias={categorias} onPersonalizar={setAbiertoId} />
       <ModalProducto item={abierto} onCerrar={() => setAbiertoId(null)} />
+      <Carrito />
     </>
   );
 }

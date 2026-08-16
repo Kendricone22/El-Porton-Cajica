@@ -165,15 +165,18 @@ export async function POST(req: Request) {
   }
 
   /* ---------- 6. respuesta ----------
-     Los números son SIEMPRE los del servidor, se haya guardado o no.
-     El mensaje de WhatsApp se arma con estos, nunca con los del
-     navegador. */
+     Se devuelve `fila.items`, que es EXACTAMENTE lo que se guardó: los
+     precios recalculados por el servidor más los campos que no afectan
+     al precio (sabores, proteínas, trozos, selectores, notas).
+     Así el mensaje de WhatsApp se arma con esto y con nada del
+     navegador — y además dice lo mismo que la base de datos, se haya
+     podido guardar o no. */
   return NextResponse.json({
     ok: true,
     guardado: guardado.id !== null,
     pedidoId: guardado.id,
     subtotal: r.subtotal,
-    lineas: r.lineas,
+    items: fila.items,
     origenPrecio: origen,
     advertencia: guardado.error
       ? 'El pedido es válido y puede enviarse por WhatsApp, pero no se pudo registrar en la base de datos.'

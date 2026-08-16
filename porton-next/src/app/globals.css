@@ -53,12 +53,27 @@ body {
 
 button.opt-card,
 button.combo-card,
-button.adiciones-toggle {
+button.adiciones-toggle,
+button.pago-opt {
   font: inherit;
   color: inherit;
   text-align: left;
   width: 100%;
   appearance: none;
+}
+
+/* Aviso del carrito: falta un dato, falta el consentimiento, o el
+   servidor rechazó el pedido. */
+.cart-aviso {
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  color: #fecaca;
+}
+
+/* El botón de enviar, mientras se está enviando. */
+.cart-send:disabled {
+  opacity: 0.6;
+  cursor: progress;
 }
 
 /* Aviso de lo que falta antes de poder añadir. No existe en v1:
