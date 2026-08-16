@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { MENU, CATEGORIES, BRAND } from '@/data/menu';
+import BancoDePruebasCarrito from './BancoDePruebasCarrito';
 
 /* =============================================================
  * PÁGINA TEMPORAL DE COMPROBACIÓN
@@ -62,6 +63,8 @@ export default function Comprobacion() {
         <Dato etiqueta="Con foto" valor={String(MENU.filter((p) => p.img).length)} />
         <Dato etiqueta="WhatsApp" valor={marca.whatsapp ?? '—'} />
       </dl>
+
+      <BancoDePruebasCarrito />
 
       <p className="mt-12" style={{ color: '#52525b', fontSize: '.85rem' }}>
         Endpoints activos: <code>/api/salud</code> · <code>/api/pedidos</code>

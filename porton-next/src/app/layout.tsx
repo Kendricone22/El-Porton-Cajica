@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Bebas_Neue, Inter, Playfair_Display } from 'next/font/google';
+import { ProveedorCarrito } from '@/estado/carrito';
 import './globals.css';
 import './estilos-v1.css';
 
@@ -96,7 +97,12 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       lang="es"
       className={`${bebas.variable} ${playfair.variable} ${inter.variable} antialiased`}
     >
-      <body>{children}</body>
+      {/* El proveedor envuelve toda la aplicación: el carrito debe
+          sobrevivir a la navegación entre páginas, así que va aquí y
+          no dentro de una página concreta. */}
+      <body>
+        <ProveedorCarrito>{children}</ProveedorCarrito>
+      </body>
     </html>
   );
 }
