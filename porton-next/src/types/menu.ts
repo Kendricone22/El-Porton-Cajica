@@ -87,3 +87,27 @@ export type Categoria = {
   label: string;
   emoji: string;
 };
+
+/**
+ * Producto estrella del Hero. Las tres variantes de foto NO son un
+ * capricho, cada una resuelve un problema concreto:
+ *   img      → panorámica 1920px, para escritorio y móvil en horizontal
+ *   img4k    → la misma a 3840px; el Hero ocupa toda la pantalla y
+ *              amplía mucho la foto, así que a 1920 se veía borrosa
+ *   imgTall  → versión vertical compuesta para móvil en vertical: con
+ *              la panorámica solo se ve `alto × ratio_pantalla` ≈ 753px
+ *              de ancho y los platos anchos se salen sí o sí
+ *   posMobile→ encuadre del recorte, medido plato por plato
+ */
+export type ProductoHero = {
+  emoji: string;
+  tagline: string;
+  title: string;
+  desc: string;
+  price: string;
+  img?: string;
+  img4k?: string;
+  imgTall?: string;
+  posMobile?: string;
+  video?: string;
+};
