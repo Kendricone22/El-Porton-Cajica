@@ -38,3 +38,40 @@ body {
   background: #e53e3e;
   color: #ffffff;
 }
+
+/* =============================================================
+ * AÑADIDOS DE LA MIGRACIÓN
+ *
+ * En v1 las opciones del modal son <label> con un <input> escondido
+ * dentro. Aquí son <button>, que es lo correcto (un control que
+ * ejecuta una acción, no una etiqueta de formulario) y además llega
+ * con el teclado y anuncia su estado con aria-pressed.
+ *
+ * Los <button> traen estilos propios del navegador que hay que
+ * neutralizar para que `estilos-v1.css` mande igual que antes.
+ * ============================================================= */
+
+button.opt-card,
+button.combo-card,
+button.adiciones-toggle {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+  appearance: none;
+}
+
+/* Aviso de lo que falta antes de poder añadir. No existe en v1:
+   allí un combo sin bebida o una pizza sin sabores salían igual. */
+.modal-falta {
+  margin: 0 0 0.7rem;
+  padding: 0.6rem 0.8rem;
+  list-style: none;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #fecaca;
+  background: rgba(229, 62, 62, 0.12);
+  border: 1px solid rgba(229, 62, 62, 0.35);
+  border-radius: 0.7rem;
+}

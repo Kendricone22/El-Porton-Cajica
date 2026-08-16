@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { CATEGORIES } from '@/data/menu';
 import { obtenerMenu } from '@/lib/menu-servidor';
-import Catalogo from '@/componentes/Catalogo';
+import Tienda from '@/componentes/Tienda';
 import BancoDePruebasCarrito from './BancoDePruebasCarrito';
 
 /* =============================================================
@@ -40,7 +40,7 @@ export default async function Portada() {
         <p className="carta-header-sub">Cada plato, una historia</p>
       </section>
 
-      <Catalogo menu={menu} categorias={CATEGORIES} />
+      <Tienda menu={menu} categorias={CATEGORIES} />
 
       <BancoDePruebasCarrito />
 
