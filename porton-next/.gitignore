@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# assets del sitio v1: se copian con `npm run assets` para desarrollo.
+# NO se versionan aqui — ya estan en ../assets y duplicarlos en git
+# los guardaria para siempre en el historial (~49 MB).
+/public/assets
