@@ -76,6 +76,148 @@ button.pago-opt {
   cursor: progress;
 }
 
+/* =============================================================
+ * CARRUSEL DEL HERO
+ *
+ * Las 7 diapositivas se apilan en el mismo hueco y se cruzan por
+ * opacidad. Se usa `opacity` y no `display` a propósito: `display`
+ * corta la transición en seco y además haría que el navegador
+ * recalculara la maquetación en cada cambio.
+ * ============================================================= */
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  /* La que no se ve no recibe clics ni la lee un lector de pantalla. */
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+  /* Un empujón muy leve de escala mientras entra: da sensación de
+     movimiento sin marear. */
+  transform: scale(1.03);
+  transition-property: opacity, transform;
+  transition-duration: 0.7s, 6s;
+  transition-timing-function: ease, linear;
+}
+
+.hero-slide.is-active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* ---------- flechas ---------- */
+.hero-flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.hero-flecha svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+.hero-flecha:hover {
+  background: var(--rojo);
+  border-color: var(--rojo);
+}
+.hero-flecha:focus-visible {
+  outline: 2px solid var(--rojo);
+  outline-offset: 3px;
+}
+.hero-flecha--izq {
+  left: 1rem;
+}
+.hero-flecha--der {
+  right: 1rem;
+}
+
+/* En móvil las flechas estorban sobre el texto: se navega deslizando
+   con el dedo, que es el gesto natural ahí. Los puntos siguen estando. */
+@media (max-width: 767px) {
+  .hero-flecha {
+    display: none;
+  }
+}
+
+/* ---------- puntos con barra de progreso ---------- */
+.hero-puntos {
+  position: absolute;
+  bottom: 1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
+}
+
+.hero-punto {
+  position: relative;
+  width: 1.9rem;
+  height: 0.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  overflow: hidden;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.hero-punto:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+.hero-punto:focus-visible {
+  outline: 2px solid var(--rojo);
+  outline-offset: 3px;
+}
+
+/* La barra se llena en los mismos 5s que tarda en pasar sola, así el
+   cliente ve cuánto le queda para leer. */
+.hero-punto-barra {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--rojo);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.hero-punto.is-active .hero-punto-barra {
+  animation: hero-progreso 5s linear forwards;
+}
+
+@keyframes hero-progreso {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Con el indicador de scroll abajo al centro, los puntos se suben un
+   poco en pantallas altas para no pisarlo. */
+@media (min-width: 768px) {
+  .hero-puntos {
+    bottom: 2.4rem;
+  }
+}
+
 /* Aviso de lo que falta antes de poder añadir. No existe en v1:
    allí un combo sin bebida o una pizza sin sabores salían igual. */
 .modal-falta {
