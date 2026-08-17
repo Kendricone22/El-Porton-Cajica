@@ -286,27 +286,59 @@ export default function Ventas({
       </div>
 
       {/* La tabla existe para que ningún valor dependa de pasar el ratón:
-          desde el celular no hay ratón. */}
-      {tabla && serie.length > 0 && (
+          desde el celular no hay ratón. Son DOS tablas, como en v1: el
+          ingreso por periodo Y los productos más pedidos — si no, los
+          productos solo se podrían leer de las barras, y una barra no
+          dice cuántas unidades ni cuánto ingreso son. */}
+      {tabla && (
         <div>
-          <table className="vt-tabla">
-            <thead>
-              <tr>
-                <th>{gran === 'dia' ? 'Día' : gran === 'semana' ? 'Semana' : 'Mes'}</th>
-                <th>Ingreso</th>
-                <th>Pedidos</th>
-              </tr>
-            </thead>
-            <tbody>
-              {serie.map((d) => (
-                <tr key={d.inicio}>
-                  <td>{etiquetaEje(d.inicio, gran)}</td>
-                  <td>{dinero(d.ingreso)}</td>
-                  <td>{d.pedidos}</td>
+          {serie.length > 0 && (
+            <table className="vt-tabla">
+              <caption className="vt-sub" style={{ textAlign: 'left', padding: '.6rem 0' }}>
+                Ingreso por {UNIDAD[gran]}
+              </caption>
+              <thead>
+                <tr>
+                  <th>Periodo</th>
+                  <th>Pedidos</th>
+                  <th>Ingreso</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {serie.map((d) => (
+                  <tr key={d.inicio}>
+                    <td>{etiquetaEje(d.inicio, gran)}</td>
+                    <td>{d.pedidos}</td>
+                    <td>{dinero(d.ingreso)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {top.length > 0 && (
+            <table className="vt-tabla" style={{ marginTop: '1rem' }}>
+              <caption className="vt-sub" style={{ textAlign: 'left', padding: '.6rem 0' }}>
+                Productos más pedidos
+              </caption>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Unidades</th>
+                  <th>Ingreso</th>
+                </tr>
+              </thead>
+              <tbody>
+                {top.map((t) => (
+                  <tr key={t.producto}>
+                    <td>{t.producto}</td>
+                    <td>{t.unidades}</td>
+                    <td>{dinero(t.ingreso)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </>

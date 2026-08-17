@@ -17,6 +17,7 @@ import { useSesionAdmin } from '@/estado/sesion-admin';
 import { Login, RetoMFA } from '@/componentes/admin/Acceso';
 import Pedidos from '@/componentes/admin/Pedidos';
 import Analitica from '@/componentes/admin/Analitica';
+import FondoAdmin from '@/componentes/admin/FondoAdmin';
 
 export default function PanelAdmin() {
   const { estado, correo, factorId, error, revisar, salir } = useSesionAdmin();
@@ -25,24 +26,43 @@ export default function PanelAdmin() {
      Es más simple que pasar una función de recarga a cada una. */
   const [recargarToken, setRecargar] = useState(0);
 
+  /* El fondo va en TODAS las pantallas, incluida la de acceso: en v1 el
+     canvas está fuera de las vistas y se ve siempre. */
   if (estado === 'cargando') {
     return (
-      <div className="admin-login">
-        <p className="loading">Cargando…</p>
-      </div>
+      <>
+        <FondoAdmin />
+        <div id="login-view" className="admin-login">
+          <p className="loading">Cargando…</p>
+        </div>
+      </>
     );
   }
 
   if (estado === 'fuera') {
-    return <Login alEntrar={revisar} avisoPrevio={error} />;
+    return (
+      <>
+        <FondoAdmin />
+        <Login alEntrar={revisar} avisoPrevio={error} />
+      </>
+    );
   }
 
   if (estado === 'mfa' && factorId) {
-    return <RetoMFA factorId={factorId} alVerificar={revisar} alCancelar={salir} />;
+    return (
+      <>
+        <FondoAdmin />
+        <RetoMFA factorId={factorId} alVerificar={revisar} alCancelar={salir} />
+      </>
+    );
   }
 
+  /* `id="dash-view"`: mismo motivo que en las pantallas de acceso — el
+     CSS lo usa para elevar el contenido por encima del lienzo del fondo. */
   return (
-    <div>
+    <div id="dash-view">
+      <FondoAdmin />
+
       <header className="admin-top">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/logo-final.png" alt="El Portón" />

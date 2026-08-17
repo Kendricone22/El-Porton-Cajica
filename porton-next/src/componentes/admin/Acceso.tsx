@@ -41,8 +41,13 @@ export function Login({ alEntrar, avisoPrevio }: { alEntrar: () => Promise<void>
     setEnviando(false);
   }
 
+  /* El `id` NO es decorativo: `estilos-admin.css` usa
+     `#login-view, #mfa-view, #dash-view { position:relative; z-index:1 }`
+     para elevar el contenido por encima del lienzo del fondo, que es
+     `position:fixed; z-index:0`. Sin el id, el fondo taparía el
+     formulario. */
   return (
-    <div className="admin-login">
+    <div id="login-view" className="admin-login">
       <form className="login-card" onSubmit={entrar}>
         <Image src="/assets/logo-final.png" alt="El Portón" className="login-logo" width={360} height={144} unoptimized />
         <h1 className="login-title">Panel Administrativo</h1>
@@ -117,7 +122,7 @@ export function RetoMFA({
   }
 
   return (
-    <div className="admin-login">
+    <div id="mfa-view" className="admin-login">
       <form className="login-card" onSubmit={verificar}>
         <Image src="/assets/logo-final.png" alt="El Portón" className="login-logo" width={360} height={144} unoptimized />
         <h1 className="login-title">Verificación en dos pasos</h1>
