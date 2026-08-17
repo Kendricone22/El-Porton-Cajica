@@ -8,6 +8,7 @@ import RevelarAlScroll from '@/componentes/RevelarAlScroll';
 import Lightbox from '@/componentes/Lightbox';
 import InsigniaHorario from '@/componentes/InsigniaHorario';
 import DatosEstructurados from '@/componentes/DatosEstructurados';
+import FondoParticulas from '@/componentes/FondoParticulas';
 import {
   ComoPedir,
   Contacto,
@@ -42,6 +43,11 @@ export default async function Portada() {
   return (
     <>
       <DatosEstructurados menu={menu} />
+
+      {/* Va primero: es el fondo de TODA la página (fijo, z-index −1).
+          `.hero` y `.page-dark` lo tapan con negro opaco donde no debe
+          verse — el mismo truco que usa v1. */}
+      <FondoParticulas />
 
       <Navbar />
       <InsigniaHorario />
