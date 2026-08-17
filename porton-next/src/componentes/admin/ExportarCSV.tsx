@@ -65,7 +65,13 @@ export default function ExportarCSV() {
 
   return (
     <>
-      <button type="button" className="btn-ghost" onClick={() => void exportar()} disabled={estado === 'trabajando'}>
+      {/* Mismas clases que v1: `btn-primary mi-add`. */}
+      <button
+        type="button"
+        className="btn-primary mi-add"
+        onClick={() => void exportar()}
+        disabled={estado === 'trabajando'}
+      >
         {estado === 'trabajando' ? 'Preparando…' : '⬇️ Exportar CSV'}
       </button>
       {aviso && <p className="vt-sub">{aviso}</p>}

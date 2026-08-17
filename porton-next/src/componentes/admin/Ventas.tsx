@@ -4,17 +4,13 @@
  * VENTANA DE VENTAS
  *
  * Dos lecturas del MISMO periodo: cuánto entró (área en el tiempo) y
- * qué se vendió (barras). Un solo selector arriba mueve las dos a la
- * vez — nunca un filtro por gráfico, que obliga a comparar cosas que
- * no son comparables.
+ * qué se vendió (barras). El selector de periodo NO vive aquí: está en
+ * la barra de la pestaña, porque mueve la gráfica Y los productos a la
+ * vez — nunca un filtro por gráfico.
  *
- * Los totales los calcula Postgres, así que no dependen del tope de
- * 1000 filas de la API.
- *
- * La gráfica se dibuja al ANCHO REAL del contenedor, no con un
- * viewBox que se estira: así el texto de los ejes mide lo mismo en el
- * celular que en el escritorio, en vez de encogerse hasta ser
- * ilegible. Por eso se redibuja al cambiar el tamaño.
+ * La gráfica se dibuja al ANCHO REAL del contenedor, no con un viewBox
+ * que se estira: así el texto de los ejes mide lo mismo en el celular
+ * que en el escritorio.
  * ============================================================= */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -42,12 +38,18 @@ import {
   type PuntoSerie,
 } from '@/lib/ventas';
 
-export default function Ventas({ recargarToken }: { recargarToken: number }) {
+export default function Ventas({
+  gran,
+  tabla,
+  recargarToken,
+}: {
+  gran: Granularidad;
+  tabla: boolean;
+  recargarToken: number;
+}) {
   const sb = supabaseNavegador();
-  const [gran, setGran] = useState<Granularidad>('dia');
   const [serie, setSerie] = useState<PuntoSerie[]>([]);
   const [top, setTop] = useState<FilaTop[]>([]);
-  const [tabla, setTabla] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [falta, setFalta] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +58,6 @@ export default function Ventas({ recargarToken }: { recargarToken: number }) {
   const [ancho, setAncho] = useState(600);
   const [encima, setEncima] = useState<number | null>(null);
 
-  /* --- datos --- */
   const cargar = useCallback(async () => {
     setCargando(true);
     setError(null);
@@ -100,7 +101,6 @@ export default function Ventas({ recargarToken }: { recargarToken: number }) {
     void cargar();
   }, [cargar, recargarToken]);
 
-  /* --- ancho real, para que los ejes no se encojan --- */
   useEffect(() => {
     const medir = () => setAncho(Math.max(260, cajaRef.current?.clientWidth || 320));
     medir();
@@ -131,26 +131,7 @@ export default function Ventas({ recargarToken }: { recargarToken: number }) {
   const maxUnidades = Math.max(1, ...top.map((t) => t.unidades));
 
   return (
-    <section className="vt">
-      <div className="vt-head">
-        <h3 className="section-title">Ventas</h3>
-        <div className="vt-periodos">
-          {(['dia', 'semana', 'mes'] as const).map((g) => (
-            <button
-              key={g}
-              type="button"
-              className={`vt-periodo${gran === g ? ' is-on' : ''}`}
-              onClick={() => setGran(g)}
-            >
-              {g === 'dia' ? 'Diario' : g === 'semana' ? 'Semanal' : 'Mensual'}
-            </button>
-          ))}
-          <button type="button" className="btn-ghost" onClick={() => setTabla((v) => !v)}>
-            {tabla ? 'Ocultar tabla' : 'Ver tabla'}
-          </button>
-        </div>
-      </div>
-
+    <>
       <div className="vt-grid-cols">
         <div>
           <div className="vt-h4">Ingreso · {TITULO[gran]}</div>
@@ -278,17 +259,24 @@ export default function Ventas({ recargarToken }: { recargarToken: number }) {
           <div className="vt-sub">{TITULO[gran]} · por unidades vendidas</div>
 
           {!top.length ? (
-            <p className="vt-vacio">Sin datos en este periodo.</p>
+            <p className="vt-vacio">Sin pedidos en este periodo.</p>
           ) : (
             <div>
               {top.map((t) => (
-                <div className="vt-bar-row" key={t.producto}>
-                  <span className="vt-bar-label">{t.producto}</span>
-                  <div className="vt-bar-wrap">
-                    {/* Todas del MISMO rojo a propósito: pintar cada barra
-                        de un tono distinto codificaría el tamaño dos veces. */}
-                    <div className="vt-bar" style={{ width: `${(t.unidades / maxUnidades) * 100}%` }} />
-                  </div>
+                <div
+                  className="vt-bar-row"
+                  key={t.producto}
+                  title={`${t.producto} — ${t.unidades} unidades · ${dinero(t.ingreso)}`}
+                >
+                  <span className="vt-bar-name">{t.producto}</span>
+                  <span className="vt-bar-track">
+                    {/* Todas del MISMO rojo a propósito: pintar cada barra de
+                        un tono distinto codificaría el tamaño dos veces. */}
+                    <span
+                      className="vt-bar-fill"
+                      style={{ width: `${Math.max(2, (t.unidades / maxUnidades) * 100)}%` }}
+                    />
+                  </span>
                   <span className="vt-bar-val">{t.unidades}</span>
                 </div>
               ))}
@@ -299,12 +287,12 @@ export default function Ventas({ recargarToken }: { recargarToken: number }) {
 
       {/* La tabla existe para que ningún valor dependa de pasar el ratón:
           desde el celular no hay ratón. */}
-      {tabla && (
-        <div className="vt-tabla-wrap">
+      {tabla && serie.length > 0 && (
+        <div>
           <table className="vt-tabla">
             <thead>
               <tr>
-                <th>{UNIDAD[gran] === 'día' ? 'Día' : UNIDAD[gran] === 'semana' ? 'Semana' : 'Mes'}</th>
+                <th>{gran === 'dia' ? 'Día' : gran === 'semana' ? 'Semana' : 'Mes'}</th>
                 <th>Ingreso</th>
                 <th>Pedidos</th>
               </tr>
@@ -321,6 +309,6 @@ export default function Ventas({ recargarToken }: { recargarToken: number }) {
           </table>
         </div>
       )}
-    </section>
+    </>
   );
 }
