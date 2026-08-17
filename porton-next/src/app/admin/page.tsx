@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useSesionAdmin } from '@/estado/sesion-admin';
 import { Login, RetoMFA } from '@/componentes/admin/Acceso';
 import Pedidos from '@/componentes/admin/Pedidos';
+import Analitica from '@/componentes/admin/Analitica';
 
 export default function PanelAdmin() {
   const { estado, correo, factorId, error, revisar, salir } = useSesionAdmin();
@@ -80,11 +81,11 @@ export default function PanelAdmin() {
         </nav>
 
         {pestana === 'pedidos' && <Pedidos recargarToken={recargarToken} />}
+        {pestana === 'analitica' && <Analitica recargarToken={recargarToken} />}
 
-        {pestana !== 'pedidos' && (
+        {pestana === 'menu' && (
           <p className="loading" style={{ marginTop: '2rem' }}>
-            Sesión iniciada como <b>{correo}</b>. La pestaña <b>{pestana}</b> se porta a
-            continuación.
+            Sesión iniciada como <b>{correo}</b>. El editor de menú se porta a continuación.
           </p>
         )}
       </div>
