@@ -15,10 +15,14 @@
 import { useState } from 'react';
 import { useSesionAdmin } from '@/estado/sesion-admin';
 import { Login, RetoMFA } from '@/componentes/admin/Acceso';
+import Pedidos from '@/componentes/admin/Pedidos';
 
 export default function PanelAdmin() {
   const { estado, correo, factorId, error, revisar, salir } = useSesionAdmin();
   const [pestana, setPestana] = useState<'pedidos' | 'analitica' | 'menu'>('pedidos');
+  /* Cambiar este número hace que las pestañas vuelvan a pedir sus datos.
+     Es más simple que pasar una función de recarga a cada una. */
+  const [recargarToken, setRecargar] = useState(0);
 
   if (estado === 'cargando') {
     return (
@@ -42,7 +46,7 @@ export default function PanelAdmin() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/logo-final.png" alt="El Portón" />
         <span className="spacer" />
-        <button type="button" className="btn-ghost" onClick={() => void revisar()}>
+        <button type="button" className="btn-ghost" onClick={() => setRecargar((n) => n + 1)}>
           ↻ Actualizar
         </button>
         <button type="button" className="btn-ghost" onClick={() => void salir()}>
@@ -75,11 +79,14 @@ export default function PanelAdmin() {
           </button>
         </nav>
 
-        <p className="loading" style={{ marginTop: '2rem' }}>
-          Sesión iniciada como <b>{correo}</b>. Pestaña activa: <b>{pestana}</b>.
-          <br />
-          <small>Los contenidos de las pestañas se portan a continuación.</small>
-        </p>
+        {pestana === 'pedidos' && <Pedidos recargarToken={recargarToken} />}
+
+        {pestana !== 'pedidos' && (
+          <p className="loading" style={{ marginTop: '2rem' }}>
+            Sesión iniciada como <b>{correo}</b>. La pestaña <b>{pestana}</b> se porta a
+            continuación.
+          </p>
+        )}
       </div>
     </div>
   );
