@@ -64,12 +64,10 @@ html { scroll-behavior: smooth; }
   /* Opacidad baja + blur alto = efecto vidrio esmerilado bien visible */
   background: rgba(11, 11, 11, 0.25);
   backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 #navbar.scrolled {
   background: rgba(11, 11, 11, 0.55);
   backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
 }
@@ -209,7 +207,6 @@ html { scroll-behavior: smooth; }
   z-index: 40;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   opacity: 0;
   pointer-events: none;
   transition: opacity .3s ease;
@@ -764,7 +761,6 @@ html { scroll-behavior: smooth; }
   /* Vidrio esmerilado premium (sin marco negro duro) */
   background: rgba(11, 11, 11, 0.45);
   backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
   border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -1054,7 +1050,6 @@ html { scroll-behavior: smooth; }
   padding: 1rem;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   opacity: 0;
   pointer-events: none;
   transition: opacity .3s ease;
@@ -1963,7 +1958,6 @@ html { scroll-behavior: smooth; }
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(10, 10, 12, 0.62);
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   color: #d4d4d8;
   white-space: nowrap;
 }

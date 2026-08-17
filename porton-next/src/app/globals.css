@@ -25,10 +25,19 @@
   --font-body: var(--font-body);
 }
 
-html {
-  background: #0b0b0b;
-}
-
+/* ⚠️ EL FONDO VA SOLO EN `body`, NUNCA TAMBIÉN EN `html`.
+ *
+ * `#page-bg` (las partículas y la textura) es `position: fixed` con
+ * `z-index: -1`, y un elemento con z-index negativo se pinta detrás
+ * del fondo de `body`.
+ *
+ * Cuando `html` NO tiene fondo propio, el navegador traslada el de
+ * `body` al lienzo de la página y `body` deja de pintar fondo — así el
+ * `#page-bg` queda a la vista. Es como funciona el sitio v1.
+ *
+ * Si se le pone fondo a `html`, el de `body` deja de trasladarse, se
+ * queda en su sitio y tapa las partículas con un rectángulo negro.
+ * Pasó, y no da ningún error: simplemente no se ve el fondo. */
 body {
   background: #0b0b0b;
   color: #ffffff;
