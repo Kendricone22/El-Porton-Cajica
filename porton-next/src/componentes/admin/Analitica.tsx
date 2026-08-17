@@ -19,6 +19,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabaseNavegador } from '@/lib/supabase-navegador';
 import { dinero } from '@/lib/pedidos-admin';
+import Ventas from './Ventas';
+import Visitas from './Visitas';
+import ExportarCSV from './ExportarCSV';
 
 type Totales = {
   pedidos_totales: number;
@@ -110,6 +113,14 @@ export default function Analitica({ recargarToken }: { recargarToken: number }) 
             </div>
           );
         })}
+      </div>
+
+      <Ventas recargarToken={recargarToken} />
+
+      <Visitas recargarToken={recargarToken} />
+
+      <div style={{ marginTop: '1.5rem' }}>
+        <ExportarCSV />
       </div>
     </>
   );
