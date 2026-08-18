@@ -17,6 +17,7 @@ import { useSesionAdmin } from '@/estado/sesion-admin';
 import { Login, RetoMFA } from '@/componentes/admin/Acceso';
 import Pedidos from '@/componentes/admin/Pedidos';
 import Analitica from '@/componentes/admin/Analitica';
+import Menu from '@/componentes/admin/Menu';
 import FondoAdmin from '@/componentes/admin/FondoAdmin';
 
 export default function PanelAdmin() {
@@ -110,11 +111,7 @@ export default function PanelAdmin() {
           {pestana === 'pedidos' && <Pedidos recargarToken={recargarToken} />}
           {pestana === 'analitica' && <Analitica recargarToken={recargarToken} />}
 
-          {pestana === 'menu' && (
-            <p className="loading" style={{ marginTop: '2rem' }}>
-              Sesión iniciada como <b>{correo}</b>. El editor de menú se porta a continuación.
-            </p>
-          )}
+          {pestana === 'menu' && <Menu recargarToken={recargarToken} />}
         </div>
       </div>
     </>
