@@ -57,58 +57,66 @@ export default function PanelAdmin() {
     );
   }
 
-  /* `id="dash-view"`: mismo motivo que en las pantallas de acceso — el
-     CSS lo usa para elevar el contenido por encima del lienzo del fondo. */
+  /* ⚠️ EL LIENZO VA FUERA DE `#dash-view`, COMO HERMANO — igual que en
+     admin.html. Metido dentro, el resultado es que TAPA el contenido:
+     un elemento POSICIONADO con `z-index: 0` se pinta por encima de los
+     elementos SIN posicionar, aunque el número sea menor, y
+     `.admin-wrap` no tiene `position`. Los puntos del fondo acababan
+     dibujados sobre los pedidos y las gráficas.
+
+     Como hermanos sí compiten de verdad: lienzo en 0, vista en 1. */
   return (
-    <div id="dash-view">
+    <>
       <FondoAdmin />
 
-      <header className="admin-top">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/assets/logo-final.png" alt="El Portón" />
-        <span className="spacer" />
-        <button type="button" className="btn-ghost" onClick={() => setRecargar((n) => n + 1)}>
-          ↻ Actualizar
-        </button>
-        <button type="button" className="btn-ghost" onClick={() => void salir()}>
-          Salir
-        </button>
-      </header>
-
-      <div className="admin-wrap">
-        <nav className="tabs">
-          <button
-            type="button"
-            className={`tab${pestana === 'pedidos' ? ' active' : ''}`}
-            onClick={() => setPestana('pedidos')}
-          >
-            📦 Pedidos
+      <div id="dash-view">
+        <header className="admin-top">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/assets/logo-final.png" alt="El Portón" />
+          <span className="spacer" />
+          <button type="button" className="btn-ghost" onClick={() => setRecargar((n) => n + 1)}>
+            ↻ Actualizar
           </button>
-          <button
-            type="button"
-            className={`tab${pestana === 'analitica' ? ' active' : ''}`}
-            onClick={() => setPestana('analitica')}
-          >
-            📊 Analítica
+          <button type="button" className="btn-ghost" onClick={() => void salir()}>
+            Salir
           </button>
-          <button
-            type="button"
-            className={`tab${pestana === 'menu' ? ' active' : ''}`}
-            onClick={() => setPestana('menu')}
-          >
-            🍔 Menú
-          </button>
-        </nav>
+        </header>
 
-        {pestana === 'pedidos' && <Pedidos recargarToken={recargarToken} />}
-        {pestana === 'analitica' && <Analitica recargarToken={recargarToken} />}
+        <div className="admin-wrap">
+          <nav className="tabs">
+            <button
+              type="button"
+              className={`tab${pestana === 'pedidos' ? ' active' : ''}`}
+              onClick={() => setPestana('pedidos')}
+            >
+              📦 Pedidos
+            </button>
+            <button
+              type="button"
+              className={`tab${pestana === 'analitica' ? ' active' : ''}`}
+              onClick={() => setPestana('analitica')}
+            >
+              📊 Analítica
+            </button>
+            <button
+              type="button"
+              className={`tab${pestana === 'menu' ? ' active' : ''}`}
+              onClick={() => setPestana('menu')}
+            >
+              🍔 Menú
+            </button>
+          </nav>
 
-        {pestana === 'menu' && (
-          <p className="loading" style={{ marginTop: '2rem' }}>
-            Sesión iniciada como <b>{correo}</b>. El editor de menú se porta a continuación.
-          </p>
-        )}
+          {pestana === 'pedidos' && <Pedidos recargarToken={recargarToken} />}
+          {pestana === 'analitica' && <Analitica recargarToken={recargarToken} />}
+
+          {pestana === 'menu' && (
+            <p className="loading" style={{ marginTop: '2rem' }}>
+              Sesión iniciada como <b>{correo}</b>. El editor de menú se porta a continuación.
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
