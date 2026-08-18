@@ -18,6 +18,7 @@ import { Login, RetoMFA } from '@/componentes/admin/Acceso';
 import Pedidos from '@/componentes/admin/Pedidos';
 import Analitica from '@/componentes/admin/Analitica';
 import Menu from '@/componentes/admin/Menu';
+import ModalSeguridad from '@/componentes/admin/ModalSeguridad';
 import FondoAdmin from '@/componentes/admin/FondoAdmin';
 
 export default function PanelAdmin() {
@@ -26,6 +27,7 @@ export default function PanelAdmin() {
   /* Cambiar este número hace que las pestañas vuelvan a pedir sus datos.
      Es más simple que pasar una función de recarga a cada una. */
   const [recargarToken, setRecargar] = useState(0);
+  const [seguridadAbierta, setSeguridadAbierta] = useState(false);
 
   /* El fondo va en TODAS las pantallas, incluida la de acceso: en v1 el
      canvas está fuera de las vistas y se ve siempre. */
@@ -75,6 +77,9 @@ export default function PanelAdmin() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/assets/logo-final.png" alt="El Portón" />
           <span className="spacer" />
+          <button type="button" className="btn-ghost" onClick={() => setSeguridadAbierta(true)}>
+            🔒 Seguridad
+          </button>
           <button type="button" className="btn-ghost" onClick={() => setRecargar((n) => n + 1)}>
             ↻ Actualizar
           </button>
@@ -113,6 +118,8 @@ export default function PanelAdmin() {
 
           {pestana === 'menu' && <Menu recargarToken={recargarToken} />}
         </div>
+
+        {seguridadAbierta && <ModalSeguridad alCerrar={() => setSeguridadAbierta(false)} />}
       </div>
     </>
   );
